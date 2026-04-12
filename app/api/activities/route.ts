@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { sendPushToProperty } from '@/lib/push'
 
 export async function GET() {
   const supabase = await createClient()
@@ -40,5 +41,12 @@ export async function POST(req: NextRequest) {
       endDate: endDate ? new Date(endDate) : null,
     },
   })
+  // Notificação push (sem bloquear a resposta)
+  sendPushToProperty(propertyId, {
+    title: '🌾 Nova atividade criada',
+    body: `${type}${description ? ' — ' + description : ''}`,
+    url: `/dashboard/operacoes/${activity.id}`,
+  }).catch(() => {})
+
   return NextResponse.json(activity, { status: 201 })
 }

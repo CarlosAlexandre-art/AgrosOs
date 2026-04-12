@@ -34,15 +34,26 @@ enum CostCategory {
 }
 
 model User {
-  id         String     @id @default(uuid())
-  supabaseId String     @unique
-  name       String
-  email      String     @unique
-  role       UserRole   @default(MANAGER)
-  avatarUrl  String?
-  phone      String?
-  properties Property[]
-  createdAt  DateTime   @default(now())
+  id                String             @id @default(uuid())
+  supabaseId        String             @unique
+  name              String
+  email             String             @unique
+  role              UserRole           @default(MANAGER)
+  avatarUrl         String?
+  phone             String?
+  properties        Property[]
+  pushSubscriptions PushSubscription[]
+  createdAt         DateTime           @default(now())
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
 }
 
 model Property {

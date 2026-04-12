@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import PushNotificationButton from '@/components/PushNotificationButton'
 
 export default function ConfiguracoesPage() {
   const router = useRouter()
@@ -176,6 +177,16 @@ export default function ConfiguracoesPage() {
             {passSaved && <span className="text-sm text-green-600 font-medium">✓ Senha alterada!</span>}
           </div>
         </form>
+      </div>
+
+      {/* Notificações */}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100">
+          <h2 className="font-semibold text-slate-900">Notificações</h2>
+        </div>
+        <div className="px-6 py-2">
+          <PushNotificationButton />
+        </div>
       </div>
 
       {/* Conta */}
