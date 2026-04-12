@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -12,7 +12,7 @@ const CATEGORIAS = [
   { value: 'OUTROS', label: 'Outros' },
 ]
 
-export default function NovoCustoPage() {
+function NovoCustoForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const activityIdParam = searchParams.get('activityId')
@@ -140,5 +140,13 @@ export default function NovoCustoPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function NovoCustoPage() {
+  return (
+    <Suspense>
+      <NovoCustoForm />
+    </Suspense>
   )
 }
