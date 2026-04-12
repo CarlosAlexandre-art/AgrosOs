@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  OPERATOR
+}
+
+enum ActivityStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  LATE
+  CANCELLED
+}
+
+enum ExecutorType {
+  INTERNAL
+  AGROLINK
+}
+
+enum CostCategory {
+  INSUMO
+  MAO_DE_OBRA
+  MAQUINARIO
+  AGROLINK
+  OUTROS
+}
+
+model User {
+  id         String     @id @default(uuid())
+  supabaseId String     @unique
+  name       String
+  email      String     @unique
+  role       UserRole   @default(MANAGER)
+  avatarUrl  String?
+  phone      String?
+  properties Property[]
+  createdAt  DateTime   @default(now())
+}
+
+model Property {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  location     String?
+  sizeHectares Decimal      @default(0)
+  coverUrl     String?
+  fields       Field[]
+  activities   Activity[]
+  costs        Cost[]
+  teamMembers  TeamMember[]
+  alerts       Alert[]
+  goals        Goal[]
+  createdAt    DateTime     @default(now())
+}
+
+model Crop {
+  id     String  @id @default(uuid())
+  name   String
+  season String?
+  fields Field[]
+}
+
+model Field {
+  id           String     @id @default(uuid())
+  propertyId   String
+  property     Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  cropId       String?
+  crop         Crop?      @relation(fields: [cropId], references: [id])
+  name         String
+  sizeHectares Decimal    @default(0)
+  activities   Activity[]
+}
+
+model Activity {
+  id                String         @id @default(uuid())
+  propertyId        String
+  property          Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  fieldId           String?
+  field             Field?         @relation(fields: [fieldId], references: [id])
+  assignedToId      String?
+  assignedTo        TeamMember?    @relation(fields: [assignedToId], references: [id])
+  type              String
+  description       String?
+  status            ActivityStatus @default(PENDING)
+  executor          ExecutorType   @default(INTERNAL)
+  agrolinkServiceId String?
+  startDate         DateTime
+  endDate           DateTime?
+  costs             Cost[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Cost {
+  id          String       @id @default(uuid())
+  propertyId  String
+  property    Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  activityId  String?
+  activity    Activity?    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  amount      Decimal
+  category    CostCategory @default(OUTROS)
+  description String?
+  date        DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+}
+
+model TeamMember {
+  id         String     @id @default(uuid())
+  propertyId String
+  property   Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name       String
+  role       String
+  phone      String?
+  activities Activity[]
+  createdAt  DateTime   @default(now())
+}
+
+model Alert {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  message    String
+  type       String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  type        String   @default("REVENUE")
+  targetValue Decimal
+  currentValue Decimal @default(0)
+  deadline    DateTime?
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
