@@ -12,9 +12,11 @@
     "@anthropic-ai/sdk": "^0.82.0",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.6.0",
+    "@stripe/stripe-js": "^9.1.0",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
     "@types/pg": "^8.20.0",
+    "cross-env": "^7.0.3",
     "gray-matter": "^4.0.3",
     "next": "16.2.2",
     "pg": "^8.20.0",
@@ -22,7 +24,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
-    "cross-env": "^7.0.3"
+    "stripe": "^22.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
