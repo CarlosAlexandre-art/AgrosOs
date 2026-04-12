@@ -11,7 +11,7 @@ export async function GET() {
     where: { supabaseId: user.id },
     include: { properties: { include: { costs: { orderBy: { date: 'desc' }, include: { activity: true } } } } },
   })
-  const costs = dbUser?.properties.flatMap(p => p.costs) || []
+  const costs = dbUser?.properties.flatMap((p: { costs: unknown[] }) => p.costs) || []
   return NextResponse.json(costs)
 }
 

@@ -55,7 +55,7 @@ export default function CostPieChart({ data }: Props) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, '']}
+            formatter={(value) => [`R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, '']}
             contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '12px' }}
           />
         </PieChart>
