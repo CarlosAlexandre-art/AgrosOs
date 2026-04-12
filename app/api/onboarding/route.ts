@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { sendWelcomeEmail } from '@/lib/email/resend'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -31,6 +32,9 @@ export async function POST(req: NextRequest) {
       sizeHectares: sizeHectares || 0,
     },
   })
+
+  // Enviar email de boas-vindas (sem bloquear a resposta)
+  sendWelcomeEmail(dbUser.name, dbUser.email).catch(() => {})
 
   return NextResponse.json({ ok: true, propertyId: property.id }, { status: 201 })
 }
