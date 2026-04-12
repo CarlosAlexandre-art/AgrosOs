@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const PLANS = [
   {
@@ -21,6 +23,7 @@ const PLANS = [
     ],
     cta: 'Plano atual',
     ctaStyle: 'bg-slate-100 text-slate-500 cursor-default',
+    priceId: null,
     current: true,
   },
   {
@@ -42,6 +45,7 @@ const PLANS = [
     ],
     cta: 'Assinar Pro',
     ctaStyle: 'bg-[#16a34a] text-white hover:bg-[#15803d]',
+    priceId: 'price_1TLVBkHOdd4LjuVT865UeWY0',
     current: false,
   },
   {
@@ -61,16 +65,34 @@ const PLANS = [
       { text: 'Integração AgroCore completa', ok: true },
       { text: 'Suporte prioritário 24/7', ok: true },
     ],
-    cta: 'Falar com vendas',
+    cta: 'Assinar Enterprise',
     ctaStyle: 'bg-slate-900 text-white hover:bg-slate-800',
+    priceId: 'price_1TLVCSHOdd4LjuVTHZEme1gr',
     current: false,
   },
 ]
 
-export default async function PlanosPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+export default function PlanosPage() {
+  const router = useRouter()
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
+  async function handleCheckout(plan: typeof PLANS[0]) {
+    if (plan.current || !plan.priceId) return
+    setLoadingPlan(plan.id)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: plan.priceId }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch {
+      setLoadingPlan(null)
+    }
+  }
 
   return (
     <div className="p-6 space-y-8 max-w-5xl mx-auto">
@@ -126,10 +148,11 @@ export default async function PlanosPage() {
             </ul>
 
             <button
-              className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${plan.ctaStyle}`}
-              disabled={plan.current}
+              onClick={() => handleCheckout(plan)}
+              disabled={plan.current || loadingPlan === plan.id}
+              className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${plan.ctaStyle} disabled:opacity-50`}
             >
-              {plan.cta}
+              {loadingPlan === plan.id ? 'Redirecionando...' : plan.cta}
             </button>
           </div>
         ))}
@@ -140,22 +163,10 @@ export default async function PlanosPage() {
         <h2 className="font-bold text-slate-900 mb-5">Perguntas frequentes</h2>
         <div className="grid md:grid-cols-2 gap-6">
           {[
-            {
-              q: 'Posso cancelar a qualquer momento?',
-              a: 'Sim. Não há fidelidade. Cancele quando quiser pelo painel de configurações.',
-            },
-            {
-              q: 'O plano Starter tem limite de tempo?',
-              a: 'Não. O plano Starter é gratuito para sempre, com as funcionalidades básicas sempre disponíveis.',
-            },
-            {
-              q: 'Posso migrar de plano depois?',
-              a: 'Sim, você pode fazer upgrade ou downgrade a qualquer momento. Cobranças são proporcionais.',
-            },
-            {
-              q: 'Como funciona o suporte?',
-              a: 'Starter tem suporte por e-mail. Pro tem chat. Enterprise tem suporte prioritário 24/7 com WhatsApp.',
-            },
+            { q: 'Posso cancelar a qualquer momento?', a: 'Sim. Não há fidelidade. Cancele quando quiser pelo painel de configurações.' },
+            { q: 'O plano Starter tem limite de tempo?', a: 'Não. O plano Starter é gratuito para sempre, com as funcionalidades básicas sempre disponíveis.' },
+            { q: 'Posso migrar de plano depois?', a: 'Sim, você pode fazer upgrade ou downgrade a qualquer momento. Cobranças são proporcionais.' },
+            { q: 'Como funciona o suporte?', a: 'Starter tem suporte por e-mail. Pro tem chat. Enterprise tem suporte prioritário 24/7 com WhatsApp.' },
           ].map((item, i) => (
             <div key={i}>
               <div className="text-sm font-semibold text-slate-900 mb-1">{item.q}</div>
