@@ -10,7 +10,8 @@ async function getPropertyId(userId: string) {
   return dbUser?.properties[0]?.id
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -20,18 +21,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const body = await req.json()
 
-  const goal = await prisma.goal.findFirst({ where: { id: params.id, propertyId } })
+  const goal = await prisma.goal.findFirst({ where: { id, propertyId } })
   if (!goal) return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 })
 
   const updated = await prisma.goal.update({
-    where: { id: params.id },
+    where: { id },
     data: body,
   })
 
   return NextResponse.json(updated)
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -39,10 +41,10 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const propertyId = await getPropertyId(user.id)
   if (!propertyId) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
 
-  const goal = await prisma.goal.findFirst({ where: { id: params.id, propertyId } })
+  const goal = await prisma.goal.findFirst({ where: { id, propertyId } })
   if (!goal) return NextResponse.json({ error: 'Meta não encontrada' }, { status: 404 })
 
-  await prisma.goal.delete({ where: { id: params.id } })
+  await prisma.goal.delete({ where: { id } })
 
   return NextResponse.json({ ok: true })
 }
