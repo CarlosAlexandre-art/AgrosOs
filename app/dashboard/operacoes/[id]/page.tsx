@@ -3,14 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import ActivityActions from './ActivityActions'
-
-const STATUS: Record<string, { label: string; pill: string }> = {
-  PENDING:     { label: 'Pendente',     pill: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  IN_PROGRESS: { label: 'Em andamento', pill: 'bg-blue-50 text-blue-700 border-blue-200' },
-  DONE:        { label: 'Concluído',    pill: 'bg-green-50 text-green-700 border-green-200' },
-  LATE:        { label: 'Atrasado',     pill: 'bg-red-50 text-red-700 border-red-200' },
-  CANCELLED:   { label: 'Cancelado',    pill: 'bg-gray-50 text-gray-600 border-gray-200' },
-}
+import { ACTIVITY_STATUS as STATUS } from '@/lib/constants'
 
 export default async function AtividadeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

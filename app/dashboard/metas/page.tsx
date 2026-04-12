@@ -34,8 +34,8 @@ export default async function MetasPage() {
   const property = dbUser?.properties[0]
   const goals = property?.goals || []
 
-  // Calcular valores atuais automaticamente
-  const totalRevenue = property?.costs.reduce((acc: number, c) => acc + Number(c.amount), 0) || 0
+  // Calcular valores atuais automaticamente por tipo de meta
+  const totalCosts = property?.costs.reduce((acc: number, c) => acc + Number(c.amount), 0) || 0
   const doneActivities = property?.activities.filter((a: any) => a.status === 'DONE').length || 0
 
   const active = goals.filter((g: any) => !g.isCompleted)
@@ -99,7 +99,7 @@ export default async function MetasPage() {
                   const info = TYPE_LABEL[g.type] || TYPE_LABEL.CUSTOM
                   // Valor atual automático por tipo
                   let current = Number(g.currentValue)
-                  if (g.type === 'REVENUE') current = Math.max(current, totalRevenue)
+                  if (g.type === 'COST') current = Math.max(current, totalCosts)
                   if (g.type === 'ACTIVITIES') current = Math.max(current, doneActivities)
                   const target = Number(g.targetValue)
                   const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0
