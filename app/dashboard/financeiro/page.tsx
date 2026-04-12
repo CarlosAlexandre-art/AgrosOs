@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import CostPieChart from '@/components/CostPieChart'
+import FinanceiroExport from '@/components/reports/FinanceiroExport'
 
 const CATEGORY_LABEL: Record<string, string> = {
   INSUMO: 'Insumo',
@@ -64,10 +65,19 @@ export default async function FinanceiroPage() {
           <h1 className="text-2xl font-bold text-slate-900">Financeiro</h1>
           <p className="text-sm text-slate-500 mt-0.5">Controle de custos e análise por categoria</p>
         </div>
-        <Link href="/dashboard/financeiro/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          Lançar custo
-        </Link>
+        <div className="flex items-center gap-3">
+          <FinanceiroExport
+            propertyName={property?.name || 'Fazenda'}
+            costs={costs.map(c => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
+            totalGeral={totalGeral}
+            costPerHa={costPerHa}
+            sizeHa={sizeHa}
+          />
+          <Link href="/dashboard/financeiro/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Lançar custo
+          </Link>
+        </div>
       </div>
 
       {/* KPIs */}

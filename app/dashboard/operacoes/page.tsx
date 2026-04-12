@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import OperacoesExport from '@/components/reports/OperacoesExport'
 
 const STATUS: Record<string, { label: string; dot: string; pill: string }> = {
   PENDING:     { label: 'Pendente',     dot: 'bg-yellow-400', pill: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
@@ -43,10 +44,19 @@ export default async function OperacoesPage({ searchParams }: { searchParams: Pr
           <h1 className="text-2xl font-bold text-slate-900">Operacional</h1>
           <p className="text-sm text-slate-500 mt-0.5">Gerencie todas as atividades da sua fazenda</p>
         </div>
-        <Link href="/dashboard/operacoes/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          Nova atividade
-        </Link>
+        <div className="flex items-center gap-3">
+          <OperacoesExport
+            propertyName={property?.name || 'Fazenda'}
+            activities={(property?.activities || []).map((a: any) => ({
+              type: a.type, status: a.status, startDate: a.startDate.toISOString(),
+              endDate: a.endDate?.toISOString() || null, description: a.description, executor: a.executor,
+            }))}
+          />
+          <Link href="/dashboard/operacoes/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Nova atividade
+          </Link>
+        </div>
       </div>
 
       {/* Filtros */}

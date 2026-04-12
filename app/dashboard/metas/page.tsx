@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import GoalActions from './GoalActions'
+import MetasExport from '@/components/reports/MetasExport'
 
 const TYPE_LABEL: Record<string, { label: string; icon: string; color: string }> = {
   REVENUE:      { label: 'Aumento de faturamento', icon: '📈', color: 'text-green-700 bg-green-50 border-green-200' },
@@ -47,10 +48,20 @@ export default async function MetasPage() {
           <h1 className="text-2xl font-bold text-slate-900">Metas</h1>
           <p className="text-sm text-slate-500 mt-0.5">Acompanhe seus objetivos interligados à operação</p>
         </div>
-        <Link href="/dashboard/metas/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          Nova meta
-        </Link>
+        <div className="flex items-center gap-3">
+          <MetasExport
+            propertyName={property?.name || 'Fazenda'}
+            goals={goals.map((g: any) => ({
+              title: g.title, type: g.type,
+              targetValue: Number(g.targetValue), currentValue: Number(g.currentValue),
+              isCompleted: g.isCompleted, deadline: g.deadline?.toISOString() || null,
+            }))}
+          />
+          <Link href="/dashboard/metas/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Nova meta
+          </Link>
+        </div>
       </div>
 
       {/* Resumo */}
