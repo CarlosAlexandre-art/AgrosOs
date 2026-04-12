@@ -34,7 +34,7 @@ export default async function MetasPage() {
   const goals = property?.goals || []
 
   // Calcular valores atuais automaticamente
-  const totalRevenue = property?.costs.reduce((acc, c) => acc + Number(c.amount), 0) || 0
+  const totalRevenue = property?.costs.reduce((acc: number, c) => acc + Number(c.amount), 0) || 0
   const doneActivities = property?.activities.filter((a: any) => a.status === 'DONE').length || 0
 
   const active = goals.filter((g: any) => !g.isCompleted)

@@ -16,7 +16,7 @@ export default async function PropriedadeDetailPage({ params }: { params: Promis
   })
   if (!property) notFound()
 
-  const totalHa = property.fields.reduce((acc, f) => acc + Number(f.sizeHectares), 0)
+  const totalHa = property.fields.reduce((acc: number, f) => acc + Number(f.sizeHectares), 0)
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">

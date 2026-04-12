@@ -26,7 +26,7 @@ export default async function AtividadeDetailPage({ params }: { params: Promise<
   if (!activity) notFound()
 
   const st = STATUS[activity.status] || STATUS.CANCELLED
-  const totalCost = activity.costs.reduce((acc, c) => acc + Number(c.amount), 0)
+  const totalCost = activity.costs.reduce((acc: number, c) => acc + Number(c.amount), 0)
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">

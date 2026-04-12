@@ -38,7 +38,7 @@ export default async function FinanceiroPage() {
 
   const property = dbUser?.properties[0]
   const costs = property?.costs || []
-  const totalGeral = costs.reduce((acc, c) => acc + Number(c.amount), 0)
+  const totalGeral = costs.reduce((acc: number, c) => acc + Number(c.amount), 0)
   const sizeHa = Number(property?.sizeHectares || 0)
   const costPerHa = sizeHa > 0 ? totalGeral / sizeHa : 0
 
@@ -54,7 +54,7 @@ export default async function FinanceiroPage() {
   const mesAtual = costs.filter((c) => {
     const d = new Date(c.date)
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-  }).reduce((acc, c) => acc + Number(c.amount), 0)
+  }).reduce((acc: number, c) => acc + Number(c.amount), 0)
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
