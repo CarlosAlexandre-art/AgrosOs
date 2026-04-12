@@ -34,8 +34,12 @@ export default function OnboardingPage() {
         }),
       })
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Erro ao configurar')
+        let errorMsg = 'Erro ao configurar. Tente novamente.'
+        try {
+          const data = await res.json()
+          errorMsg = data.error || errorMsg
+        } catch {}
+        throw new Error(errorMsg)
       }
       router.push('/dashboard')
       router.refresh()
