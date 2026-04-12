@@ -16,6 +16,7 @@
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
     "@types/pg": "^8.20.0",
+    "canvas": "^3.2.3",
     "cross-env": "^7.0.3",
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
