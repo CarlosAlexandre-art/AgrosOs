@@ -39,6 +39,8 @@ model User {
   name              String
   email             String             @unique
   role              UserRole           @default(MANAGER)
+  plan              String             @default("starter")
+  stripeCustomerId  String?
   avatarUrl         String?
   phone             String?
   properties        Property[]

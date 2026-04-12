@@ -12,6 +12,7 @@ export default function CadastroPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
 
   async function handleCadastro(e: React.FormEvent) {
     e.preventDefault()
@@ -19,10 +20,13 @@ export default function CadastroPage() {
     setError('')
 
     const supabase = createClient()
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: { name },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+      },
     })
 
     if (signUpError) {
@@ -31,8 +35,16 @@ export default function CadastroPage() {
       return
     }
 
-    router.push('/onboarding')
-    router.refresh()
+    // Se a confirmação de e-mail está desativada no Supabase, a sessão já vem aqui
+    if (data.session) {
+      router.push('/onboarding')
+      router.refresh()
+      return
+    }
+
+    // Se email confirmation está ativada, mostrar mensagem para checar o e-mail
+    setEmailSent(true)
+    setLoading(false)
   }
 
   return (
@@ -48,65 +60,78 @@ export default function CadastroPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-[#e2e8f0] p-8 shadow-sm">
-          <form onSubmit={handleCadastro} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[#0f172a] mb-1">Nome completo</label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-                placeholder="João da Silva"
-                className="w-full border border-[#e2e8f0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition-all"
-              />
+          {emailSent ? (
+            <div className="text-center space-y-4">
+              <div className="text-4xl">📧</div>
+              <h2 className="text-lg font-bold text-slate-900">Verifique seu e-mail</h2>
+              <p className="text-sm text-slate-500">
+                Enviamos um link de confirmação para <strong>{email}</strong>. Clique no link para ativar sua conta e começar.
+              </p>
+              <p className="text-xs text-slate-400">Não recebeu? Verifique sua caixa de spam.</p>
             </div>
+          ) : (
+            <>
+              <form onSubmit={handleCadastro} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#0f172a] mb-1">Nome completo</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                    placeholder="João da Silva"
+                    className="w-full border border-[#e2e8f0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition-all"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[#0f172a] mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                placeholder="seu@email.com"
-                className="w-full border border-[#e2e8f0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition-all"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0f172a] mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    placeholder="seu@email.com"
+                    className="w-full border border-[#e2e8f0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition-all"
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[#0f172a] mb-1">Senha</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                minLength={6}
-                placeholder="Mínimo 6 caracteres"
-                className="w-full border border-[#e2e8f0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition-all"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#0f172a] mb-1">Senha</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    placeholder="Mínimo 6 caracteres"
+                    className="w-full border border-[#e2e8f0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition-all"
+                  />
+                </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
-                {error}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#16a34a] text-white font-bold py-3 rounded-lg hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Criando conta...' : 'Criar conta grátis'}
+                </button>
+              </form>
+
+              <div className="mt-6 text-center text-sm text-[#64748b]">
+                Já tem conta?{' '}
+                <Link href="/login" className="text-[#16a34a] font-semibold hover:underline">
+                  Entrar
+                </Link>
               </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#16a34a] text-white font-bold py-3 rounded-lg hover:bg-[#15803d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Criando conta...' : 'Criar conta grátis'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-[#64748b]">
-            Já tem conta?{' '}
-            <Link href="/login" className="text-[#16a34a] font-semibold hover:underline">
-              Entrar
-            </Link>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

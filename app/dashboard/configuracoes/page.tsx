@@ -14,6 +14,7 @@ export default function ConfiguracoesPage() {
   const [passError, setPassError] = useState('')
   const [passSaved, setPassSaved] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState('')
+  const [plan, setPlan] = useState('starter')
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function ConfiguracoesPage() {
         setAvatarPreview(user.user_metadata?.avatarUrl || '')
       }
     })
+    fetch('/api/user/plan').then(r => r.json()).then(d => setPlan(d.plan || 'starter'))
   }, [])
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -198,13 +200,19 @@ export default function ConfiguracoesPage() {
           <div className="flex items-center justify-between py-3 border-b border-slate-100">
             <div>
               <div className="text-sm font-medium text-slate-900">Plano atual</div>
-              <div className="text-xs text-slate-400">Gratuito — recursos básicos</div>
+              <div className="text-xs text-slate-400">
+                {plan === 'pro' ? 'Pro — recursos completos' : plan === 'enterprise' ? 'Enterprise — suporte prioritário' : 'Gratuito — recursos básicos'}
+              </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-[#16a34a] bg-green-50 px-3 py-1 rounded-full border border-green-200">Grátis</span>
-              <button className="text-xs font-bold text-white bg-[#16a34a] px-3 py-1.5 rounded-lg hover:bg-[#15803d] transition-colors">
-                Fazer upgrade
-              </button>
+              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${plan === 'pro' ? 'text-blue-700 bg-blue-50 border-blue-200' : plan === 'enterprise' ? 'text-purple-700 bg-purple-50 border-purple-200' : 'text-[#16a34a] bg-green-50 border-green-200'}`}>
+                {plan === 'pro' ? 'Pro' : plan === 'enterprise' ? 'Enterprise' : 'Grátis'}
+              </span>
+              {plan === 'starter' && (
+                <button onClick={() => router.push('/dashboard/planos')} className="text-xs font-bold text-white bg-[#16a34a] px-3 py-1.5 rounded-lg hover:bg-[#15803d] transition-colors">
+                  Fazer upgrade
+                </button>
+              )}
             </div>
           </div>
           <button onClick={handleSignOut} className="flex items-center gap-2 text-sm text-red-600 font-medium hover:text-red-700 transition-colors pt-1">
