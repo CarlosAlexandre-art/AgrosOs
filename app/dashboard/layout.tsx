@@ -138,6 +138,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userName, setUserName] = useState('')
   const [userInitial, setUserInitial] = useState('U')
+  const [properties, setProperties] = useState<{ id: string; name: string }[]>([])
+  const [activePropertyId, setActivePropertyId] = useState<string>('')
+  const [propMenuOpen, setPropMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -153,7 +156,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setUserInitial(name[0]?.toUpperCase() || 'U')
       }
     })
+    fetch('/api/properties').then(r => r.json()).then((data: { id: string; name: string }[]) => {
+      if (Array.isArray(data)) {
+        setProperties(data)
+        const cookie = document.cookie.split('; ').find(c => c.startsWith('activePropertyId='))?.split('=')[1]
+        setActivePropertyId(cookie || data[0]?.id || '')
+      }
+    })
   }, [])
+
+  async function handleSelectProperty(id: string) {
+    await fetch('/api/properties/active', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ propertyId: id }),
+    })
+    setActivePropertyId(id)
+    setPropMenuOpen(false)
+    router.refresh()
+  }
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -183,6 +204,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </Link>
       </div>
+
+      {/* Seletor de propriedade */}
+      {properties.length > 1 && (
+        <div className="px-3 py-3 border-b border-white/8 relative">
+          <button
+            onClick={() => setPropMenuOpen(o => !o)}
+            className="w-full flex items-center justify-between gap-2 bg-white/5 hover:bg-white/10 px-3 py-2 rounded-xl transition-colors"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <svg className="w-4 h-4 text-[#16a34a] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-sm text-white font-medium truncate">
+                {properties.find(p => p.id === activePropertyId)?.name || 'Selecionar fazenda'}
+              </span>
+            </div>
+            <svg className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${propMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
+            </svg>
+          </button>
+          {propMenuOpen && (
+            <div className="absolute left-3 right-3 top-full mt-1 bg-[#1e293b] border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl">
+              {properties.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => handleSelectProperty(p.id)}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${p.id === activePropertyId ? 'bg-[#16a34a] text-white font-semibold' : 'text-slate-300 hover:bg-white/8'}`}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
