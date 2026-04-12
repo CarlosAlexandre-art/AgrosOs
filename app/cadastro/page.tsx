@@ -31,14 +31,7 @@ export default function CadastroPage() {
       return
     }
 
-    // Criar perfil no banco
-    await fetch('/api/usuarios', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email }),
-    })
-
-    router.push('/dashboard')
+    router.push('/onboarding')
     router.refresh()
   }
 
