@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { sendPushToProperty } from '@/lib/push'
+import { createAlert } from '@/lib/alerts'
 
 export async function GET() {
   const supabase = await createClient()
@@ -35,12 +35,12 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  // Notifica custo alto (acima de R$500)
+  // Alerta + push para custo alto (acima de R$500)
   if (Number(amount) >= 500) {
-    sendPushToProperty(propertyId, {
-      title: '💰 Custo alto registrado',
-      body: `R$ ${Number(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}${description ? ' — ' + description : ''}`,
-      url: '/dashboard/financeiro',
+    createAlert(propertyId, {
+      message: `Custo de R$ ${Number(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} registrado${description ? ' — ' + description : ''}`,
+      type: 'COST',
+      pushUrl: '/dashboard/financeiro',
     }).catch(() => {})
   }
 

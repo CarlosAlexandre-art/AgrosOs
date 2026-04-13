@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendPushToUser } from '@/lib/push'
+import { createAlert } from '@/lib/alerts'
 
 // Mapeia status do AgroCore → status da atividade no AgroOS
 const STATUS_MAP: Record<string, string> = {
@@ -65,14 +66,23 @@ export async function POST(req: NextRequest) {
     data: updateData,
   })
 
-  // Enviar push notification para o dono da propriedade
+  // Push + alerta para o dono da propriedade
   const notif = STATUS_NOTIF[status]
   if (notif && activity.property?.user?.id) {
-    const agrocoreUrl = process.env.NEXT_PUBLIC_AGROCORE_URL || 'https://agrolink-opal.vercel.app'
+    const agrocoreUrl = process.env.AGROCORE_API_URL || 'https://agrolink-opal.vercel.app'
+    const trackUrl = `${agrocoreUrl}/rastrear/${serviceId}`
+
     sendPushToUser(activity.property.user.id, {
       title: notif.title,
       body: notif.body,
-      url: `${agrocoreUrl}/rastrear/${serviceId}`,
+      url: trackUrl,
+    }).catch(() => {})
+
+    createAlert(activity.propertyId, {
+      message: `${notif.title} — ${activity.type}`,
+      type: 'INFO',
+      push: false, // já enviamos o push acima
+      pushUrl: trackUrl,
     }).catch(() => {})
   }
 
