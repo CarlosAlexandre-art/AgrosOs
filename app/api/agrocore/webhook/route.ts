@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendPushToUser } from '@/lib/push'
 
 // Mapeia status do AgroCore → status da atividade no AgroOS
 const STATUS_MAP: Record<string, string> = {
@@ -10,6 +11,14 @@ const STATUS_MAP: Record<string, string> = {
   EXECUTANDO:          'IN_PROGRESS',
   CONCLUIDO:           'DONE',
   CANCELADO:           'CANCELLED',
+}
+
+const STATUS_NOTIF: Record<string, { title: string; body: string }> = {
+  MATCH_ENCONTRADO: { title: '🤝 Prestador encontrado!',   body: 'Um prestador aceitou seu serviço no AgroCore.' },
+  EM_ROTA:          { title: '🚜 Serviço confirmado!',     body: 'Pagamento confirmado. O prestador está a caminho.' },
+  EXECUTANDO:       { title: '⚙️ Serviço em execução!',   body: 'O prestador está executando seu serviço.' },
+  CONCLUIDO:        { title: '✅ Serviço concluído!',      body: 'Seu serviço foi concluído com sucesso.' },
+  CANCELADO:        { title: '❌ Serviço cancelado',       body: 'O serviço foi cancelado no AgroCore.' },
 }
 
 export async function POST(req: NextRequest) {
@@ -28,9 +37,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ignored: true })
   }
 
-  // Busca a atividade pelo agrolinkServiceId
+  // Busca a atividade e o usuário dono
   const activity = await prisma.activity.findFirst({
     where: { agrolinkServiceId: serviceId },
+    include: { property: { include: { user: true } } },
   })
 
   if (!activity) {
@@ -40,12 +50,10 @@ export async function POST(req: NextRequest) {
   // Atualiza o status da atividade
   const updateData: Record<string, unknown> = { status: newStatus, agrolinkStatus: status }
 
-  // Se concluído, registra data de término
   if (status === 'CONCLUIDO' && !activity.endDate) {
     updateData.endDate = new Date()
   }
 
-  // Guarda o status do AgroCore na descrição se houver prestador
   if (prestadorNome && status === 'MATCH_ENCONTRADO') {
     updateData.description = activity.description
       ? `${activity.description}\n\n[AgroCore] Prestador: ${prestadorNome}`
@@ -56,6 +64,17 @@ export async function POST(req: NextRequest) {
     where: { id: activity.id },
     data: updateData,
   })
+
+  // Enviar push notification para o dono da propriedade
+  const notif = STATUS_NOTIF[status]
+  if (notif && activity.property?.user?.id) {
+    const agrocoreUrl = process.env.NEXT_PUBLIC_AGROCORE_URL || 'https://agrolink-opal.vercel.app'
+    sendPushToUser(activity.property.user.id, {
+      title: notif.title,
+      body: notif.body,
+      url: `${agrocoreUrl}/rastrear/${serviceId}`,
+    }).catch(() => {})
+  }
 
   return NextResponse.json({ ok: true, activityId: activity.id, newStatus })
 }
