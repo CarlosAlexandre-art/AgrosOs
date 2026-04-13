@@ -105,7 +105,8 @@ model Activity {
   description       String?
   status            ActivityStatus @default(PENDING)
   executor          ExecutorType   @default(INTERNAL)
-  agrolinkServiceId String?
+  agrolinkServiceId     String?
+  agrolinkStatus        String?
   startDate         DateTime
   endDate           DateTime?
   costs             Cost[]

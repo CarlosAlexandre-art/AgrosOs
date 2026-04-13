@@ -114,6 +114,7 @@ export default async function AtividadeDetailPage({ params }: { params: Promise<
             <AgroCoreButton
               activityId={activity.id}
               agrolinkServiceId={activity.agrolinkServiceId}
+              agrocoreStatus={(activity as any).agrolinkStatus ?? null}
             />
           )}
         </div>
