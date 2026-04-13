@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import ActivityActions from './ActivityActions'
+import AgroCoreButton from '@/components/AgroCoreButton'
 import { ACTIVITY_STATUS as STATUS } from '@/lib/constants'
 
 export default async function AtividadeDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -107,8 +108,14 @@ export default async function AtividadeDetailPage({ params }: { params: Promise<
         </div>
 
         {/* Ações */}
-        <div>
+        <div className="space-y-4">
           <ActivityActions activity={{ id: activity.id, status: activity.status }} />
+          {activity.executor === 'AGROLINK' && (
+            <AgroCoreButton
+              activityId={activity.id}
+              agrolinkServiceId={activity.agrolinkServiceId}
+            />
+          )}
         </div>
       </div>
     </div>
