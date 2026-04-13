@@ -5,6 +5,14 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+// Itens que exigem plano pago
+const REQUIRES_PLAN = [
+  '/dashboard/metas',
+  '/dashboard/agrocore',
+  '/dashboard/equipe',
+  '/dashboard/suporte',
+]
+
 const NAV = [
   {
     group: 'Principal',
@@ -102,13 +110,22 @@ const NAV = [
           </svg>
         ),
       },
+      {
+        href: '/dashboard/suporte',
+        label: 'Suporte',
+        icon: (
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        ),
+      },
     ],
   },
 ]
 
 function SidebarLink({
-  href, label, icon, badge, onClick,
-}: { href: string; label: string; icon: React.ReactNode; badge?: boolean; onClick?: () => void }) {
+  href, label, icon, badge, locked, onClick,
+}: { href: string; label: string; icon: React.ReactNode; badge?: boolean; locked?: boolean; onClick?: () => void }) {
   const pathname = usePathname()
   const exact = href === '/dashboard'
   const active = exact ? pathname === href : pathname.startsWith(href)
@@ -127,7 +144,14 @@ function SidebarLink({
         {icon}
       </span>
       {label}
-      {badge && (
+      {locked && (
+        <span className="ml-auto">
+          <svg className="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </span>
+      )}
+      {badge && !locked && (
         <span className="ml-auto w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
       )}
     </Link>
@@ -141,6 +165,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [properties, setProperties] = useState<{ id: string; name: string }[]>([])
   const [activePropertyId, setActivePropertyId] = useState<string>('')
   const [propMenuOpen, setPropMenuOpen] = useState(false)
+  const [userPlan, setUserPlan] = useState<string>('starter')
   const router = useRouter()
   const pathname = usePathname()
 
@@ -155,6 +180,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setUserName(name)
         setUserInitial(name[0]?.toUpperCase() || 'U')
       }
+    })
+    fetch('/api/user/plan').then(r => r.json()).then((d: { plan: string }) => {
+      if (d.plan) setUserPlan(d.plan)
     })
     fetch('/api/properties').then(r => r.json()).then((data: { id: string; name: string }[]) => {
       if (Array.isArray(data)) {
@@ -250,7 +278,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div className="space-y-0.5">
               {section.items.map(item => (
-                <SidebarLink key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+                <SidebarLink
+                  key={item.href}
+                  {...item}
+                  locked={REQUIRES_PLAN.includes(item.href) && !['pro', 'enterprise', 'admin'].includes(userPlan)}
+                  onClick={() => setSidebarOpen(false)}
+                />
               ))}
             </div>
           </div>
