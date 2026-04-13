@@ -38,9 +38,12 @@ export default async function FinanceiroPage() {
     },
   })
 
+  const plan = (dbUser as any)?.plan ?? 'starter'
+  const isPago = ['pro', 'enterprise', 'admin'].includes(plan)
+
   const property = dbUser?.properties[0]
   const costs = property?.costs || []
-  const revenues = (property as any)?.revenues || []
+  const revenues = isPago ? ((property as any)?.revenues || []) : []
   const sizeHa = Number(property?.sizeHectares || 0)
 
   const totalCosts = costs.reduce((acc: number, c: any) => acc + Number(c.amount), 0)
@@ -74,14 +77,27 @@ export default async function FinanceiroPage() {
           <p className="text-sm text-slate-500 mt-0.5">Receitas, custos e resultado por hectare</p>
         </div>
         <div className="flex items-center gap-3">
-          <FinanceiroExport
-            propertyName={property?.name || 'Fazenda'}
-            costs={costs.map((c: any) => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
-            totalGeral={totalCosts}
-            costPerHa={costPerHa}
-            sizeHa={sizeHa}
-          />
-          <NovaReceitaButton propertyId={property?.id || ''} />
+          {isPago ? (
+            <FinanceiroExport
+              propertyName={property?.name || 'Fazenda'}
+              costs={costs.map((c: any) => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
+              totalGeral={totalCosts}
+              costPerHa={costPerHa}
+              sizeHa={sizeHa}
+            />
+          ) : (
+            <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              Exportar (Pro)
+            </Link>
+          )}
+          {isPago && <NovaReceitaButton propertyId={property?.id || ''} />}
+          {!isPago && (
+            <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              Receitas (Pro)
+            </Link>
+          )}
           <Link href="/dashboard/financeiro/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             Lançar custo

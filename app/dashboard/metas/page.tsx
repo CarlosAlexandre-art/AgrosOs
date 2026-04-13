@@ -70,6 +70,26 @@ export default async function MetasPage() {
     },
   })
 
+  const plan = (dbUser as any)?.plan ?? 'starter'
+  const isPago = ['pro', 'enterprise', 'admin'].includes(plan)
+
+  if (!isPago) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto">
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+          <div className="text-5xl mb-4">🎯</div>
+          <h1 className="text-xl font-bold text-slate-900 mb-2">Metas e projeções — recurso exclusivo Pro</h1>
+          <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
+            Defina objetivos sincronizados com dados reais e acompanhe projeções automáticas com o plano Pro ou Enterprise.
+          </p>
+          <Link href="/dashboard/planos" className="inline-flex items-center gap-2 bg-[#16a34a] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#15803d] transition-colors">
+            Ver planos →
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   const property = dbUser?.properties[0]
   const goals = property?.goals || []
 
