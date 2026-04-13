@@ -54,6 +54,16 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Se havia serviço vinculado no AgroCore, cancela lá também
+  const activity = await prisma.activity.findUnique({ where: { id }, select: { agrolinkServiceId: true } })
+  if (activity?.agrolinkServiceId) {
+    const agrocoreUrl = process.env.AGROCORE_API_URL || 'https://agrolink-opal.vercel.app'
+    fetch(`${agrocoreUrl}/api/internal/servicos/${activity.agrolinkServiceId}`, {
+      method: 'DELETE',
+      headers: { 'x-internal-secret': process.env.AGROLINK_INTERNAL_SECRET! },
+    }).catch(() => {})
+  }
+
   await prisma.activity.delete({ where: { id } })
   return NextResponse.json({ ok: true })
 }
