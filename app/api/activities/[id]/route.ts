@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { sendPushToProperty } from '@/lib/push'
+
+const STATUS_PUSH: Record<string, { title: string; emoji: string }> = {
+  DONE:        { title: 'Atividade concluída',  emoji: '✅' },
+  LATE:        { title: 'Atividade atrasada',   emoji: '⚠️' },
+  CANCELLED:   { title: 'Atividade cancelada',  emoji: '❌' },
+  IN_PROGRESS: { title: 'Atividade iniciada',   emoji: '🔄' },
+}
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -24,7 +32,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (data.startDate) data.startDate = new Date(data.startDate)
   if (data.endDate) data.endDate = new Date(data.endDate)
 
+  const prev = await prisma.activity.findUnique({ where: { id } })
   const updated = await prisma.activity.update({ where: { id }, data })
+
+  // Notifica mudança de status relevante
+  if (data.status && data.status !== prev?.status && STATUS_PUSH[data.status]) {
+    const { title, emoji } = STATUS_PUSH[data.status]
+    sendPushToProperty(updated.propertyId, {
+      title: `${emoji} ${title}`,
+      body: updated.type,
+      url: `/dashboard/operacoes/${id}`,
+    }).catch(() => {})
+  }
+
   return NextResponse.json(updated)
 }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { sendPushToProperty } from '@/lib/push'
 
 async function getPropertyId(userId: string) {
   const dbUser = await prisma.user.findUnique({
@@ -28,6 +29,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     where: { id },
     data: body,
   })
+
+  // Notifica quando meta é concluída
+  if (body.isCompleted && !goal.isCompleted) {
+    sendPushToProperty(propertyId, {
+      title: '🎯 Meta concluída!',
+      body: goal.title,
+      url: '/dashboard/metas',
+    }).catch(() => {})
+  }
 
   return NextResponse.json(updated)
 }
