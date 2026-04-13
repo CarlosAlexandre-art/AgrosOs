@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getUserPlan, planoBloqueado } from '@/lib/planos'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+
+  const { plan, limites } = await getUserPlan(user.id)
+  if (!limites.metas) return planoBloqueado('metas', plan)
 
   const body = await req.json()
   const { title, description, type, targetValue, deadline } = body

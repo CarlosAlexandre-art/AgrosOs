@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getUserPlan, planoBloqueado } from '@/lib/planos'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -8,6 +10,13 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { plan, limites } = await getUserPlan(user.id)
+  if (!limites.multiusuario) return planoBloqueado('multiusuario', plan)
+
   const { id } = await params
   const { name, role, phone } = await req.json()
   if (!name || !role) return NextResponse.json({ error: 'Nome e cargo obrigatórios' }, { status: 400 })

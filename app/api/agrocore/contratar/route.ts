@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getUserPlan, planoBloqueado } from '@/lib/planos'
 
 const TIPO_MAP: Record<string, string> = {
   'Pulverização':   'PULVERIZACAO',
@@ -19,6 +20,9 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+
+    const { plan, limites } = await getUserPlan(user.id)
+    if (!limites.agrocore) return planoBloqueado('agrocore', plan)
 
     const { activityId } = await req.json()
     if (!activityId) return NextResponse.json({ error: 'activityId obrigatório' }, { status: 400 })

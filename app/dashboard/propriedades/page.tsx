@@ -12,6 +12,13 @@ const COVER_DEFAULTS = [
   'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800&q=80',
 ]
 
+const PROP_LIMIT: Record<string, number> = {
+  starter:    1,
+  pro:        3,
+  enterprise: 999,
+  admin:      999,
+}
+
 export default async function PropriedadesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -32,6 +39,9 @@ export default async function PropriedadesPage() {
   })
 
   const properties = dbUser?.properties || []
+  const plan = (dbUser as any)?.plan ?? 'starter'
+  const limite = PROP_LIMIT[plan] ?? 1
+  const atingiuLimite = properties.length >= limite
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
@@ -40,11 +50,34 @@ export default async function PropriedadesPage() {
           <h1 className="text-2xl font-bold text-slate-900">Propriedades</h1>
           <p className="text-sm text-slate-500 mt-0.5">Gerencie fazendas, talhões e culturas</p>
         </div>
-        <Link href="/dashboard/propriedades/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          Nova propriedade
-        </Link>
+        {atingiuLimite ? (
+          <Link href="/dashboard/planos" className="flex items-center gap-1.5 bg-amber-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-amber-600 transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            Limite atingido — Ver planos
+          </Link>
+        ) : (
+          <Link href="/dashboard/propriedades/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Nova propriedade
+          </Link>
+        )}
       </div>
+
+      {atingiuLimite && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+          <div>
+            <div className="text-sm font-semibold text-amber-800">
+              Limite do plano {plan.charAt(0).toUpperCase() + plan.slice(1)} atingido
+            </div>
+            <div className="text-xs text-amber-600 mt-0.5">
+              Seu plano permite até {limite} propriedade{limite > 1 ? 's' : ''}. Faça upgrade para adicionar mais.
+            </div>
+          </div>
+          <Link href="/dashboard/planos" className="flex-shrink-0 text-xs font-bold bg-amber-500 text-white px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors">
+            Ver planos →
+          </Link>
+        </div>
+      )}
 
       {properties.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">

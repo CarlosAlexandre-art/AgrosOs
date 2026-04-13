@@ -23,6 +23,13 @@ export default function NovaPropriedadePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, sizeHectares: parseFloat(form.sizeHectares) || 0 }),
       })
+      if (res.status === 403) {
+        const data = await res.json()
+        if (data.error === 'PLAN_LIMIT') {
+          router.push('/dashboard/planos')
+          return
+        }
+      }
       if (!res.ok) throw new Error((await res.json()).error || 'Erro ao criar')
       router.push('/dashboard/propriedades')
       router.refresh()

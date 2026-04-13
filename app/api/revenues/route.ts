@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getUserPlan, planoBloqueado } from '@/lib/planos'
 
 export async function GET() {
   const supabase = await createClient()
@@ -19,6 +20,9 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { plan, limites } = await getUserPlan(user.id)
+  if (!limites.receitas) return planoBloqueado('receitas', plan)
 
   const { propertyId, amount, category, description, date } = await req.json()
   if (!propertyId || !amount) return NextResponse.json({ error: 'Campos obrigatórios faltando' }, { status: 400 })
