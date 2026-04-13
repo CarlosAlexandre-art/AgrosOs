@@ -69,10 +69,22 @@ model Property {
   fields       Field[]
   activities   Activity[]
   costs        Cost[]
+  revenues     Revenue[]
   teamMembers  TeamMember[]
   alerts       Alert[]
   goals        Goal[]
   createdAt    DateTime     @default(now())
+}
+
+model Revenue {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  amount      Decimal
+  category    String   @default("VENDA")
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Crop {

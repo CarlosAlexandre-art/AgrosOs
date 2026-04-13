@@ -6,11 +6,49 @@ import GoalActions from './GoalActions'
 import MetasExport from '@/components/reports/MetasExport'
 
 const TYPE_LABEL: Record<string, { label: string; icon: string; color: string }> = {
-  REVENUE:      { label: 'Aumento de faturamento', icon: '📈', color: 'text-green-700 bg-green-50 border-green-200' },
-  PRODUCTIVITY: { label: 'Produtividade', icon: '⚡', color: 'text-blue-700 bg-blue-50 border-blue-200' },
-  COST:         { label: 'Redução de custos', icon: '💰', color: 'text-purple-700 bg-purple-50 border-purple-200' },
-  ACTIVITIES:   { label: 'Atividades concluídas', icon: '✅', color: 'text-orange-700 bg-orange-50 border-orange-200' },
-  CUSTOM:       { label: 'Meta personalizada', icon: '🎯', color: 'text-slate-700 bg-slate-50 border-slate-200' },
+  REVENUE:      { label: 'Faturamento',         icon: '📈', color: 'text-green-700 bg-green-50 border-green-200' },
+  PRODUCTIVITY: { label: 'Produtividade',        icon: '⚡', color: 'text-blue-700 bg-blue-50 border-blue-200' },
+  COST:         { label: 'Redução de custos',    icon: '💰', color: 'text-purple-700 bg-purple-50 border-purple-200' },
+  ACTIVITIES:   { label: 'Atividades concluídas',icon: '✅', color: 'text-orange-700 bg-orange-50 border-orange-200' },
+  CUSTOM:       { label: 'Meta personalizada',   icon: '🎯', color: 'text-slate-700 bg-slate-50 border-slate-200' },
+}
+
+function gerarConselho(type: string, pct: number, mesesRestantes: number | null): string {
+  if (pct >= 100) return 'Meta atingida! Considere elevar o objetivo para continuar crescendo.'
+  if (type === 'REVENUE') {
+    if (pct < 20) return 'Faturamento muito abaixo da meta. Avalie novos canais de venda ou diversificação de culturas.'
+    if (pct < 50) return 'Ritmo abaixo do esperado. Registre todas as receitas para acompanhar o progresso real.'
+    if (mesesRestantes !== null && mesesRestantes > 12) return 'No ritmo atual o prazo está apertado. Considere antecipar colheitas ou negociar contratos de venda.'
+    return 'Bom progresso! Mantenha o registro de receitas atualizado para projeções precisas.'
+  }
+  if (type === 'COST') {
+    if (pct > 80) return 'Custos próximos do limite definido. Revise contratos de insumos e mão de obra.'
+    if (pct > 50) return 'Custos em nível moderado. Monitore categorias de maior impacto no financeiro.'
+    return 'Custos controlados. Continue registrando todas as saídas para manter a precisão.'
+  }
+  if (type === 'ACTIVITIES') {
+    if (pct < 30) return 'Poucas atividades concluídas. Verifique se há tarefas atrasadas na operação.'
+    if (pct < 70) return 'Progresso moderado. Priorize atividades com prazo próximo para evitar atrasos.'
+    return 'Excelente ritmo operacional! Mantenha o planejamento das próximas atividades.'
+  }
+  return 'Mantenha o registro atualizado para projeções mais precisas.'
+}
+
+function calcularProjecao(current: number, target: number, createdAt: Date, deadline: Date | null): { mesesParaAtingir: number | null; mesesRestantes: number | null; noRitmoAtual: boolean } {
+  const now = new Date()
+  const mesesDecorridos = Math.max(1, (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30))
+  const taxaMensal = current / mesesDecorridos
+  const restante = target - current
+  const mesesParaAtingir = taxaMensal > 0 ? Math.ceil(restante / taxaMensal) : null
+
+  let mesesRestantes: number | null = null
+  let noRitmoAtual = false
+  if (deadline) {
+    mesesRestantes = Math.max(0, Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30)))
+    noRitmoAtual = mesesParaAtingir !== null && mesesParaAtingir <= mesesRestantes
+  }
+
+  return { mesesParaAtingir, mesesRestantes, noRitmoAtual }
 }
 
 export default async function MetasPage() {
@@ -23,8 +61,9 @@ export default async function MetasPage() {
     include: {
       properties: {
         include: {
-          goals: { orderBy: { createdAt: 'desc' } },
+          goals: { orderBy: { createdAt: 'asc' } },
           costs: true,
+          revenues: true,
           activities: true,
         },
       },
@@ -34,9 +73,10 @@ export default async function MetasPage() {
   const property = dbUser?.properties[0]
   const goals = property?.goals || []
 
-  // Calcular valores atuais automaticamente por tipo de meta
-  const totalCosts = property?.costs.reduce((acc: number, c) => acc + Number(c.amount), 0) || 0
+  const totalCosts = property?.costs.reduce((acc: number, c: any) => acc + Number(c.amount), 0) || 0
+  const totalRevenues = (property as any)?.revenues?.reduce((acc: number, r: any) => acc + Number(r.amount), 0) || 0
   const doneActivities = property?.activities.filter((a: any) => a.status === 'DONE').length || 0
+  const sizeHa = Number(property?.sizeHectares || 0)
 
   const active = goals.filter((g: any) => !g.isCompleted)
   const completed = goals.filter((g: any) => g.isCompleted)
@@ -46,7 +86,7 @@ export default async function MetasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Metas</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Acompanhe seus objetivos interligados à operação</p>
+          <p className="text-sm text-slate-500 mt-0.5">Objetivos sincronizados com a operação real</p>
         </div>
         <div className="flex items-center gap-3">
           <MetasExport
@@ -65,14 +105,15 @@ export default async function MetasPage() {
       </div>
 
       {/* Resumo */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Metas ativas', value: active.length, color: 'text-blue-700', bg: 'bg-blue-50' },
           { label: 'Concluídas', value: completed.length, color: 'text-green-700', bg: 'bg-green-50' },
-          { label: 'Total de metas', value: goals.length, color: 'text-slate-700', bg: 'bg-slate-50' },
+          { label: 'Receita total', value: `R$ ${totalRevenues.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, color: 'text-green-700', bg: 'bg-green-50' },
+          { label: 'Atividades concluídas', value: doneActivities, color: 'text-orange-700', bg: 'bg-orange-50' },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-2xl border border-slate-200 p-5">
-            <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+          <div key={s.label} className="bg-white rounded-2xl border border-slate-200 p-4">
+            <div className={`text-xl font-bold ${s.color}`}>{s.value}</div>
             <div className="text-xs text-slate-400 mt-1">{s.label}</div>
           </div>
         ))}
@@ -83,7 +124,7 @@ export default async function MetasPage() {
           <div className="text-5xl mb-4">🎯</div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Nenhuma meta definida</h2>
           <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
-            Defina objetivos claros — aumento de faturamento, produtividade, redução de custos — e acompanhe o progresso em tempo real.
+            Defina objetivos claros e acompanhe o progresso automaticamente com base nos dados reais da sua operação.
           </p>
           <Link href="/dashboard/metas/nova" className="inline-flex items-center gap-2 bg-[#16a34a] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#15803d] transition-colors">
             Criar primeira meta
@@ -97,13 +138,23 @@ export default async function MetasPage() {
               <div className="space-y-4">
                 {active.map((g: any) => {
                   const info = TYPE_LABEL[g.type] || TYPE_LABEL.CUSTOM
-                  // Valor atual automático por tipo
+                  const target = Number(g.targetValue)
+
+                  // Sincroniza com dados reais
                   let current = Number(g.currentValue)
+                  if (g.type === 'REVENUE') current = Math.max(current, totalRevenues)
                   if (g.type === 'COST') current = Math.max(current, totalCosts)
                   if (g.type === 'ACTIVITIES') current = Math.max(current, doneActivities)
-                  const target = Number(g.targetValue)
+                  if (g.type === 'PRODUCTIVITY' && sizeHa > 0) current = Math.max(current, doneActivities / sizeHa)
+
                   const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0
                   const isNear = pct >= 80
+                  const proj = calcularProjecao(current, target, new Date(g.createdAt), g.deadline ? new Date(g.deadline) : null)
+                  const conselho = gerarConselho(g.type, pct, proj.mesesRestantes)
+
+                  const formatVal = (v: number) => g.type === 'ACTIVITIES' || g.type === 'PRODUCTIVITY'
+                    ? v.toFixed(g.type === 'PRODUCTIVITY' ? 1 : 0)
+                    : `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`
 
                   return (
                     <div key={g.id} className="bg-white rounded-2xl border border-slate-200 p-6">
@@ -120,27 +171,38 @@ export default async function MetasPage() {
                       </div>
 
                       {/* Barra de progresso */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 mb-4">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">
-                            {g.type === 'ACTIVITIES'
-                              ? `${current} de ${target} atividades`
-                              : `R$ ${current.toLocaleString('pt-BR', { minimumFractionDigits: 0 })} de R$ ${target.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`
-                            }
-                          </span>
+                          <span className="text-slate-500">{formatVal(current)} de {formatVal(target)}</span>
                           <span className={`font-bold ${isNear ? 'text-green-600' : 'text-slate-700'}`}>{pct.toFixed(0)}%</span>
                         </div>
                         <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${isNear ? 'bg-green-500' : 'bg-[#16a34a]'}`}
+                            className={`h-full rounded-full transition-all duration-500 ${pct >= 100 ? 'bg-green-500' : isNear ? 'bg-green-400' : 'bg-[#16a34a]'}`}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
                         {g.deadline && (
-                          <div className="text-xs text-slate-400">
-                            Prazo: {new Date(g.deadline).toLocaleDateString('pt-BR')}
+                          <div className="flex items-center justify-between text-xs text-slate-400">
+                            <span>Prazo: {new Date(g.deadline).toLocaleDateString('pt-BR')}</span>
+                            {proj.mesesParaAtingir !== null && (
+                              <span className={proj.noRitmoAtual ? 'text-green-600 font-medium' : 'text-orange-600 font-medium'}>
+                                {proj.noRitmoAtual ? '✓ No ritmo certo' : `Projeção: +${proj.mesesParaAtingir} meses`}
+                              </span>
+                            )}
                           </div>
                         )}
+                        {!g.deadline && proj.mesesParaAtingir !== null && proj.mesesParaAtingir > 0 && (
+                          <div className="text-xs text-slate-400">
+                            No ritmo atual: <span className="font-medium text-slate-600">~{proj.mesesParaAtingir} {proj.mesesParaAtingir === 1 ? 'mês' : 'meses'}</span> para atingir a meta
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Conselho */}
+                      <div className="bg-slate-50 rounded-xl px-4 py-3 flex items-start gap-2">
+                        <span className="text-sm">💡</span>
+                        <p className="text-xs text-slate-600">{conselho}</p>
                       </div>
                     </div>
                   )
@@ -165,6 +227,7 @@ export default async function MetasPage() {
                         </div>
                         <div className="text-xs text-slate-400">{info.label}</div>
                       </div>
+                      <GoalActions goalId={g.id} />
                     </div>
                   )
                 })}
