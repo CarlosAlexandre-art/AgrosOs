@@ -40,7 +40,7 @@ export default async function AgroCoreInternalPage() {
           <p className="text-sm text-slate-500 mt-0.5">Contrate serviços externos integrados à sua operação</p>
         </div>
         <a
-          href="https://agrocore.com.br"
+          href="https://agrolink-opal.vercel.app"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors"
@@ -76,7 +76,7 @@ export default async function AgroCoreInternalPage() {
             {SERVICOS.map(s => (
               <a
                 key={s.nome}
-                href="https://agrocore.com.br"
+                href="https://agrolink-opal.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white rounded-2xl border border-slate-200 p-4 hover:border-[#16a34a] hover:shadow-sm transition-all group cursor-pointer"

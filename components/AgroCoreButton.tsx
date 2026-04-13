@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 const AGROCORE_URL = 'https://agrolink-opal.vercel.app'
+const AGROCORE_TRACK_PATH = '/rastrear'
 
 const STATUS_LABEL: Record<string, { label: string; icon: string; color: string }> = {
   PROCURANDO:          { label: 'Buscando prestador',    icon: '🔍', color: 'text-yellow-700 bg-yellow-50 border-yellow-200' },
@@ -130,7 +131,7 @@ export default function AgroCoreButton({
 
       {/* Link */}
       <a
-        href={`${AGROCORE_URL}/servico/${serviceId}`}
+        href={`${AGROCORE_URL}${AGROCORE_TRACK_PATH}/${serviceId}`}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 w-full border-2 border-[#16a34a] text-[#16a34a] font-semibold py-2 rounded-xl hover:bg-green-50 transition-colors text-sm"
