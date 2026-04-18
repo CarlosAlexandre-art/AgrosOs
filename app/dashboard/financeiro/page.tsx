@@ -10,11 +10,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   INSUMO: 'Insumo', MAO_DE_OBRA: 'Mão de obra', MAQUINARIO: 'Maquinário',
   AGROLINK: 'AgroCore', OUTROS: 'Outros',
 }
-const CATEGORY_COLOR: Record<string, string> = {
-  INSUMO: 'bg-green-100 text-green-700', MAO_DE_OBRA: 'bg-blue-100 text-blue-700',
-  MAQUINARIO: 'bg-orange-100 text-orange-700', AGROLINK: 'bg-purple-100 text-purple-700',
-  OUTROS: 'bg-slate-100 text-slate-600',
-}
 const REVENUE_CAT_LABEL: Record<string, string> = {
   VENDA: 'Venda', SERVICO: 'Serviço', SUBSIDIO: 'Subsídio',
   ARRENDAMENTO: 'Arrendamento', OUTROS: 'Outros',
@@ -69,38 +64,40 @@ export default async function FinanceiroPage() {
   const isPositive = resultado >= 0
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Financeiro</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Receitas, custos e resultado por hectare</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Financeiro</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5 hidden sm:block">Receitas, custos e resultado por hectare</p>
         </div>
-        <div className="flex items-center gap-3">
-          {isPago ? (
-            <FinanceiroExport
-              propertyName={property?.name || 'Fazenda'}
-              costs={costs.map((c: any) => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
-              totalGeral={totalCosts}
-              costPerHa={costPerHa}
-              sizeHa={sizeHa}
-            />
-          ) : (
-            <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              Exportar (Pro)
-            </Link>
-          )}
-          {isPago && <NovaReceitaButton propertyId={property?.id || ''} />}
-          {!isPago && (
-            <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              Receitas (Pro)
-            </Link>
-          )}
-          <Link href="/dashboard/financeiro/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="hidden sm:flex items-center gap-2">
+            {isPago ? (
+              <FinanceiroExport
+                propertyName={property?.name || 'Fazenda'}
+                costs={costs.map((c: any) => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
+                totalGeral={totalCosts}
+                costPerHa={costPerHa}
+                sizeHa={sizeHa}
+              />
+            ) : (
+              <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                Exportar (Pro)
+              </Link>
+            )}
+            {isPago && <NovaReceitaButton propertyId={property?.id || ''} />}
+            {!isPago && (
+              <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                Receitas (Pro)
+              </Link>
+            )}
+          </div>
+          <Link href="/dashboard/financeiro/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-            Lançar custo
+            <span className="hidden sm:inline">Lançar custo</span>
           </Link>
         </div>
       </div>

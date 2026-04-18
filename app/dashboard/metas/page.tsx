@@ -102,24 +102,26 @@ export default async function MetasPage() {
   const completed = goals.filter((g: any) => g.isCompleted)
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Metas</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Objetivos sincronizados com a operação real</p>
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Metas</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5 hidden sm:block">Objetivos sincronizados com a operação real</p>
         </div>
-        <div className="flex items-center gap-3">
-          <MetasExport
-            propertyName={property?.name || 'Fazenda'}
-            goals={goals.map((g: any) => ({
-              title: g.title, type: g.type,
-              targetValue: Number(g.targetValue), currentValue: Number(g.currentValue),
-              isCompleted: g.isCompleted, deadline: g.deadline?.toISOString() || null,
-            }))}
-          />
-          <Link href="/dashboard/metas/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="hidden sm:block">
+            <MetasExport
+              propertyName={property?.name || 'Fazenda'}
+              goals={goals.map((g: any) => ({
+                title: g.title, type: g.type,
+                targetValue: Number(g.targetValue), currentValue: Number(g.currentValue),
+                isCompleted: g.isCompleted, deadline: g.deadline?.toISOString() || null,
+              }))}
+            />
+          </div>
+          <Link href="/dashboard/metas/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-            Nova meta
+            <span className="hidden sm:inline">Nova meta</span>
           </Link>
         </div>
       </div>

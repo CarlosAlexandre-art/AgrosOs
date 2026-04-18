@@ -230,7 +230,7 @@ export default function HomePage() {
                   Acessar AgroCore
                 </Link>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {[
                   { icon: '🚜', label: 'Tratoreação' },
                   { icon: '🌿', label: 'Pulverização' },
@@ -239,9 +239,9 @@ export default function HomePage() {
                   { icon: '🧪', label: 'Análise de Solo' },
                   { icon: '🚁', label: 'Drone Agrícola' },
                 ].map(s => (
-                  <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3">
-                    <span className="text-xl">{s.icon}</span>
-                    <span className="text-sm text-gray-300 font-medium">{s.label}</span>
+                  <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2 min-w-0">
+                    <span className="text-lg flex-shrink-0">{s.icon}</span>
+                    <span className="text-xs sm:text-sm text-gray-300 font-medium truncate">{s.label}</span>
                   </div>
                 ))}
               </div>
