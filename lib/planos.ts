@@ -12,7 +12,7 @@ export const PLANO_LIMITES = {
     metas:             false,
     push:              false,
     agrocore:          false,
-    multiusuario:      false,
+    membrosEquipe:     2,
     exportacao:        false,
   },
   pro: {
@@ -23,7 +23,7 @@ export const PLANO_LIMITES = {
     metas:             true,
     push:              true,
     agrocore:          true,
-    multiusuario:      false,
+    membrosEquipe:     5,
     exportacao:        true,
   },
   enterprise: {
@@ -34,7 +34,7 @@ export const PLANO_LIMITES = {
     metas:             true,
     push:              true,
     agrocore:          true,
-    multiusuario:      true,
+    membrosEquipe:     9999,
     exportacao:        true,
   },
   admin: {
@@ -45,7 +45,7 @@ export const PLANO_LIMITES = {
     metas:             true,
     push:              true,
     agrocore:          true,
-    multiusuario:      true,
+    membrosEquipe:     9999,
     exportacao:        true,
   },
 }

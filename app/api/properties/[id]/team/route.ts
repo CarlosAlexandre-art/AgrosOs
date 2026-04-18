@@ -15,9 +15,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { plan, limites } = await getUserPlan(user.id)
-  if (!limites.multiusuario) return planoBloqueado('multiusuario', plan)
-
   const { id } = await params
+
+  const currentCount = await prisma.teamMember.count({ where: { propertyId: id } })
+  if (currentCount >= limites.membrosEquipe) return planoBloqueado('membrosEquipe', plan)
+
   const { name, role, phone } = await req.json()
   if (!name || !role) return NextResponse.json({ error: 'Nome e cargo obrigatórios' }, { status: 400 })
   const member = await prisma.teamMember.create({ data: { propertyId: id, name, role, phone: phone || null } })

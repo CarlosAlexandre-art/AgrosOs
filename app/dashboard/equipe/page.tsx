@@ -2,11 +2,17 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { getUserPlan } from '@/lib/planos'
 
 export default async function EquipePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { plan, limites } = await getUserPlan(user.id)
+  const limite = limites.membrosEquipe
+  const isEnterprise = plan === 'enterprise' || plan === 'admin'
+  const isPago = ['pro', 'enterprise', 'admin'].includes(plan)
 
   const dbUser = await prisma.user.findUnique({
     where: { supabaseId: user.id },
@@ -23,19 +29,61 @@ export default async function EquipePage() {
 
   const property = dbUser?.properties[0]
   const team = property?.teamMembers || []
+  const atLimite = team.length >= limite
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Equipe</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{team.length} membro{team.length !== 1 ? 's' : ''} cadastrado{team.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {team.length} de {isEnterprise ? 'ilimitados' : limite} membro{limite !== 1 ? 's' : ''}
+          </p>
         </div>
-        <Link href="/dashboard/equipe/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-          Adicionar membro
-        </Link>
+        <div className="flex items-center gap-3">
+          {atLimite ? (
+            <Link
+              href="/dashboard/planos"
+              className="flex items-center gap-1.5 border border-amber-300 text-amber-600 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-amber-50 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              Limite atingido — Fazer upgrade
+            </Link>
+          ) : (
+            <Link href="/dashboard/equipe/novo" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              Adicionar membro
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* Barra de uso */}
+      {!isEnterprise && (
+        <div className={`rounded-xl p-4 border flex items-center gap-4 ${atLimite ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`}>
+          <div className="flex-1">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className={`font-semibold ${atLimite ? 'text-amber-700' : 'text-slate-600'}`}>
+                {team.length} de {limite} membros usados
+              </span>
+              <span className={`font-bold ${atLimite ? 'text-amber-600' : 'text-slate-500'}`}>
+                {Math.round((team.length / limite) * 100)}%
+              </span>
+            </div>
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${atLimite ? 'bg-amber-400' : 'bg-[#16a34a]'}`}
+                style={{ width: `${Math.min((team.length / limite) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+          {atLimite && (
+            <Link href="/dashboard/planos" className="text-xs font-semibold text-amber-600 hover:underline flex-shrink-0">
+              {isPago ? 'Ver Enterprise →' : 'Ver planos →'}
+            </Link>
+          )}
+        </div>
+      )}
 
       {team.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
