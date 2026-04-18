@@ -93,9 +93,9 @@ const CATEGORIAS = [
 
 export default function AprendizadoPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <Nav />
-      <main className="pt-20 pb-20">
+      <main className="pt-20 pb-20 w-full">
 
         {/* Hero */}
         <section className="px-4 sm:px-6 py-10 sm:py-16 relative overflow-hidden">
@@ -136,24 +136,24 @@ export default function AprendizadoPage() {
 
         {/* Estatísticas rápidas */}
         <section className="px-4 sm:px-6 py-6 sm:py-8 border-y border-gray-100 bg-[#f8fafc]">
-          <div className="max-w-4xl mx-auto grid grid-cols-3 gap-4 sm:gap-6 text-center">
+          <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 text-center">
             <div>
-              <div className="text-2xl sm:text-3xl font-black text-[#16a34a]">24</div>
-              <div className="text-xs sm:text-sm text-[#64748b] mt-1">Aulas disponíveis</div>
+              <div className="text-xl sm:text-3xl font-black text-[#16a34a]">24</div>
+              <div className="text-[10px] sm:text-sm text-[#64748b] mt-1 leading-tight">Aulas</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-black text-[#16a34a]">6</div>
-              <div className="text-xs sm:text-sm text-[#64748b] mt-1">Módulos completos</div>
+              <div className="text-xl sm:text-3xl font-black text-[#16a34a]">6</div>
+              <div className="text-[10px] sm:text-sm text-[#64748b] mt-1 leading-tight">Módulos</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-black text-[#16a34a]">100%</div>
-              <div className="text-xs sm:text-sm text-[#64748b] mt-1">Gratuito</div>
+              <div className="text-xl sm:text-3xl font-black text-[#16a34a]">100%</div>
+              <div className="text-[10px] sm:text-sm text-[#64748b] mt-1 leading-tight">Gratuito</div>
             </div>
           </div>
         </section>
 
         {/* Categorias */}
-        <section className="px-4 sm:px-6 py-10 sm:py-16 overflow-hidden">
+        <section className="px-4 sm:px-6 py-10 sm:py-16">
           <div className="max-w-5xl mx-auto space-y-6 sm:space-y-10">
             {CATEGORIAS.map(cat => (
               <div key={cat.id} className={`rounded-2xl border p-4 sm:p-6 ${cat.cor}`}>
