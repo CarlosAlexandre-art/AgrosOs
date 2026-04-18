@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 
-const CANAL_YT = 'https://www.youtube.com/@agroos'
+const CANAL_YT = 'https://youtube.com/@agroos-r4f?si=vvnV4op5IEKQPafI'
 
 const CATEGORIAS = [
   {
