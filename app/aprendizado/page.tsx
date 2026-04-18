@@ -90,11 +90,6 @@ const CATEGORIAS = [
   },
 ]
 
-const NIVEL_COR: Record<string, string> = {
-  'Iniciante': 'bg-green-100 text-green-700',
-  'Intermediário': 'bg-yellow-100 text-yellow-700',
-  'Avançado': 'bg-red-100 text-red-700',
-}
 
 export default function AprendizadoPage() {
   return (
@@ -158,56 +153,60 @@ export default function AprendizadoPage() {
         </section>
 
         {/* Categorias */}
-        <section className="px-4 sm:px-6 py-10 sm:py-16">
-          <div className="max-w-5xl mx-auto space-y-8 sm:space-y-12">
+        <section className="px-4 sm:px-6 py-10 sm:py-16 overflow-hidden">
+          <div className="max-w-5xl mx-auto space-y-6 sm:space-y-10">
             {CATEGORIAS.map(cat => (
-              <div key={cat.id} className={`rounded-2xl border p-4 sm:p-8 ${cat.cor}`}>
-                <div className="flex items-start gap-3 sm:gap-4 mb-5">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl flex-shrink-0 ${cat.iconBg}`}>
+              <div key={cat.id} className={`rounded-2xl border p-4 sm:p-6 ${cat.cor}`}>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${cat.iconBg}`}>
                     {cat.icon}
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-lg sm:text-xl font-bold text-[#0f172a]">{cat.titulo}</h2>
-                    <p className="text-xs sm:text-sm text-[#64748b] mt-0.5 leading-snug">{cat.desc}</p>
+                    <h2 className="text-base sm:text-lg font-bold text-[#0f172a] leading-tight">{cat.titulo}</h2>
+                    <p className="text-xs text-[#64748b] mt-0.5 leading-snug hidden sm:block">{cat.desc}</p>
                   </div>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-2 sm:gap-3">
-                  {cat.aulas.map(aula => {
-                    const Wrapper = aula.url ? 'a' : 'div'
-                    const wrapperProps = aula.url
-                      ? { href: aula.url, target: '_blank', rel: 'noopener noreferrer' }
-                      : {}
-                    return (
-                      <Wrapper
+                <div className="space-y-2">
+                  {cat.aulas.map(aula => (
+                    aula.url ? (
+                      <a
                         key={aula.titulo}
-                        {...(wrapperProps as any)}
-                        className={`flex items-center gap-3 bg-white rounded-xl px-3 sm:px-4 py-3 border border-gray-100 transition-all group ${aula.url ? 'hover:border-[#16a34a] hover:shadow-sm cursor-pointer' : 'opacity-60 cursor-default'}`}
+                        href={aula.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2.5 w-full bg-white rounded-xl px-3 py-2.5 border border-gray-100 hover:border-[#16a34a] hover:shadow-sm transition-all group"
                       >
-                        <div className={`w-8 h-8 rounded-lg flex-shrink-0 border flex items-center justify-center transition-colors ${aula.url ? 'bg-[#f8fafc] border-gray-200 group-hover:bg-[#16a34a] group-hover:border-[#16a34a]' : 'bg-gray-100 border-gray-200'}`}>
-                          {aula.url ? (
-                            <svg className="w-3.5 h-3.5 text-[#94a3b8] group-hover:text-white transition-colors ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          ) : (
-                            <span className="text-[10px] font-bold text-gray-400">EM</span>
-                          )}
+                        <div className="w-7 h-7 rounded-lg flex-shrink-0 bg-[#f0fdf4] border border-green-200 flex items-center justify-center group-hover:bg-[#16a34a] group-hover:border-[#16a34a] transition-colors">
+                          <svg className="w-3 h-3 text-[#16a34a] group-hover:text-white ml-0.5 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-semibold transition-colors truncate ${aula.url ? 'text-[#0f172a] group-hover:text-[#16a34a]' : 'text-[#64748b]'}`}>
+                          <div className="text-xs sm:text-sm font-semibold text-[#0f172a] group-hover:text-[#16a34a] transition-colors leading-snug line-clamp-2">
                             {aula.titulo}
                           </div>
-                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                            <span className="text-xs text-[#94a3b8]">{aula.duracao}</span>
-                            {aula.url ? (
-                              <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${NIVEL_COR[aula.nivel]}`}>{aula.nivel}</span>
-                            ) : (
-                              <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-400">Em breve</span>
-                            )}
-                          </div>
+                          <span className="text-[10px] text-[#94a3b8]">{aula.duracao} · {aula.nivel}</span>
                         </div>
-                      </Wrapper>
+                      </a>
+                    ) : (
+                      <div
+                        key={aula.titulo}
+                        className="flex items-center gap-2.5 w-full bg-white/60 rounded-xl px-3 py-2.5 border border-gray-100 opacity-60"
+                      >
+                        <div className="w-7 h-7 rounded-lg flex-shrink-0 bg-gray-100 border border-gray-200 flex items-center justify-center">
+                          <svg className="w-3 h-3 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs sm:text-sm font-medium text-[#94a3b8] leading-snug line-clamp-2">
+                            {aula.titulo}
+                          </div>
+                          <span className="text-[10px] text-gray-400">Em breve</span>
+                        </div>
+                      </div>
                     )
-                  })}
+                  ))}
                 </div>
               </div>
             ))}
