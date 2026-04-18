@@ -104,19 +104,19 @@ export default async function OperacoesPage({ searchParams }: { searchParams: Pr
         ) : (
           <>
             {/* Cabeçalho da tabela */}
-            <div className="px-6 py-3 border-b border-slate-100 grid grid-cols-12 text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              <div className="col-span-4">Atividade</div>
+            <div className="px-4 sm:px-6 py-3 border-b border-slate-100 grid grid-cols-12 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+              <div className="col-span-7 md:col-span-4">Atividade</div>
               <div className="col-span-2 hidden md:block">Talhão</div>
               <div className="col-span-2 hidden md:block">Responsável</div>
-              <div className="col-span-2">Data</div>
+              <div className="col-span-3 md:col-span-2">Data</div>
               <div className="col-span-2">Status</div>
             </div>
             <div className="divide-y divide-slate-50">
               {activities.map((a: any) => {
                 const st = STATUS[a.status] || STATUS.CANCELLED
                 return (
-                  <Link key={a.id} href={`/dashboard/operacoes/${a.id}`} className="px-6 py-4 grid grid-cols-12 items-center hover:bg-slate-50 transition-colors group">
-                    <div className="col-span-4 flex items-center gap-3 min-w-0">
+                  <Link key={a.id} href={`/dashboard/operacoes/${a.id}`} className="px-4 sm:px-6 py-4 grid grid-cols-12 items-center hover:bg-slate-50 transition-colors group">
+                    <div className="col-span-7 md:col-span-4 flex items-center gap-3 min-w-0">
                       <span className={`w-2 h-2 rounded-full flex-shrink-0 ${st.dot}`} />
                       <div className="min-w-0">
                         <div className="text-sm font-medium text-slate-900 truncate group-hover:text-[#16a34a] transition-colors">{a.type}</div>
@@ -125,9 +125,9 @@ export default async function OperacoesPage({ searchParams }: { searchParams: Pr
                     </div>
                     <div className="col-span-2 hidden md:block text-sm text-slate-500">{a.field?.name || '—'}</div>
                     <div className="col-span-2 hidden md:block text-sm text-slate-500">{a.assignedTo?.name || '—'}</div>
-                    <div className="col-span-2 text-sm text-slate-500">{new Date(a.startDate).toLocaleDateString('pt-BR')}</div>
+                    <div className="col-span-3 md:col-span-2 text-xs sm:text-sm text-slate-500">{new Date(a.startDate).toLocaleDateString('pt-BR')}</div>
                     <div className="col-span-2">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${st.pill}`}>{st.label}</span>
+                      <span className={`text-[10px] sm:text-xs font-medium px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full border ${st.pill}`}>{st.label}</span>
                     </div>
                   </Link>
                 )

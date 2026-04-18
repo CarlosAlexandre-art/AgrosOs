@@ -149,7 +149,7 @@ export default function Nav() {
       </button>
 
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl md:hidden">
+        <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl md:hidden max-h-[calc(100vh-68px)] overflow-y-auto">
           <div className="px-4 py-4 space-y-1">
             <div className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider px-3 py-2">Funcionalidades</div>
             {FUNCIONALIDADES.map(item => (

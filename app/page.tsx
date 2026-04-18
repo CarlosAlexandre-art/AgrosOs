@@ -21,14 +21,14 @@ export default function HomePage() {
             Sistema Operacional da Fazenda Moderna
           </div>
 
-          <h1 className="text-6xl md:text-7xl font-bold text-[#0f172a] leading-[1.05] tracking-tight mb-6">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-[#0f172a] leading-[1.05] tracking-tight mb-6">
             Controle total da<br />
             <span style={{background: 'linear-gradient(135deg, #16a34a 0%, #059669 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
               sua operação
             </span>
           </h1>
 
-          <p className="text-xl text-[#64748b] max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base sm:text-xl text-[#64748b] max-w-2xl mx-auto mb-10 leading-relaxed">
             O AgroOS centraliza planejamento, execução e controle da sua fazenda em um único lugar — e integra com o AgroCore para contratar serviços sem sair do sistema.
           </p>
 
@@ -43,15 +43,15 @@ export default function HomePage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-3 sm:gap-6 max-w-2xl mx-auto">
             {[
               { value: '100%', label: 'Operação visível' },
               { value: 'R$ 1B+', label: 'Aumento de faturamento' },
               { value: '+40%', label: 'Aumento de produtividade' },
             ].map(s => (
               <div key={s.label} className="text-center">
-                <div className="text-3xl font-bold text-[#0f172a]">{s.value}</div>
-                <div className="text-sm text-[#94a3b8] mt-1">{s.label}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-[#0f172a]">{s.value}</div>
+                <div className="text-xs sm:text-sm text-[#94a3b8] mt-1">{s.label}</div>
               </div>
             ))}
           </div>
@@ -73,7 +73,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="bg-[#f8fafc] p-6">
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
                 {[
                   { icon: '📋', value: '12', label: 'Em andamento', color: 'bg-blue-50 border-blue-100' },
                   { icon: '⚠️', value: '2', label: 'Atrasadas', color: 'bg-red-50 border-red-100' },
@@ -87,7 +87,7 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="hidden sm:grid grid-cols-3 gap-4">
                 <div className="col-span-2 bg-white rounded-2xl border border-gray-200 p-4">
                   <div className="font-semibold text-sm text-[#0f172a] mb-3">Atividades recentes</div>
                   {[
