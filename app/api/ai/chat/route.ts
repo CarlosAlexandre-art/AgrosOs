@@ -1,7 +1,7 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { groqStream, Msg } from '@/lib/groq'
+import { groq, Msg } from '@/lib/groq'
 
 export async function POST(req: NextRequest) {
   try {
@@ -82,47 +82,12 @@ ${(p as any).goals?.length > 0
 
 Hoje: ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`
 
-    const stream = await groqStream([
+    const text = await groq([
       { role: 'system', content: systemPrompt },
       ...messages,
-    ])
+    ], 1024)
 
-    // Transform Groq SSE to plain text stream (client reads token by token)
-    const encoder = new TextEncoder()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    const transformed = new ReadableStream({
-      async start(controller) {
-        const reader = stream.getReader()
-        try {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            buffer += decoder.decode(value, { stream: true })
-            const lines = buffer.split('\n')
-            buffer = lines.pop() ?? ''
-            for (const line of lines) {
-              if (!line.startsWith('data: ')) continue
-              const data = line.slice(6).trim()
-              if (data === '[DONE]') { controller.close(); return }
-              try {
-                const parsed = JSON.parse(data)
-                const token = parsed.choices?.[0]?.delta?.content
-                if (token) controller.enqueue(encoder.encode(token))
-              } catch { /* skip */ }
-            }
-          }
-          controller.close()
-        } catch (e) {
-          controller.error(e)
-        }
-      },
-    })
-
-    return new Response(transformed, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' },
-    })
+    return NextResponse.json({ text })
   } catch (e: any) {
     console.error('AI chat error:', e)
     return new Response(e.message || 'Erro interno', { status: 500 })

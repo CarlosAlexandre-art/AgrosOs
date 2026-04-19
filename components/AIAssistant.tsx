@@ -16,7 +16,6 @@ export default function AIAssistant() {
   const [messages, setMessages] = useState<Msg[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [streamText, setStreamText] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -32,7 +31,7 @@ export default function AIAssistant() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, streamText])
+  }, [messages, loading])
 
   async function send(text?: string) {
     const userMsg = text ?? input.trim()
@@ -41,7 +40,6 @@ export default function AIAssistant() {
     const newMessages: Msg[] = [...messages, { role: 'user', content: userMsg }]
     setMessages(newMessages)
     setLoading(true)
-    setStreamText('')
 
     try {
       const res = await fetch('/api/ai/chat', {
@@ -49,24 +47,14 @@ export default function AIAssistant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages.map(m => ({ role: m.role, content: m.content })) }),
       })
-      if (!res.ok || !res.body) throw new Error('Erro na resposta')
-
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder()
-      let full = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        const chunk = decoder.decode(value, { stream: true })
-        full += chunk
-        setStreamText(full)
-      }
+      if (!res.ok) throw new Error('Erro na resposta')
+      const data = await res.json()
+      const full = data.text ?? 'Sem resposta.'
       setMessages(prev => [...prev, { role: 'assistant', content: full }])
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Desculpe, ocorreu um erro. Tente novamente.' }])
     } finally {
       setLoading(false)
-      setStreamText('')
     }
   }
 
@@ -126,15 +114,8 @@ export default function AIAssistant() {
               </div>
             ))}
 
-            {/* Streaming */}
-            {loading && streamText && (
-              <div className="flex justify-start">
-                <div className="max-w-[85%] bg-white/8 text-slate-200 px-3.5 py-2.5 rounded-2xl rounded-tl-sm text-sm leading-relaxed whitespace-pre-wrap">
-                  {streamText}
-                </div>
-              </div>
-            )}
-            {loading && !streamText && (
+            {/* Loading */}
+            {loading && (
               <div className="flex justify-start">
                 <div className="bg-white/8 px-4 py-3 rounded-2xl rounded-tl-sm flex gap-1.5 items-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0ms' }} />
