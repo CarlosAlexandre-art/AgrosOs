@@ -71,12 +71,21 @@ export default function Nav() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        const name = user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário'
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário'
         setUserName(name)
       }
     })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário'
+        setUserName(name)
+      } else {
+        setUserName(null)
+      }
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   return (
