@@ -3,93 +3,84 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { groq, Msg } from '@/lib/groq'
 
+export const maxDuration = 60
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return new Response('Unauthorized', { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
     const { messages }: { messages: Msg[] } = await req.json()
 
+    // Query mínima para reduzir latência
     const dbUser = await prisma.user.findUnique({
       where: { supabaseId: user.id },
-      include: {
+      select: {
         properties: {
-          include: {
-            activities: { orderBy: { startDate: 'desc' }, take: 20 },
-            costs: { orderBy: { date: 'desc' }, take: 20 },
-            revenues: { orderBy: { date: 'desc' }, take: 10 },
-            goals: true,
-            teamMembers: true,
-            fields: true,
+          take: 1,
+          select: {
+            name: true,
+            sizeHectares: true,
+            activities: {
+              orderBy: { startDate: 'desc' },
+              take: 15,
+              select: { type: true, status: true, startDate: true },
+            },
+            costs: {
+              orderBy: { date: 'desc' },
+              take: 15,
+              select: { amount: true, category: true, date: true },
+            },
+            revenues: {
+              orderBy: { date: 'desc' },
+              take: 10,
+              select: { amount: true },
+            },
+            goals: {
+              where: { isCompleted: false },
+              select: { title: true, type: true, targetValue: true, currentValue: true },
+            },
+            teamMembers: { select: { name: true, role: true } },
+            fields: { select: { name: true } },
           },
         },
       },
     })
 
     const p = dbUser?.properties[0]
-    if (!p) return new Response('Propriedade não encontrada', { status: 404 })
+    if (!p) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
 
     const totalCosts = p.costs.reduce((s, c) => s + Number(c.amount), 0)
-    const totalRevenues = (p as any).revenues?.reduce((s: number, r: any) => s + Number(r.amount), 0) ?? 0
-    const resultado = totalRevenues - totalCosts
+    const totalRevenues = (p.revenues as any[]).reduce((s: number, r: any) => s + Number(r.amount), 0)
     const sizeHa = Number(p.sizeHectares ?? 0)
-    const acts = p.activities as any[]
+    const acts = p.activities
     const late = acts.filter(a => a.status === 'LATE')
     const inProgress = acts.filter(a => a.status === 'IN_PROGRESS')
     const pending = acts.filter(a => a.status === 'PENDING')
+    const done = acts.filter(a => a.status === 'DONE')
 
-    const costsMonth = p.costs.filter((c: any) => {
-      const d = new Date(c.date)
-      const now = new Date()
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    })
+    const systemPrompt = `Você é o Assistente IA do AgroOS. Responda SEMPRE em português brasileiro. Seja direto e prático. Máximo 4 parágrafos curtos.
 
-    const systemPrompt = `Você é o Assistente IA do AgroOS — sistema operacional para produtores rurais brasileiros.
-Responda SEMPRE em português brasileiro. Seja direto, prático, use linguagem simples que um produtor rural entenda.
-Máximo 4 parágrafos curtos. Use listas quando ajudar na clareza. Nunca invente dados que não estão abaixo.
+FAZENDA: ${p.name} | ${sizeHa > 0 ? sizeHa + ' ha' : 'área não informada'} | ${p.fields.length} talhões | ${p.teamMembers.length} membros
 
-━━━ FAZENDA: ${p.name} ━━━
-Área: ${sizeHa > 0 ? sizeHa + ' ha' : 'não informada'}
-Talhões: ${p.fields.length} (${p.fields.map((f: any) => f.name).join(', ') || 'nenhum'})
-Equipe: ${p.teamMembers.length} membros (${p.teamMembers.map((m: any) => `${m.name} - ${m.role}`).join(', ') || 'nenhum'})
+OPERACIONAL: ${inProgress.length} em andamento, ${pending.length} pendentes, ${late.length} atrasadas, ${done.length} concluídas
+${late.length > 0 ? 'Atrasadas: ' + late.slice(0, 3).map(a => a.type).join(', ') : ''}
 
-━━━ OPERACIONAL ━━━
-Em andamento: ${inProgress.length} — ${inProgress.slice(0, 3).map((a: any) => a.type).join(', ') || 'nenhuma'}
-Pendentes: ${pending.length} — ${pending.slice(0, 3).map((a: any) => a.type).join(', ') || 'nenhuma'}
-Atrasadas: ${late.length} — ${late.slice(0, 3).map((a: any) => `${a.type} (iniciou ${new Date(a.startDate).toLocaleDateString('pt-BR')})`).join(', ') || 'nenhuma'}
-Concluídas (total): ${acts.filter(a => a.status === 'DONE').length}
+FINANCEIRO: Receita R$${totalRevenues.toLocaleString('pt-BR', { minimumFractionDigits: 0 })} | Custo R$${totalCosts.toLocaleString('pt-BR', { minimumFractionDigits: 0 })} | Resultado ${totalRevenues - totalCosts >= 0 ? '+' : ''}R$${(totalRevenues - totalCosts).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}${sizeHa > 0 ? ` | R$${Math.round(totalCosts / sizeHa)}/ha` : ''}
 
-━━━ FINANCEIRO ━━━
-Receita total: R$ ${totalRevenues.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-Custo total: R$ ${totalCosts.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-Resultado: ${resultado >= 0 ? '+' : ''}R$ ${resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-${sizeHa > 0 ? `Custo/ha: R$ ${(totalCosts / sizeHa).toFixed(0)} | Receita/ha: R$ ${(totalRevenues / sizeHa).toFixed(0)}` : ''}
-Gastos este mês: R$ ${costsMonth.reduce((s, c) => s + Number(c.amount), 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-Categorias de custo: ${(() => {
-  const byCat: Record<string, number> = {}
-  p.costs.forEach((c: any) => { byCat[c.category] = (byCat[c.category] || 0) + Number(c.amount) })
-  return Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}: R$${v.toFixed(0)}`).join(', ')
-})()}
+METAS ATIVAS: ${p.goals.length > 0 ? p.goals.map(g => `${g.title} (${Math.round((Number(g.currentValue) / Number(g.targetValue)) * 100)}%)`).join(', ') : 'nenhuma'}
 
-━━━ METAS ATIVAS ━━━
-${(p as any).goals?.length > 0
-  ? (p as any).goals.map((g: any) => {
-    const pct = Number(g.targetValue) > 0 ? Math.round((Number(g.currentValue) / Number(g.targetValue)) * 100) : 0
-    return `${g.title} (${g.type}) — ${pct}% de R$${Number(g.targetValue).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`
-  }).join('\n')
-  : 'Nenhuma meta cadastrada'}
-
-Hoje: ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`
+Hoje: ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`
 
     const text = await groq([
       { role: 'system', content: systemPrompt },
       ...messages,
-    ], 1024)
+    ], 800)
 
     return NextResponse.json({ text })
   } catch (e: any) {
-    console.error('AI chat error:', e)
-    return NextResponse.json({ error: e.message || 'Erro interno', stack: e.stack }, { status: 500 })
+    console.error('[AI Chat Error]', e?.message, e?.code)
+    return NextResponse.json({ error: e?.message ?? 'Erro interno' }, { status: 500 })
   }
 }
