@@ -17,6 +17,8 @@ export default function NovaAtividadePage() {
   const [properties, setProperties] = useState<any[]>([])
   const [fields, setFields] = useState<any[]>([])
   const [team, setTeam] = useState<any[]>([])
+  const [aiDica, setAiDica] = useState<{ prazo_dias: number; dica: string; insumos: string | null } | null>(null)
+  const [aiLoading, setAiLoading] = useState(false)
 
   const [form, setForm] = useState({
     propertyId: '',
@@ -44,10 +46,33 @@ export default function NovaAtividadePage() {
     fetch(`/api/properties/${form.propertyId}/team`).then(r => r.json()).then(setTeam)
   }, [form.propertyId])
 
+  useEffect(() => {
+    const tipo = form.type && form.type !== 'Outro' ? form.type : null
+    if (!tipo || !form.propertyId) { setAiDica(null); return }
+    setAiLoading(true)
+    setAiDica(null)
+    fetch('/api/ai/atividade', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: tipo, propertyId: form.propertyId }),
+    })
+      .then(r => r.json())
+      .then(data => { if (!data.error) setAiDica(data) })
+      .catch(() => {})
+      .finally(() => setAiLoading(false))
+  }, [form.type, form.propertyId])
+
+  function aplicarSugestao() {
+    if (!aiDica) return
+    const endDate = new Date(form.startDate)
+    endDate.setDate(endDate.getDate() + aiDica.prazo_dias)
+    setForm(f => ({ ...f, endDate: endDate.toISOString().split('T')[0] }))
+  }
+
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -75,7 +100,6 @@ export default function NovaAtividadePage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link href="/dashboard/operacoes" className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m15 19-7-7 7-7" /></svg>
@@ -87,7 +111,6 @@ export default function NovaAtividadePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Tipo */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
           <h2 className="font-semibold text-slate-900">Dados da atividade</h2>
 
@@ -103,6 +126,34 @@ export default function NovaAtividadePage() {
             <div>
               <label className={labelCls}>Descreva o tipo</label>
               <input value={form.customType} onChange={set('customType')} placeholder="Ex: Reparo de cerca..." className={inputCls} />
+            </div>
+          )}
+
+          {/* Sugestão IA */}
+          {(aiLoading || aiDica) && (
+            <div className="bg-gradient-to-r from-[#0f172a] to-[#1e293b] rounded-xl p-4 border border-white/10">
+              {aiLoading ? (
+                <div className="flex items-center gap-2 text-slate-400 text-sm">
+                  <svg className="w-4 h-4 animate-spin text-[#16a34a]" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  IA analisando atividade...
+                </div>
+              ) : aiDica && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#16a34a] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+                    <span className="text-xs font-bold text-[#16a34a] uppercase tracking-wide">Sugestão IA</span>
+                  </div>
+                  <p className="text-sm text-slate-200">💡 {aiDica.dica}</p>
+                  {aiDica.insumos && <p className="text-xs text-slate-400">📦 Insumos típicos: {aiDica.insumos}</p>}
+                  <button
+                    type="button"
+                    onClick={aplicarSugestao}
+                    className="text-xs font-semibold text-[#16a34a] bg-[#16a34a]/10 hover:bg-[#16a34a]/20 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Aplicar prazo sugerido ({aiDica.prazo_dias} dias) →
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -123,7 +174,6 @@ export default function NovaAtividadePage() {
           </div>
         </div>
 
-        {/* Execução */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
           <h2 className="font-semibold text-slate-900">Execução</h2>
 

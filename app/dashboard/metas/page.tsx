@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import GoalActions from './GoalActions'
 import MetasExport from '@/components/reports/MetasExport'
+import ConselheirMetas from '@/components/ai/ConselheirMetas'
 
 const TYPE_LABEL: Record<string, { label: string; icon: string; color: string }> = {
   REVENUE:      { label: 'Faturamento',         icon: '📈', color: 'text-green-700 bg-green-50 border-green-200' },
@@ -125,6 +126,9 @@ export default async function MetasPage() {
           </Link>
         </div>
       </div>
+
+      {/* IA Metas */}
+      <ConselheirMetas />
 
       {/* Resumo */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

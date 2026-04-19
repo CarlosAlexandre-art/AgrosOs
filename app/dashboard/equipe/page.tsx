@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { getUserPlan } from '@/lib/planos'
+import OtimizacaoEquipe from '@/components/ai/OtimizacaoEquipe'
 
 export default async function EquipePage() {
   const supabase = await createClient()
@@ -84,6 +85,8 @@ export default async function EquipePage() {
           )}
         </div>
       )}
+
+      {team.length > 0 && <OtimizacaoEquipe />}
 
       {team.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">

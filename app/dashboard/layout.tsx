@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import AIAssistant from '@/components/AIAssistant'
 
 // Itens que exigem plano pago
 const REQUIRES_PLAN = [
@@ -406,6 +407,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
+
+      {/* Assistente IA flutuante */}
+      <AIAssistant />
     </div>
   )
 }

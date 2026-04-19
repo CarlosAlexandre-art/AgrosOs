@@ -57,6 +57,10 @@ export default async function OperacoesPage({ searchParams }: { searchParams: Pr
               </Link>
             )}
           </div>
+          <Link href="/dashboard/operacoes/safra" className="flex items-center gap-1.5 border border-slate-200 text-slate-600 text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:border-[#16a34a] hover:text-[#16a34a] transition-colors">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
+            <span className="hidden sm:inline">Planejar safra</span>
+          </Link>
           <Link href="/dashboard/operacoes/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             <span className="hidden sm:inline">Nova atividade</span>

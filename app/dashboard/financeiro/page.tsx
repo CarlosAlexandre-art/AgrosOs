@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import CostPieChart from '@/components/CostPieChart'
 import FinanceiroExport from '@/components/reports/FinanceiroExport'
 import NovaReceitaButton from './NovaReceitaButton'
+import AnaliseFinanceira from '@/components/ai/AnaliseFinanceira'
+import GerarRelatorio from '@/components/ai/GerarRelatorio'
 
 const CATEGORY_LABEL: Record<string, string> = {
   INSUMO: 'Insumo', MAO_DE_OBRA: 'Mão de obra', MAQUINARIO: 'Maquinário',
@@ -73,7 +75,8 @@ export default async function FinanceiroPage() {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <div className="hidden sm:flex items-center gap-2">
-            {isPago ? (
+            <GerarRelatorio />
+          {isPago ? (
               <FinanceiroExport
                 propertyName={property?.name || 'Fazenda'}
                 costs={costs.map((c: any) => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
@@ -127,6 +130,9 @@ export default async function FinanceiroPage() {
           </div>
         </div>
       </div>
+
+      {/* IA Financeira */}
+      <AnaliseFinanceira />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
