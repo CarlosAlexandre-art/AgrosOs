@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 const FUNCIONALIDADES = [
   { icon: '📋', label: 'Operacional', desc: 'Gestão de tarefas e execução no campo', href: '/funcionalidades/operacional' },
@@ -57,16 +58,25 @@ function Dropdown({ items, onClose }: {
 export default function Nav() {
   const [open, setOpen] = useState<'funcionalidades' | 'recursos' | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
   const navRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setOpen(null)
-      }
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpen(null)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        const name = user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário'
+        setUserName(name)
+      }
+    })
   }, [])
 
   return (
@@ -128,12 +138,29 @@ export default function Nav() {
       </nav>
 
       <div className="hidden md:flex items-center gap-3">
-        <Link href="/login" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a] transition-colors px-4 py-2">
-          Entrar
-        </Link>
-        <Link href="/login" className="text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-all shadow-md shadow-green-200">
-          Começar grátis
-        </Link>
+        {userName ? (
+          <>
+            <div className="flex items-center gap-2 text-sm text-[#64748b]">
+              <div className="w-7 h-7 rounded-lg bg-[#16a34a] flex items-center justify-center text-white text-xs font-bold">
+                {userName[0].toUpperCase()}
+              </div>
+              <span className="font-medium text-[#0f172a] max-w-[120px] truncate">{userName}</span>
+            </div>
+            <Link href="/dashboard" className="text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-all shadow-md shadow-green-200 flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+              Ir para o painel
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link href="/login" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a] transition-colors px-4 py-2">
+              Entrar
+            </Link>
+            <Link href="/login" className="text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-all shadow-md shadow-green-200">
+              Começar grátis
+            </Link>
+          </>
+        )}
       </div>
 
       <button
@@ -179,14 +206,32 @@ export default function Nav() {
               </Link>
             ))}
             <div className="border-t border-gray-100 pt-3 mt-2 flex flex-col gap-2">
-              <Link href="/login" onClick={() => setMobileOpen(false)}
-                className="text-center py-3 font-medium text-sm text-[#64748b]">
-                Entrar
-              </Link>
-              <Link href="/login" onClick={() => setMobileOpen(false)}
-                className="text-center py-3 font-bold text-sm bg-[#16a34a] text-white rounded-xl">
-                Começar grátis
-              </Link>
+              {userName ? (
+                <>
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    <div className="w-7 h-7 rounded-lg bg-[#16a34a] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {userName[0].toUpperCase()}
+                    </div>
+                    <span className="font-medium text-sm text-[#0f172a] truncate">{userName}</span>
+                  </div>
+                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}
+                    className="text-center py-3 font-bold text-sm bg-[#16a34a] text-white rounded-xl flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    Ir para o painel
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}
+                    className="text-center py-3 font-medium text-sm text-[#64748b]">
+                    Entrar
+                  </Link>
+                  <Link href="/login" onClick={() => setMobileOpen(false)}
+                    className="text-center py-3 font-bold text-sm bg-[#16a34a] text-white rounded-xl">
+                    Começar grátis
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
