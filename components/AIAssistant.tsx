@@ -47,12 +47,12 @@ export default function AIAssistant() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages.map(m => ({ role: m.role, content: m.content })) }),
       })
-      if (!res.ok) throw new Error('Erro na resposta')
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
       const full = data.text ?? 'Sem resposta.'
       setMessages(prev => [...prev, { role: 'assistant', content: full }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Desculpe, ocorreu um erro. Tente novamente.' }])
+    } catch (e: any) {
+      setMessages(prev => [...prev, { role: 'assistant', content: `Erro: ${e.message}` }])
     } finally {
       setLoading(false)
     }

@@ -16,10 +16,10 @@ export async function POST(req: NextRequest) {
       include: {
         properties: {
           include: {
-            activities: { orderBy: { startDate: 'desc' }, take: 30 },
-            costs: { orderBy: { date: 'desc' }, take: 30 },
-            revenues: { orderBy: { date: 'desc' }, take: 20 },
-            goals: { where: { isCompleted: false } },
+            activities: { orderBy: { startDate: 'desc' }, take: 20 },
+            costs: { orderBy: { date: 'desc' }, take: 20 },
+            revenues: { orderBy: { date: 'desc' }, take: 10 },
+            goals: true,
             teamMembers: true,
             fields: true,
           },
@@ -90,6 +90,6 @@ Hoje: ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric
     return NextResponse.json({ text })
   } catch (e: any) {
     console.error('AI chat error:', e)
-    return new Response(e.message || 'Erro interno', { status: 500 })
+    return NextResponse.json({ error: e.message || 'Erro interno', stack: e.stack }, { status: 500 })
   }
 }
