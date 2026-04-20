@@ -218,6 +218,7 @@ export async function GET(request: NextRequest) {
       include: {
         revenues: true,
         costs: true,
+        fields: true,
         activities: { where: { status: 'DONE' } }
       }
     });
