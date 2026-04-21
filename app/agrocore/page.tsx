@@ -42,10 +42,7 @@ export default function AgroCoreExternalPage() {
                 href="https://agrocore.com.br"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-lg text-lg"
-                style={{background:'#104e27'}}
-                onMouseOver={e => (e.currentTarget.style.background='#679d3f')}
-                onMouseOut={e => (e.currentTarget.style.background='#104e27')}
+                className="inline-flex items-center justify-center gap-2 text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-lg text-lg bg-[#104e27] hover:bg-[#679d3f]"
               >
                 Acessar AgroCore
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
