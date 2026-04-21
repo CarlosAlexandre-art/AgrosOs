@@ -9,41 +9,55 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  let dbUser = await prisma.user.findUnique({
-    where: { supabaseId: user.id },
-    include: {
-      properties: {
-        include: {
-          activities: { orderBy: { createdAt: 'desc' }, take: 8 },
-          costs: { orderBy: { date: 'desc' }, take: 50 },
-          alerts: { where: { isRead: false }, orderBy: { createdAt: 'desc' } },
-          teamMembers: true,
-          fields: true,
-        },
-      },
-    },
-  })
+  const include = {
+    activities: { orderBy: { createdAt: 'desc' as const }, take: 8 },
+    costs:      { orderBy: { date: 'desc' as const }, take: 50 },
+    alerts:     { where: { isRead: false }, orderBy: { createdAt: 'desc' as const } },
+    teamMembers: true,
+    fields: true,
+  }
 
-  if (!dbUser) {
-    dbUser = await prisma.user.create({
-      data: {
-        supabaseId: user.id,
-        name: user.user_metadata?.name || user.email!.split('@')[0],
-        email: user.email!,
-      },
-      include: {
-        properties: {
-          include: {
-            activities: { orderBy: { createdAt: 'desc' }, take: 8 },
-            costs: { orderBy: { date: 'desc' }, take: 50 },
-            alerts: { where: { isRead: false }, orderBy: { createdAt: 'desc' } },
-            teamMembers: true,
-            fields: true,
+  let dbUser: any = null
+  try {
+    dbUser = await prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      include: { properties: { include } },
+    })
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          supabaseId: user.id,
+          name: user.user_metadata?.name || user.email!.split('@')[0],
+          email: user.email!,
+        },
+        include: { properties: { include } },
+      })
+    }
+  } catch (err) {
+    console.error('[Dashboard] DB error:', err)
+    // Tenta sem alerts (caso tabela ainda não exista)
+    try {
+      dbUser = await prisma.user.findUnique({
+        where: { supabaseId: user.id },
+        include: {
+          properties: {
+            include: {
+              activities: { orderBy: { createdAt: 'desc' }, take: 8 },
+              costs:      { orderBy: { date: 'desc' }, take: 50 },
+              teamMembers: true,
+              fields: true,
+            },
           },
         },
-      },
-    })
+      }) as any
+      if (dbUser) (dbUser as any).properties = (dbUser as any).properties.map((p: any) => ({ ...p, alerts: [] }))
+    } catch (err2) {
+      console.error('[Dashboard] DB fallback error:', err2)
+    }
   }
+
+  if (!dbUser) redirect('/login')
 
   const property = dbUser.properties[0]
   const allActivities = property?.activities || []
