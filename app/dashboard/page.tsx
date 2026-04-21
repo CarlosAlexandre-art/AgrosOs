@@ -9,25 +9,20 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  let dbUser
-  try {
-    dbUser = await prisma.user.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        properties: {
-          include: {
-            activities: { orderBy: { createdAt: 'desc' }, take: 8 },
-            costs: { orderBy: { date: 'desc' }, take: 50 },
-            alerts: { where: { isRead: false }, orderBy: { createdAt: 'desc' } },
-            teamMembers: true,
-            fields: true,
-          },
+  let dbUser = await prisma.user.findUnique({
+    where: { supabaseId: user.id },
+    include: {
+      properties: {
+        include: {
+          activities: { orderBy: { createdAt: 'desc' }, take: 8 },
+          costs: { orderBy: { date: 'desc' }, take: 50 },
+          alerts: { where: { isRead: false }, orderBy: { createdAt: 'desc' } },
+          teamMembers: true,
+          fields: true,
         },
       },
-    })
-  } catch (e) {
-    return <pre style={{color:'red',padding:20,whiteSpace:'pre-wrap'}}>{String(e)}</pre>
-  }
+    },
+  })
 
   if (!dbUser) {
     dbUser = await prisma.user.create({

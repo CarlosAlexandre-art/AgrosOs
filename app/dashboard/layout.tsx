@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AIAssistant from '@/components/AIAssistant'
+import AgroOSLogo from '@/components/AgroOSLogo'
 
 // Itens que exigem plano pago
 const REQUIRES_PLAN = [
@@ -249,17 +250,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8 flex-shrink-0">
         <Link href="/" className="flex items-center gap-2.5">
-          <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="34" height="34" rx="10" fill="#16a34a"/>
-            <path d="M17 8C17 8 10 12.5 10 19.5C10 23.6 13.1 26 17 26C20.9 26 24 23.6 24 19.5C24 12.5 17 8 17 8Z" fill="white" fillOpacity="0.2"/>
-            <path d="M17 8C17 8 10 12.5 10 19.5C10 23.6 13.1 26 17 26" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-            <path d="M17 8C17 8 24 12.5 24 19.5C24 23.6 20.9 26 17 26" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-            <line x1="17" y1="8" x2="17" y2="26" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-            <path d="M17 14L13 11.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-            <path d="M17 14L21 11.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-            <path d="M17 18.5L12.5 16.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-            <path d="M17 18.5L21.5 16.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-          </svg>
+          <AgroOSLogo size={34} />
           <div>
             <div className="font-bold text-white text-base leading-none">AgroOS</div>
             <div className="text-[10px] text-slate-500 mt-0.5 leading-none">Sistema Operacional</div>

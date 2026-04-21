@@ -1,0 +1,49 @@
+========================================
+  BRAND KIT — AgroOS
+  Sistema Operacional da Fazenda
+========================================
+
+ARQUIVOS INCLUÍDOS
+------------------
+logo-transparente.svg         Logo completa em fundo transparente
+logo-fundo-escuro.svg         Logo em fundo escuro (#0f172a)
+logo-fundo-claro.svg          Logo em fundo verde claro (#f0fdf4)
+logotipo-horizontal.svg       Versão horizontal positiva
+logotipo-horizontal-negativo.svg  Versão horizontal para fundo escuro
+logo-marca-dagua.svg          Versão marca d'água (10% opacidade)
+paleta-cores.svg              Guia de paleta de cores
+tipografia.svg                Guia de tipografia
+../icons/logo-mark.svg        Emblema isolado (para ícones e favicons)
+../icons/icon.svg             Ícone PWA 512x512
+../icons/aibot.svg            Mascote do Assistente IA
+
+PALETA DE CORES
+---------------
+Primary:    #16a34a  — Verde principal
+Dark:       #15803d  — Verde escuro
+Light:      #22c55e  — Verde claro
+Accent:     #4ade80  — Verde acento
+Sidebar:    #0f172a  — Azul noite (fundo sidebar)
+Background: #f0fdf4  — Verde muito claro (fundo app)
+Text:       #0f172a  — Texto principal
+Muted:      #64748b  — Texto secundário
+
+TIPOGRAFIA
+----------
+Família: Montserrat (Google Fonts)
+Pesos:   800 (títulos), 700 (subtítulos), 600 (labels), 400 (texto)
+
+REGRAS DE USO
+-------------
+✓  Use o logo sempre com proporção original
+✓  Mantenha o espaço de respiro mínimo de 16px ao redor do logo
+✓  Prefira a versão fundo escuro no sidebar e telas noturnas
+✓  Use a marca d'água em documentos e PDFs gerados pelo sistema
+✗  Não distorça, rotacione ou altere as cores do logo
+✗  Não use o logo sobre fundos que conflitem com o verde
+✗  Não use fontes diferentes da Montserrat em materiais oficiais
+
+PRODUTO
+-------
+AgroOS — Sistema Operacional da Fazenda
+Plataforma de gestão operacional agrícola integrada ao ecossistema AgroCore

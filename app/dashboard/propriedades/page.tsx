@@ -24,24 +24,19 @@ export default async function PropriedadesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  let dbUser
-  try {
-    dbUser = await prisma.user.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        properties: {
-          include: {
-            fields: { include: { crop: true } },
-            teamMembers: true,
-            activities: true,
-            costs: true,
-          },
+  const dbUser = await prisma.user.findUnique({
+    where: { supabaseId: user.id },
+    include: {
+      properties: {
+        include: {
+          fields: { include: { crop: true } },
+          teamMembers: true,
+          activities: true,
+          costs: true,
         },
       },
-    })
-  } catch (e) {
-    return <pre style={{color:'red',padding:20,whiteSpace:'pre-wrap'}}>{String(e)}</pre>
-  }
+    },
+  })
 
   const properties = dbUser?.properties || []
   const plan = (dbUser as any)?.plan ?? 'starter'

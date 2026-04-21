@@ -40,7 +40,7 @@ export default async function AgroCoreInternalPage() {
           <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
             Contrate serviços externos integrados à sua operação com o plano Pro ou Enterprise.
           </p>
-          <Link href="/dashboard/planos" className="inline-flex items-center gap-2 bg-[#16a34a] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#15803d] transition-colors">
+          <Link href="/dashboard/planos" className="inline-flex items-center gap-2 bg-[#104e27] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#679d3f] transition-colors">
             Ver planos →
           </Link>
         </div>
@@ -63,7 +63,7 @@ export default async function AgroCoreInternalPage() {
           href="https://agrolink-opal.vercel.app"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors"
+          className="flex items-center gap-1.5 bg-[#104e27] text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-[#679d3f] transition-colors"
         >
           Acessar AgroCore
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -82,7 +82,7 @@ export default async function AgroCoreInternalPage() {
             <h2 className="text-xl font-bold text-white mb-1">Contrate sem sair do sistema</h2>
             <p className="text-slate-400 text-sm max-w-md">Solicite um serviço AgroCore e crie automaticamente a atividade na sua fazenda — com custo integrado ao financeiro.</p>
           </div>
-          <Link href="/dashboard/operacoes/nova" className="flex-shrink-0 flex items-center gap-2 bg-[#16a34a] text-white font-semibold px-5 py-3 rounded-xl hover:bg-[#15803d] transition-colors text-sm">
+          <Link href="/dashboard/operacoes/nova" className="flex-shrink-0 flex items-center gap-2 bg-[#104e27] text-white font-semibold px-5 py-3 rounded-xl hover:bg-[#679d3f] transition-colors text-sm">
             Criar atividade via AgroCore
           </Link>
         </div>
@@ -147,7 +147,7 @@ export default async function AgroCoreInternalPage() {
             { num: '4', title: 'Custo integrado', desc: 'Lance o valor no Financeiro' },
           ].map(s => (
             <div key={s.num} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-[#16a34a] text-white text-xs font-black flex items-center justify-center flex-shrink-0">{s.num}</div>
+              <div className="w-7 h-7 rounded-lg bg-[#104e27] text-white text-xs font-black flex items-center justify-center flex-shrink-0">{s.num}</div>
               <div>
                 <div className="text-sm font-semibold text-slate-900">{s.title}</div>
                 <div className="text-xs text-slate-400 mt-0.5">{s.desc}</div>

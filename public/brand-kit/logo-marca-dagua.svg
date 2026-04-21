@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="90" stroke="#16a34a" stroke-width="4" fill="none" opacity="0.08"/>
+  <path d="M100 30 C100 30 50 65 50 105 C50 132 72 155 100 155 C128 155 150 132 150 105 C150 65 100 30 100 30Z"
+        fill="rgba(22,163,74,0.06)" stroke="#16a34a" stroke-width="4" opacity="0.12"/>
+  <line x1="100" y1="30" x2="100" y2="155" stroke="#16a34a" stroke-width="4" stroke-linecap="round" opacity="0.12"/>
+  <line x1="100" y1="68" x2="74" y2="56" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
+  <line x1="100" y1="68" x2="126" y2="56" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
+  <line x1="100" y1="95" x2="68" y2="82" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
+  <line x1="100" y1="95" x2="132" y2="82" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
+  <text x="100" y="178" font-family="Montserrat, sans-serif" font-size="18" font-weight="800" fill="#16a34a" opacity="0.1" text-anchor="middle">AgroOS</text>
+</svg>

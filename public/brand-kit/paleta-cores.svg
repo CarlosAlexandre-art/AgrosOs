@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160">
+  <rect width="560" height="160" rx="12" fill="#f8fafc"/>
+  <text x="20" y="28" font-family="Montserrat, sans-serif" font-size="13" font-weight="700" fill="#0f172a">PALETA DE CORES — AgroOS</text>
+
+  <!-- Cor 1: Primary -->
+  <rect x="20" y="40" width="76" height="76" rx="10" fill="#16a34a"/>
+  <text x="58" y="136" font-family="Montserrat, sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">Primary</text>
+  <text x="58" y="148" font-family="Montserrat, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">#16a34a</text>
+
+  <!-- Cor 2: Primary Dark -->
+  <rect x="108" y="40" width="76" height="76" rx="10" fill="#15803d"/>
+  <text x="146" y="136" font-family="Montserrat, sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">Dark</text>
+  <text x="146" y="148" font-family="Montserrat, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">#15803d</text>
+
+  <!-- Cor 3: Light -->
+  <rect x="196" y="40" width="76" height="76" rx="10" fill="#22c55e"/>
+  <text x="234" y="136" font-family="Montserrat, sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">Light</text>
+  <text x="234" y="148" font-family="Montserrat, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">#22c55e</text>
+
+  <!-- Cor 4: Accent -->
+  <rect x="284" y="40" width="76" height="76" rx="10" fill="#4ade80"/>
+  <text x="322" y="136" font-family="Montserrat, sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">Accent</text>
+  <text x="322" y="148" font-family="Montserrat, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">#4ade80</text>
+
+  <!-- Cor 5: Sidebar/Dark -->
+  <rect x="372" y="40" width="76" height="76" rx="10" fill="#0f172a"/>
+  <text x="410" y="136" font-family="Montserrat, sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">Sidebar</text>
+  <text x="410" y="148" font-family="Montserrat, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">#0f172a</text>
+
+  <!-- Cor 6: Background -->
+  <rect x="460" y="40" width="76" height="76" rx="10" fill="#f0fdf4" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="498" y="136" font-family="Montserrat, sans-serif" font-size="9" font-weight="700" fill="#0f172a" text-anchor="middle">BG</text>
+  <text x="498" y="148" font-family="Montserrat, sans-serif" font-size="8" fill="#64748b" text-anchor="middle">#f0fdf4</text>
+</svg>

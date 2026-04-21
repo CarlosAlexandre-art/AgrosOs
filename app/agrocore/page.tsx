@@ -28,8 +28,8 @@ export default function AgroCoreExternalPage() {
         <section className="px-6 py-20 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none" style={{background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(22,163,74,0.10), transparent)'}} />
           <div className="max-w-5xl mx-auto relative text-center">
-            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 text-xs font-semibold px-4 py-2 rounded-full mb-6 border border-green-200 uppercase tracking-wider">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> AgroCore — Serviços externos
+            <div className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full mb-6 border uppercase tracking-wider" style={{background:'#f2f9ea', color:'#104e27', borderColor:'#679d3f'}}>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{background:'#679d3f'}} /> AgroCore — Soluções Sustentáveis do Campo
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-[#0f172a] leading-tight mb-6">
               O braço que executa<br />o que o AgroOS planeja
@@ -42,14 +42,17 @@ export default function AgroCoreExternalPage() {
                 href="https://agrocore.com.br"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-[#16a34a] text-white font-bold px-8 py-4 rounded-2xl hover:bg-[#15803d] transition-all shadow-lg shadow-green-200 text-lg"
+                className="inline-flex items-center justify-center gap-2 text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-lg text-lg"
+                style={{background:'#104e27'}}
+                onMouseOver={e => (e.currentTarget.style.background='#679d3f')}
+                onMouseOut={e => (e.currentTarget.style.background='#104e27')}
               >
                 Acessar AgroCore
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>
-              <Link href="/demo" className="inline-flex items-center justify-center gap-2 border-2 border-[#e2e8f0] text-[#0f172a] font-semibold px-8 py-4 rounded-2xl hover:border-[#16a34a] hover:text-[#16a34a] transition-all text-lg">
+              <Link href="/demo" className="inline-flex items-center justify-center gap-2 border-2 border-[#e2e8f0] text-[#0f172a] font-semibold px-8 py-4 rounded-2xl hover:border-[#104e27] hover:text-[#16a34a] transition-all text-lg">
                 Ver demonstração
               </Link>
             </div>
@@ -77,7 +80,7 @@ export default function AgroCoreExternalPage() {
                   ))}
                 </ul>
               </div>
-              <div className="bg-[#0f172a] rounded-2xl p-8 border-2 border-[#16a34a] shadow-lg relative overflow-hidden">
+              <div className="bg-[#0f172a] rounded-2xl p-8 border-2 border-[#104e27] shadow-lg relative overflow-hidden">
                 <div className="absolute top-4 right-4">
                   <span className="flex items-center gap-1.5 bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full border border-green-500/30">
                     <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" /> Integrado
@@ -126,9 +129,9 @@ export default function AgroCoreExternalPage() {
             <div className="relative">
               <div className="absolute left-8 top-0 bottom-0 w-px bg-gray-200 hidden md:block" />
               <div className="space-y-8">
-                {PASSOS.map((p, i) => (
+                {PASSOS.map((p) => (
                   <div key={p.num} className="flex gap-6 items-start relative">
-                    <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#16a34a] flex items-center justify-center flex-shrink-0 z-10 shadow-sm">
+                    <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#104e27] flex items-center justify-center flex-shrink-0 z-10 shadow-sm">
                       <span className="font-black text-[#16a34a] text-lg">{p.num}</span>
                     </div>
                     <div className="pt-3 pb-2">

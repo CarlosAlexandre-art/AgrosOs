@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Corpo -->
+  <rect x="13" y="26" width="38" height="30" rx="10" fill="#0f172a" stroke="#16a34a" stroke-width="1.8"/>
+  <!-- Cabeça -->
+  <rect x="15" y="8" width="34" height="24" rx="9" fill="#0f172a" stroke="#16a34a" stroke-width="1.8"/>
+  <!-- Antena -->
+  <line x1="32" y1="8" x2="32" y2="2" stroke="#16a34a" stroke-width="2" stroke-linecap="round"/>
+  <!-- Folha na antena esq -->
+  <path d="M32 3 C29 0 25 2 27 5 C28.5 7 32 5 32 3Z" fill="#16a34a"/>
+  <!-- Folha na antena dir -->
+  <path d="M32 3 C35 0 39 2 37 5 C35.5 7 32 5 32 3Z" fill="#22c55e"/>
+  <!-- Olhos -->
+  <circle cx="23" cy="18" r="4" fill="#16a34a"/>
+  <circle cx="41" cy="18" r="4" fill="#16a34a"/>
+  <circle cx="24" cy="17" r="1.5" fill="white"/>
+  <circle cx="42" cy="17" r="1.5" fill="white"/>
+  <!-- Boca -->
+  <path d="M25 27 Q32 31 39 27" stroke="#16a34a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- Tela no peito -->
+  <rect x="20" y="33" width="24" height="16" rx="4" fill="#1e293b" stroke="#16a34a" stroke-width="1.2"/>
+  <!-- Barras dashboard -->
+  <rect x="23" y="44" width="3.5" height="3" rx="1" fill="#16a34a" opacity="0.7"/>
+  <rect x="28" y="41" width="3.5" height="6" rx="1" fill="#16a34a"/>
+  <rect x="33" y="37" width="3.5" height="10" rx="1" fill="#4ade80"/>
+  <!-- Braços -->
+  <rect x="3" y="30" width="10" height="7" rx="3.5" fill="#0f172a" stroke="#16a34a" stroke-width="1.5"/>
+  <rect x="51" y="30" width="10" height="7" rx="3.5" fill="#0f172a" stroke="#16a34a" stroke-width="1.5"/>
+  <!-- Pernas -->
+  <rect x="17" y="54" width="11" height="8" rx="3" fill="#0f172a" stroke="#16a34a" stroke-width="1.5"/>
+  <rect x="36" y="54" width="11" height="8" rx="3" fill="#0f172a" stroke="#16a34a" stroke-width="1.5"/>
+</svg>
