@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import AgroOSLogo from '@/components/AgroOSLogo'
 
 const FUNCIONALIDADES = [
   { icon: '📋', label: 'Operacional', desc: 'Gestão de tarefas e execução no campo', href: '/funcionalidades/operacional' },
@@ -91,17 +92,7 @@ export default function Nav() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-white/90 backdrop-blur-md border-b border-gray-100">
       <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="34" height="34" rx="10" fill="#16a34a"/>
-          <path d="M17 8C17 8 10 12.5 10 19.5C10 23.6 13.1 26 17 26C20.9 26 24 23.6 24 19.5C24 12.5 17 8 17 8Z" fill="white" fillOpacity="0.2"/>
-          <path d="M17 8C17 8 10 12.5 10 19.5C10 23.6 13.1 26 17 26" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-          <path d="M17 8C17 8 24 12.5 24 19.5C24 23.6 20.9 26 17 26" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-          <line x1="17" y1="8" x2="17" y2="26" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-          <path d="M17 14L13 11.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-          <path d="M17 14L21 11.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-          <path d="M17 18.5L12.5 16.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-          <path d="M17 18.5L21.5 16.5" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeOpacity="0.85"/>
-        </svg>
+        <AgroOSLogo size={34} />
         <span className="font-bold text-xl text-[#0f172a]">AgroOS</span>
       </Link>
 

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import AgroOSLogo from '@/components/AgroOSLogo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -35,8 +36,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <span className="text-3xl">🌾</span>
-            <span className="font-bold text-2xl text-[#15803d]">AgroOS</span>
+            <AgroOSLogo size={36} />
+            <span className="font-bold text-2xl text-[#0f172a]">AgroOS</span>
           </Link>
           <h1 className="text-2xl font-bold text-[#0f172a]">Bem-vindo de volta</h1>
           <p className="text-[#64748b] mt-1 text-sm">Entre na sua conta para continuar</p>

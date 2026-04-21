@@ -75,7 +75,15 @@ export default function AgroCoreButton({
     return (
       <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🌾</span>
+          <div className="w-10 h-10 rounded-xl bg-[#f2f9ea] flex items-center justify-center flex-shrink-0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#104e27" strokeWidth="1.5"/>
+              <path d="M12 5C12 5 7 8 7 12.5C7 15 9.2 17 12 17C14.8 17 17 15 17 12.5C17 8 12 5 12 5Z" fill="rgba(16,78,39,0.12)" stroke="#104e27" strokeWidth="1.2"/>
+              <line x1="12" y1="5" x2="12" y2="17" stroke="#104e27" strokeWidth="1.2" strokeLinecap="round"/>
+              <line x1="12" y1="9" x2="9" y2="7.5" stroke="#104e27" strokeWidth="0.9" strokeLinecap="round"/>
+              <line x1="12" y1="9" x2="15" y2="7.5" stroke="#104e27" strokeWidth="0.9" strokeLinecap="round"/>
+            </svg>
+          </div>
           <div>
             <div className="font-semibold text-slate-900">Contratar via AgroCore</div>
             <div className="text-xs text-slate-400">Marketplace de serviços agrícolas</div>
@@ -103,7 +111,13 @@ export default function AgroCoreButton({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🌾</span>
+          <div className="w-7 h-7 rounded-lg bg-[#f2f9ea] flex items-center justify-center flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#104e27" strokeWidth="1.8"/>
+              <path d="M12 5C12 5 7 8 7 12.5C7 15 9.2 17 12 17C14.8 17 17 15 17 12.5C17 8 12 5 12 5Z" fill="rgba(16,78,39,0.12)" stroke="#104e27" strokeWidth="1.4"/>
+              <line x1="12" y1="5" x2="12" y2="17" stroke="#104e27" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+          </div>
           <span className="font-semibold text-slate-900">AgroCore</span>
         </div>
         {statusInfo && (

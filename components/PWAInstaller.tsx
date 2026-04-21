@@ -10,33 +10,33 @@ interface BeforeInstallPromptEvent extends Event {
 export default function PWAInstaller() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
   const [isIOSPrompt, setIsIOSPrompt] = useState(false)
 
   useEffect(() => {
-    // Registrar service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    if (window.matchMedia('(display-mode: standalone)').matches) return
+    if (localStorage.getItem('pwa-dismissed')) return
+
+    // Evento pode ter sido capturado antes da hidratação (ver layout.tsx)
+    if ((window as any).__bip) {
+      setInstallPrompt((window as any).__bip)
+      setTimeout(() => setShow(true), 3000)
     }
 
-    // Detectar iOS
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
-    const standalone = (navigator as unknown as { standalone?: boolean }).standalone
-    setIsIOS(ios)
-
-    if (ios && !standalone) {
-      const dismissed = localStorage.getItem('pwa-ios-dismissed')
-      if (!dismissed) setTimeout(() => setIsIOSPrompt(true), 3000)
-    }
-
-    // Android / Chrome
     const handler = (e: Event) => {
       e.preventDefault()
+      ;(window as any).__bip = e
       setInstallPrompt(e as BeforeInstallPromptEvent)
-      const dismissed = localStorage.getItem('pwa-dismissed')
-      if (!dismissed) setTimeout(() => setShow(true), 3000)
+      setTimeout(() => setShow(true), 3000)
     }
     window.addEventListener('beforeinstallprompt', handler)
+
+    // iOS
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    const standalone = (navigator as any).standalone
+    if (ios && !standalone && !localStorage.getItem('pwa-ios-dismissed')) {
+      setTimeout(() => setIsIOSPrompt(true), 3000)
+    }
+
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
@@ -44,7 +44,10 @@ export default function PWAInstaller() {
     if (!installPrompt) return
     await installPrompt.prompt()
     const { outcome } = await installPrompt.userChoice
-    if (outcome === 'accepted') setShow(false)
+    if (outcome === 'accepted') {
+      setShow(false)
+      localStorage.setItem('pwa-dismissed', '1')
+    }
     setInstallPrompt(null)
   }
 
@@ -57,9 +60,9 @@ export default function PWAInstaller() {
 
   if (isIOSPrompt) {
     return (
-      <div className="fixed bottom-6 left-4 right-4 z-50 bg-[#0f172a] text-white rounded-2xl p-4 shadow-2xl border border-white/10 animate-in slide-in-from-bottom-4">
+      <div className="fixed bottom-6 left-4 right-4 z-50 bg-[#0f172a] text-white rounded-2xl p-4 shadow-2xl border border-white/10 animate-in slide-in-from-bottom-4 max-w-sm mx-auto">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-[#16a34a] rounded-xl flex items-center justify-center flex-shrink-0 text-lg">🌾</div>
+          <img src="/icons/icon-192.png" alt="AgroOS" className="w-10 h-10 rounded-xl flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-sm mb-0.5">Instalar AgroOS</div>
             <div className="text-xs text-slate-400 leading-relaxed">
@@ -80,21 +83,27 @@ export default function PWAInstaller() {
   if (!show) return null
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-50 bg-[#0f172a] text-white rounded-2xl p-4 shadow-2xl border border-white/10">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#16a34a] rounded-xl flex items-center justify-center flex-shrink-0 text-lg">🌾</div>
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm">Instalar AgroOS</div>
-          <div className="text-xs text-slate-400">Acesse sua fazenda direto da tela inicial</div>
+    <div className="fixed bottom-6 left-4 right-4 z-50 bg-[#0f172a] text-white rounded-2xl overflow-hidden shadow-2xl border border-white/10 max-w-sm mx-auto">
+      <div className="bg-[#16a34a] px-4 py-3 flex items-center gap-3">
+        <img src="/icons/icon-192.png" alt="AgroOS" className="w-10 h-10 rounded-xl flex-shrink-0" />
+        <div>
+          <div className="text-white font-bold text-sm">Instalar AgroOS</div>
+          <div className="text-green-200 text-xs">Sistema Operacional da Fazenda</div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button onClick={handleDismiss} className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1.5">
-            Agora não
-          </button>
-          <button onClick={handleInstall} className="text-xs font-bold bg-[#16a34a] hover:bg-[#15803d] transition-colors px-3 py-1.5 rounded-lg">
-            Instalar
-          </button>
-        </div>
+      </div>
+      <div className="px-4 py-3">
+        <p className="text-slate-400 text-xs mb-3">
+          Acesse sua fazenda direto da tela inicial — funciona sem abrir o navegador.
+        </p>
+        <button
+          onClick={handleInstall}
+          className="w-full py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-bold rounded-xl text-sm transition mb-2"
+        >
+          Instalar no celular
+        </button>
+        <button onClick={handleDismiss} className="w-full text-slate-500 text-xs py-1">
+          Agora não
+        </button>
       </div>
     </div>
   )

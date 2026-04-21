@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import AgroOSLogo from '@/components/AgroOSLogo'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -55,7 +56,7 @@ export default function OnboardingPage() {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <span className="text-4xl">🌾</span>
+          <div className="flex justify-center mb-2"><AgroOSLogo size={52} /></div>
           <h1 className="text-2xl font-bold text-slate-900 mt-2">Bem-vindo ao AgroOS</h1>
           <p className="text-slate-500 text-sm mt-1">Vamos configurar sua fazenda em 1 minuto</p>
         </div>

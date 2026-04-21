@@ -1,10 +1,11 @@
 import Link from 'next/link'
+import AgroOSLogo from '@/components/AgroOSLogo'
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-4">
       <div className="text-center max-w-md">
-        <div className="text-8xl mb-6">🌾</div>
+        <div className="flex justify-center mb-6"><AgroOSLogo size={80} /></div>
         <h1 className="text-6xl font-bold text-[#16a34a] mb-2">404</h1>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">Página não encontrada</h2>
         <p className="text-slate-500 mb-8">
