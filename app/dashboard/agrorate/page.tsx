@@ -26,6 +26,8 @@ interface ScoreData {
   trendHistory?: Array<{ date: string; score: number }>;
 }
 
+type TabId = 'score' | 'history' | 'analytics' | 'credit'
+
 const mockHistory = [
   { date: 'Jan', score: 620 },
   { date: 'Fev', score: 680 },
@@ -81,7 +83,7 @@ const categoryConfig = {
 export default function AgroRateDashboard() {
   const [data, setData] = useState<ScoreData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'score' | 'history' | 'analytics' | 'credit'>('score');
+  const [activeTab, setActiveTab] = useState<TabId>('score');
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
@@ -139,15 +141,15 @@ export default function AgroRateDashboard() {
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <Header />
         
-        <MainScoreCard data={data} config={config} animatedScore={animatedScore} />
-        
+        <MainScoreCard data={data!} config={config} animatedScore={animatedScore} />
+
         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        
+
         <AnimatePresence mode="wait">
-          {activeTab === 'score' && <ScoreOverview data={data} config={config} />}
-          {activeTab === 'history' && <HistoryTab data={data} config={config} />}
-          {activeTab === 'analytics' && <AnalyticsTab data={data} config={config} />}
-          {activeTab === 'credit' && <CreditTab data={data} config={config} />}
+          {activeTab === 'score' && <ScoreOverview data={data!} config={config} />}
+          {activeTab === 'history' && <HistoryTab data={data!} config={config} />}
+          {activeTab === 'analytics' && <AnalyticsTab data={data!} config={config} />}
+          {activeTab === 'credit' && <CreditTab data={data!} config={config} />}
         </AnimatePresence>
       </div>
     </div>
@@ -193,7 +195,7 @@ function Header() {
         <p className="text-slate-400 mt-1">Sua pontuação de crédito baseada em dados reais</p>
       </div>
       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-        <Link href="/dashboard/agrorate" className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-semibold rounded-xl hover:opacity-90 transition-all">
+        <Link href="/dashboard/agrorate/credito" className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-semibold rounded-xl hover:opacity-90 transition-all">
           Solicitar Crédito
         </Link>
       </motion.div>
@@ -265,11 +267,25 @@ function MainScoreCard({ data, config, animatedScore }: { data: ScoreData; confi
             <p className="text-slate-600 text-lg mb-6 max-w-xl">{config.description}</p>
           </motion.div>
 
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 gap-6 mb-6">
             <BenchmarkItem label="Sua Nota" value={animatedScore} color={config.color} />
             <BenchmarkItem label="Regional" value={data.benchmarkComparison?.regional || 680} color="#64748b" />
             <BenchmarkItem label="Nacional" value={data.benchmarkComparison?.national || 720} color="#64748b" />
           </div>
+
+          <button
+            onClick={() => {
+              const prompt = `Analise meu score AgroRate de ${data.score} pontos (categoria ${config.label}). Minha margem é ${(data.marginRate * 100).toFixed(0)}%, produtividade R$ ${data.productivity}/ha e completude de dados ${(data.dataCompleteness * 100).toFixed(0)}%. O que devo melhorar para subir de categoria?`
+              window.dispatchEvent(new CustomEvent('ai-prefill', { detail: { prompt } }))
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border"
+            style={{ borderColor: config.color + '40', color: config.color, backgroundColor: config.bg }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            Perguntar à IA sobre meu score
+          </button>
         </div>
       </div>
     </motion.div>
@@ -285,8 +301,8 @@ function BenchmarkItem({ label, value, color }: { label: string; value: number; 
   );
 }
 
-function Tabs({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: 'score' | 'history' | 'analytics' | 'credit') => void }) {
-  const tabs = [
+function Tabs({ activeTab, setActiveTab }: { activeTab: TabId; setActiveTab: (tab: TabId) => void }) {
+  const tabs: { id: TabId; label: string; icon: string }[] = [
     { id: 'score', label: 'Score', icon: '📊' },
     { id: 'history', label: 'Histórico', icon: '📈' },
     { id: 'analytics', label: 'Analytics', icon: '🔍' },
@@ -312,7 +328,7 @@ function Tabs({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (t
         </motion.button>
       ))}
     </div>
-  );
+  )
 }
 
 function ScoreOverview({ data, config }: { data: ScoreData; config: typeof categoryConfig[keyof typeof categoryConfig] }) {

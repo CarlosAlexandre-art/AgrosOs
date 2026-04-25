@@ -93,7 +93,28 @@ export default function CreditoPage() {
           <Link href="/dashboard/agrorate" className="text-gray-500 hover:text-gray-700">
             ← Voltar
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Ofertas de Crédito</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Simulação de Crédito</h1>
+        </div>
+
+        {/* CTA AgroRate */}
+        <div className="bg-gradient-to-r from-emerald-600 to-green-500 rounded-2xl p-5 flex items-center justify-between gap-4">
+          <div>
+            <div className="text-white font-bold text-base">Quer solicitar crédito de verdade?</div>
+            <div className="text-emerald-100 text-sm mt-0.5">
+              Acesse o AgroRate — seu score completo, verificação de bureau e pedido direto aos parceiros.
+            </div>
+          </div>
+          <a
+            href="https://agro-rate.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-shrink-0 flex items-center gap-2 bg-white text-emerald-700 font-bold text-sm px-4 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors"
+          >
+            Acessar AgroRate
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
         </div>
 
         {requestSent && (

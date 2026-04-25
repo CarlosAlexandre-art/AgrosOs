@@ -18,6 +18,7 @@ export default function AIAssistant() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const pendingPrompt = useRef<string | null>(null)
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -26,8 +27,28 @@ export default function AIAssistant() {
         content: 'Olá! Sou o Assistente IA do AgroOS. Tenho acesso aos dados reais da sua fazenda. Como posso ajudar?',
       }])
     }
-    if (open) setTimeout(() => inputRef.current?.focus(), 100)
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100)
+      // auto-send any pending prefill prompt after greeting loads
+      if (pendingPrompt.current) {
+        const p = pendingPrompt.current
+        pendingPrompt.current = null
+        setTimeout(() => send(p), 400)
+      }
+    }
   }, [open])
+
+  useEffect(() => {
+    function handlePrefill(e: Event) {
+      const prompt = (e as CustomEvent<{ prompt: string }>).detail?.prompt
+      if (!prompt) return
+      pendingPrompt.current = prompt
+      setMessages([])
+      setOpen(true)
+    }
+    window.addEventListener('ai-prefill', handlePrefill)
+    return () => window.removeEventListener('ai-prefill', handlePrefill)
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })

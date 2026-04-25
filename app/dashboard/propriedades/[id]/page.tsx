@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import AddFieldForm from './AddFieldForm'
+import EditPropertyForm from './EditPropertyForm'
 
 export default async function PropriedadeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -25,10 +26,17 @@ export default async function PropriedadeDetailPage({ params }: { params: Promis
         <Link href="/dashboard/propriedades" className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m15 19-7-7 7-7" /></svg>
         </Link>
-        <div>
+        <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-slate-900">{property.name}</h1>
           {property.location && <p className="text-sm text-slate-400">{property.location} · {Number(property.sizeHectares)} ha</p>}
         </div>
+        <EditPropertyForm property={{
+          id: property.id,
+          name: property.name,
+          location: property.location,
+          sizeHectares: Number(property.sizeHectares),
+          coverUrl: property.coverUrl,
+        }} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">

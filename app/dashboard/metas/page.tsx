@@ -193,7 +193,7 @@ export default async function MetasPage() {
                             {g.description && <p className="text-sm text-slate-400 mt-1">{g.description}</p>}
                           </div>
                         </div>
-                        <GoalActions goalId={g.id} />
+                        <GoalActions goalId={g.id} goal={{ id: g.id, title: g.title, description: g.description, type: g.type, targetValue: Number(g.targetValue), deadline: g.deadline?.toISOString() ?? null, isCompleted: g.isCompleted }} />
                       </div>
 
                       {/* Barra de progresso */}
@@ -253,7 +253,7 @@ export default async function MetasPage() {
                         </div>
                         <div className="text-xs text-slate-400">{info.label}</div>
                       </div>
-                      <GoalActions goalId={g.id} />
+                      <GoalActions goalId={g.id} goal={{ id: g.id, title: g.title, description: g.description, type: g.type, targetValue: Number(g.targetValue), deadline: g.deadline?.toISOString() ?? null, isCompleted: g.isCompleted }} />
                     </div>
                   )
                 })}

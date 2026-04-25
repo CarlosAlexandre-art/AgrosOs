@@ -15,10 +15,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { name, location, sizeHectares } = await req.json()
+  const { name, location, sizeHectares, coverUrl } = await req.json()
   const property = await prisma.property.update({
     where: { id },
-    data: { ...(name && { name }), ...(location !== undefined && { location }), ...(sizeHectares !== undefined && { sizeHectares }) },
+    data: {
+      ...(name && { name }),
+      ...(location !== undefined && { location }),
+      ...(sizeHectares !== undefined && { sizeHectares }),
+      ...(coverUrl !== undefined && { coverUrl }),
+    },
   })
   return NextResponse.json(property)
 }
