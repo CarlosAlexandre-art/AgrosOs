@@ -75,6 +75,7 @@ model Property {
   goals        Goal[]
   agroRate     AgroRate?
   creditRequests CreditRequest[]
+  agroTokens   AgroToken[]
   createdAt    DateTime     @default(now())
 }
 
@@ -302,4 +303,62 @@ model LearningClick {
   clickedAt DateTime @default(now())
 
   @@index([moduleId, clickedAt])
+}
+
+enum TokenType {
+  SAFRA
+  MATERIAL
+  MAQUINARIO
+}
+
+enum TokenStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  REDEEMED
+  CANCELLED
+}
+
+model AgroToken {
+  id          String      @id @default(uuid())
+  propertyId  String
+  property    Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  type        TokenType
+  status      TokenStatus @default(DRAFT)
+  title       String
+  description String?
+
+  totalValue  Decimal
+  tokenPrice  Decimal     @default(100)
+  totalTokens Int
+  soldTokens  Int         @default(0)
+
+  expectedReturn Decimal?
+  periodMonths   Int?
+
+  // Safra
+  commodity    String?
+  quantityKg   Decimal?
+  deliveryDate DateTime?
+  fieldId      String?
+
+  // Material
+  materialType String?
+  quantity     Decimal?
+  unit         String?
+
+  // Maquinário
+  machineType  String?
+  machineModel String?
+  machineYear  Int?
+  usageHours   Decimal?
+
+  contractUrl  String?
+  blockchainTx String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([propertyId])
 }
