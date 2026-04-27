@@ -45,6 +45,7 @@ model User {
   phone             String?
   cpf               String?
   kycVerified       Boolean            @default(false)
+  stripeAccountId   String?
   properties        Property[]
   pushSubscriptions PushSubscription[]
   tokenTransactions TokenTransaction[]

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 
+export const runtime = 'nodejs'
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const PRO_PRICE_ID = 'price_1TLVBkHOdd4LjuVT865UeWY0'
@@ -29,12 +31,38 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
-      const userId = session.metadata?.userId
-      const customerId = session.customer as string
+      const meta = session.metadata ?? {}
 
+      // --- AgroToken purchase ---
+      if (meta.tokenId && meta.buyerId) {
+        const qty = parseInt(meta.quantity)
+        const total = parseFloat(meta.totalAmount)
+        const comm = parseFloat(meta.commission)
+        await prisma.$transaction([
+          prisma.tokenTransaction.create({
+            data: {
+              tokenId: meta.tokenId,
+              buyerId: meta.buyerId,
+              quantity: qty,
+              pricePerToken: total / qty,
+              totalAmount: total,
+              commission: comm,
+              type: 'BUY',
+            },
+          }),
+          prisma.agroToken.update({
+            where: { id: meta.tokenId },
+            data: { soldTokens: { increment: qty } },
+          }),
+        ])
+        break
+      }
+
+      // --- Subscription / plan upgrade ---
+      const userId = meta.userId
+      const customerId = session.customer as string
       if (!userId) break
 
-      // Buscar o priceId da assinatura
       let plan = 'pro'
       if (session.subscription) {
         const sub = await stripe.subscriptions.retrieve(session.subscription as string)

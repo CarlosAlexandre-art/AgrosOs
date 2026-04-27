@@ -49,18 +49,20 @@ function BuyModal({ token, onClose, onSuccess }: {
   async function handleBuy() {
     setLoading(true)
     setError('')
-    const res = await fetch(`/api/tokens/${token.id}/buy`, {
+    const res = await fetch(`/api/tokens/${token.id}/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ quantity }),
     })
     if (res.ok) {
-      onSuccess()
+      const data = await res.json()
+      // Redireciona para o checkout do Stripe
+      window.location.href = data.url
     } else {
       const data = await res.json()
       setError(data.error || 'Erro ao processar compra')
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (

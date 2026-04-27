@@ -41,7 +41,12 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Lock all AgroToken sub-pages — redirect to the "Em Breve" page
-  if (pathname.startsWith('/dashboard/token/')) {
+  // Exceptions: /sucesso (payment confirmation) and /cancelado
+  if (
+    pathname.startsWith('/dashboard/token/') &&
+    !pathname.startsWith('/dashboard/token/sucesso') &&
+    !pathname.startsWith('/dashboard/token/cancelado')
+  ) {
     return NextResponse.redirect(new URL('/dashboard/token', request.url))
   }
 
