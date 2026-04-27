@@ -40,6 +40,11 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Lock all AgroToken sub-pages — redirect to the "Em Breve" page
+  if (pathname.startsWith('/dashboard/token/')) {
+    return NextResponse.redirect(new URL('/dashboard/token', request.url))
+  }
+
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
