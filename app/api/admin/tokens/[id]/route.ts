@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { mintToken, isBlockchainConfigured, getPolygonScanUrl } from '@/lib/blockchain'
 
 const ORIGINACAO_RATE = 0.02
 
@@ -41,6 +42,26 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         },
       },
     })
+
+    // Minta na Polygon se a blockchain estiver configurada (falha silenciosa)
+    if (isBlockchainConfigured() && process.env.BLOCKCHAIN_PLATFORM_ADDRESS) {
+      try {
+        const txHash = await mintToken({
+          dbId: id,
+          totalTokens: token.totalTokens,
+          metadataHash: `agrotoken:${id}`,
+          toAddress: process.env.BLOCKCHAIN_PLATFORM_ADDRESS,
+        })
+        await prisma.agroToken.update({
+          where: { id },
+          data: { blockchainTx: txHash },
+        })
+        return NextResponse.json({ ...updated, blockchainTx: txHash, explorerUrl: getPolygonScanUrl(txHash) })
+      } catch (err) {
+        console.error('[blockchain] mint failed (token aprovado no DB):', err)
+      }
+    }
+
     return NextResponse.json(updated)
   }
 

@@ -1,0 +1,17 @@
+[
+  "constructor(address admin)",
+  "function mint(address to, uint256 tokenId, uint256 amount, string calldata metadataHash) external",
+  "function burn(address from, uint256 tokenId, uint256 amount) external",
+  "function recordPurchase(uint256 tokenId, address buyer, uint256 quantity, uint256 totalAmountCents) external",
+  "function addToWhitelist(address account) external",
+  "function removeFromWhitelist(address account) external",
+  "function tokenSupply(uint256 tokenId) view returns (uint256)",
+  "function tokenMetadata(uint256 tokenId) view returns (string)",
+  "function balanceOf(address account, uint256 id) view returns (uint256)",
+  "function whitelisted(address account) view returns (bool)",
+  "function pause() external",
+  "function unpause() external",
+  "event TokenMinted(uint256 indexed tokenId, address indexed to, uint256 amount, string metadataHash)",
+  "event TokenBurned(uint256 indexed tokenId, address indexed from, uint256 amount)",
+  "event Purchase(uint256 indexed tokenId, address indexed buyer, uint256 quantity, uint256 totalAmountCents)"
+]

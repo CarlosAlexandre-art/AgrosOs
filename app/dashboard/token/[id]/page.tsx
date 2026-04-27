@@ -282,15 +282,40 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Blockchain */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Blockchain</div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Blockchain</div>
+          {token.blockchainTx && (
+            <span className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+              </svg>
+              Registrado na Polygon
+            </span>
+          )}
+        </div>
         {token.blockchainTx ? (
-          <div className="text-sm font-mono text-slate-700 break-all">{token.blockchainTx}</div>
+          <div className="space-y-3">
+            <div className="text-xs font-mono text-slate-600 break-all bg-white border border-slate-200 rounded-xl px-3 py-2">
+              {token.blockchainTx}
+            </div>
+            <a
+              href={`https://polygonscan.com/tx/${token.blockchainTx}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+              Ver no PolygonScan
+            </a>
+          </div>
         ) : (
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Publicação na blockchain disponível em breve (Polygon mainnet)
+            Registro na Polygon mainnet após aprovação do token
           </div>
         )}
       </div>
