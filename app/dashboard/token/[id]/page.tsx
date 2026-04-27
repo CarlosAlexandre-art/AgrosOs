@@ -4,6 +4,16 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+type Transaction = {
+  id: string
+  quantity: number
+  pricePerToken: number
+  totalAmount: number
+  commission: number
+  createdAt: string
+  buyer: { name: string; email: string }
+}
+
 type AgroToken = {
   id: string
   type: 'SAFRA' | 'MATERIAL' | 'MAQUINARIO'
@@ -56,6 +66,21 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
   )
 }
 
+type Laudo = {
+  produtor: string
+  kycVerificado: boolean
+  propriedade: string
+  areaHectares: number
+  talhoes: number
+  receitaAnual: number
+  margemPct: number
+  atividadesConcluidas: number
+  agroRateScore: number | null
+  agroRateCategoria: string | null
+  scoreConfianca: number
+  nivelConfianca: string
+}
+
 export default function TokenDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
@@ -63,12 +88,33 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [totalCommission, setTotalCommission] = useState(0)
+  const [laudo, setLaudo] = useState<Laudo | null>(null)
+  const [resgatando, setResgatando] = useState(false)
 
   useEffect(() => {
     fetch(`/api/tokens/${id}`)
       .then(r => r.json())
       .then(d => { setToken(d); setLoading(false) })
+    fetch(`/api/tokens/${id}/transactions`)
+      .then(r => r.json())
+      .then(d => { setTransactions(d.transactions ?? []); setTotalCommission(d.totalCommission ?? 0) })
+    fetch(`/api/tokens/${id}/laudo`)
+      .then(r => r.json())
+      .then(d => { if (!d.error) setLaudo(d) })
   }, [id])
+
+  async function handleResgatar() {
+    if (!confirm('Confirmar resgate do token? O status mudará para Resgatado e a taxa de sucesso (3%) será cobrada sobre o valor captado.')) return
+    setResgatando(true)
+    const res = await fetch(`/api/tokens/${id}/resgatar`, { method: 'POST' })
+    if (res.ok) {
+      const data = await res.json()
+      setToken(data.token)
+    }
+    setResgatando(false)
+  }
 
   async function handlePublish() {
     setSubmitting(true)
@@ -185,6 +231,55 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
+      {/* Laudo de Capacidade */}
+      {laudo && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Laudo de Capacidade Produtiva</div>
+            <div className={`text-xs px-3 py-1 rounded-full font-semibold ${
+              laudo.nivelConfianca === 'ALTO' ? 'bg-green-100 text-green-700' :
+              laudo.nivelConfianca === 'MÉDIO' ? 'bg-amber-100 text-amber-700' :
+              'bg-gray-100 text-gray-600'
+            }`}>
+              Confiança {laudo.nivelConfianca} — {laudo.scoreConfianca}/100
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="bg-slate-50 rounded-xl p-3">
+              <div className="text-xs text-slate-400 mb-0.5">Receita anual</div>
+              <div className="font-semibold text-slate-900">{fmt(laudo.receitaAnual)}</div>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3">
+              <div className="text-xs text-slate-400 mb-0.5">Margem operacional</div>
+              <div className={`font-semibold ${laudo.margemPct >= 20 ? 'text-green-700' : laudo.margemPct >= 0 ? 'text-amber-700' : 'text-red-600'}`}>
+                {laudo.margemPct}%
+              </div>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3">
+              <div className="text-xs text-slate-400 mb-0.5">Área / Talhões</div>
+              <div className="font-semibold text-slate-900">{laudo.areaHectares} ha / {laudo.talhoes}</div>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3">
+              <div className="text-xs text-slate-400 mb-0.5">Atividades (12m)</div>
+              <div className="font-semibold text-slate-900">{laudo.atividadesConcluidas} concluídas</div>
+            </div>
+            {laudo.agroRateScore !== null && (
+              <div className="bg-slate-50 rounded-xl p-3">
+                <div className="text-xs text-slate-400 mb-0.5">AgroRate Score</div>
+                <div className="font-semibold text-slate-900">{laudo.agroRateScore} <span className="text-xs text-slate-400">{laudo.agroRateCategoria}</span></div>
+              </div>
+            )}
+            <div className="bg-slate-50 rounded-xl p-3">
+              <div className="text-xs text-slate-400 mb-0.5">KYC do produtor</div>
+              <div className={`font-semibold ${laudo.kycVerificado ? 'text-green-700' : 'text-slate-500'}`}>
+                {laudo.kycVerificado ? '✓ Verificado' : 'Pendente'}
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 mt-3">Laudo gerado automaticamente com base nos dados operacionais do AgroOS.</p>
+        </div>
+      )}
+
       {/* Blockchain */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
         <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Blockchain</div>
@@ -200,8 +295,32 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
         )}
       </div>
 
+      {/* Transações */}
+      {transactions.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Compradores</div>
+            <span className="text-xs text-slate-400">Comissão total: <span className="font-semibold text-green-700">{fmt(totalCommission)}</span></span>
+          </div>
+          <div className="space-y-0">
+            {transactions.map(t => (
+              <div key={t.id} className="flex justify-between py-2.5 border-b border-gray-100 last:border-0">
+                <div>
+                  <div className="text-sm font-medium text-slate-900">{t.buyer.name}</div>
+                  <div className="text-xs text-slate-400">{t.quantity.toLocaleString('pt-BR')} tokens • {new Date(t.createdAt).toLocaleDateString('pt-BR')}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-slate-900">{fmt(Number(t.totalAmount))}</div>
+                  <div className="text-xs text-green-600">comissão {fmt(Number(t.commission))}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Ações */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         {token.status === 'DRAFT' && (
           <button
             onClick={handlePublish}
@@ -218,6 +337,15 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
             className="px-5 border border-red-200 text-red-600 font-semibold py-3 rounded-xl hover:bg-red-50 disabled:opacity-50 transition-colors"
           >
             {deleting ? '...' : 'Excluir'}
+          </button>
+        )}
+        {token.status === 'ACTIVE' && (
+          <button
+            onClick={handleResgatar}
+            disabled={resgatando}
+            className="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {resgatando ? 'Processando...' : 'Solicitar resgate (liquidar)'}
           </button>
         )}
         {token.status !== 'DRAFT' && (

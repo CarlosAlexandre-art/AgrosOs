@@ -1,11 +1,14 @@
 import Link from 'next/link'
 import Nav from '@/components/Nav'
 import VideoPlayer from '@/components/VideoPlayer'
+import LaunchPopup from '@/components/LaunchPopup'
+import LaunchCTA from '@/components/LaunchCTA'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Nav />
+      <LaunchPopup />
 
       {/* Hero */}
       <section className="pt-32 pb-24 px-6 relative overflow-hidden">
@@ -242,6 +245,55 @@ export default function HomePage() {
                   <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2 min-w-0">
                     <span className="text-lg flex-shrink-0">{s.icon}</span>
                     <span className="text-xs sm:text-sm text-gray-300 font-medium truncate">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AgroToken Launch */}
+      <section className="px-6 py-24">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden border border-amber-200/60 shadow-2xl shadow-amber-100">
+            {/* Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#1a2e1a] to-[#0f172a]" />
+            <div className="absolute inset-0 opacity-30"
+              style={{ background: 'radial-gradient(ellipse 60% 50% at 30% 50%, rgba(22,163,74,0.4), transparent)' }} />
+            <div className="absolute top-4 right-8 text-[120px] opacity-5 select-none">🌾</div>
+
+            <div className="relative px-8 py-12 md:px-16 md:py-16 grid md:grid-cols-2 gap-10 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  Em breve · Fase Piloto
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
+                  AgroToken —<br />
+                  <span style={{ background: 'linear-gradient(135deg, #16a34a 0%, #34d399 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                    tokenize sua safra
+                  </span>
+                </h2>
+                <p className="text-slate-400 leading-relaxed mb-6 text-sm md:text-base">
+                  O AgroToken permitirá que produtores captem capital tokenizando ativos agrícolas reais — e que investidores participem da produção do campo com transparência total.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <LaunchCTA />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: '🏦', title: 'Captação de Capital', desc: 'Produtor tokeniza safra e capta recursos de múltiplos investidores' },
+                  { icon: '📈', title: 'Retorno Real', desc: 'Investidor recebe retorno lastreado em produção agrícola verificada' },
+                  { icon: '📋', title: 'Laudo Automático', desc: 'Capacidade produtiva calculada com dados reais do AgroOS' },
+                  { icon: '🔒', title: 'Conformidade CVM', desc: 'Operação estruturada dentro da Resolução CVM 88' },
+                ].map(item => (
+                  <div key={item.title} className="bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/8 transition-colors">
+                    <div className="text-2xl mb-2">{item.icon}</div>
+                    <div className="font-bold text-white text-sm mb-1">{item.title}</div>
+                    <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
                   </div>
                 ))}
               </div>

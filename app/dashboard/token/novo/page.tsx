@@ -74,6 +74,24 @@ function Select({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectEle
   )
 }
 
+const ORIGINACAO_RATE = 0.02
+const SUCESSO_RATE = 0.03
+
+function validateCPF(cpf: string) {
+  const c = cpf.replace(/\D/g, '')
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false
+  let sum = 0
+  for (let i = 0; i < 9; i++) sum += parseInt(c[i]) * (10 - i)
+  let r = (sum * 10) % 11
+  if (r === 10 || r === 11) r = 0
+  if (r !== parseInt(c[9])) return false
+  sum = 0
+  for (let i = 0; i < 10; i++) sum += parseInt(c[i]) * (11 - i)
+  r = (sum * 10) % 11
+  if (r === 10 || r === 11) r = 0
+  return r === parseInt(c[10])
+}
+
 export default function NovoTokenPage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
@@ -104,9 +122,14 @@ export default function NovoTokenPage() {
     machineModel: '',
     machineYear: '',
     usageHours: '',
+    // Compliance
+    cpf: '',
+    aceitaTermos: false,
+    aceitaCVM: false,
+    aceitaPiloto: false,
   })
 
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: string, v: string | boolean) => setForm(f => ({ ...f, [k]: v }))
 
   useEffect(() => {
     fetch('/api/properties').then(r => r.json()).then((d: Property[]) => {
@@ -131,6 +154,14 @@ export default function NovoTokenPage() {
   async function handleSubmit() {
     setSaving(true)
     try {
+      // Save CPF to user profile
+      if (form.cpf) {
+        await fetch('/api/user/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cpf: form.cpf }),
+        }).catch(() => {})
+      }
       const res = await fetch('/api/tokens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,13 +178,21 @@ export default function NovoTokenPage() {
 
   const selectedType = TOKEN_TYPES.find(t => t.type === form.type)
 
+  const tv = parseFloat(form.totalValue) || 0
+  const tp = parseFloat(form.tokenPrice) || 100
+  const feeOriginacao = tv * ORIGINACAO_RATE
+  const feeSucesso = tv * SUCESSO_RATE
+  const liquidoProdutor = tv - feeOriginacao
+  const cpfOk = validateCPF(form.cpf)
+
   const canGoStep2 = !!form.type && !!form.propertyId
   const canGoStep3 = !!form.title && !!form.totalValue && !!form.tokenPrice
-  const canSubmit = canGoStep3 && (
+  const canGoStep4 = canGoStep3 && (
     form.type === 'SAFRA' ? !!form.commodity && !!form.deliveryDate :
     form.type === 'MATERIAL' ? !!form.materialType && !!form.quantity :
     !!form.machineType
   )
+  const canSubmit = canGoStep4 && cpfOk && form.aceitaTermos && form.aceitaCVM && form.aceitaPiloto
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
@@ -172,12 +211,12 @@ export default function NovoTokenPage() {
 
       {/* Steps */}
       <div className="flex gap-2">
-        {[1, 2, 3].map(s => (
+        {[1, 2, 3, 4].map(s => (
           <div key={s} className={`flex-1 h-1.5 rounded-full ${step >= s ? 'bg-[#16a34a]' : 'bg-gray-200'}`} />
         ))}
       </div>
       <div className="text-xs text-slate-400 -mt-4">
-        {step === 1 ? 'Tipo e propriedade' : step === 2 ? 'Valores e retorno' : 'Detalhes do ativo'}
+        {step === 1 ? 'Tipo e propriedade' : step === 2 ? 'Valores e retorno' : step === 3 ? 'Detalhes do ativo' : 'Simulação e conformidade'}
       </div>
 
       {/* Step 1 — Tipo e propriedade */}
@@ -422,6 +461,87 @@ export default function NovoTokenPage() {
 
           <div className="flex gap-3">
             <button onClick={() => setStep(2)} className="flex-1 border border-gray-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors">
+              Voltar
+            </button>
+            <button
+              onClick={() => setStep(4)}
+              disabled={!canGoStep4}
+              className="flex-1 bg-[#16a34a] text-white font-semibold py-3 rounded-xl disabled:opacity-40 hover:bg-[#15803d] transition-colors"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4 — Simulação e Conformidade */}
+      {step === 4 && (
+        <div className="space-y-5">
+          {/* Simulador financeiro */}
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-5">
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Simulação financeira</div>
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600">Valor total do ativo</span>
+                <span className="font-semibold text-slate-900">R$ {tv.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-600">Taxa de originação (2%) — ao ser aprovado</span>
+                <span className="font-semibold text-red-600">− R$ {feeOriginacao.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-green-200 pt-3">
+                <span className="font-semibold text-slate-700">Você capta líquido</span>
+                <span className="font-bold text-green-700">R$ {liquidoProdutor.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500 text-xs">Taxa de sucesso (3%) — na liquidação</span>
+                <span className="text-xs text-slate-500">− R$ {feeSucesso.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} sobre captado</span>
+              </div>
+            </div>
+            {form.expectedReturn && form.periodMonths && (
+              <div className="mt-4 bg-white rounded-xl p-3 text-sm">
+                <div className="text-xs text-slate-400 mb-1">Retorno projetado para investidores</div>
+                <div className="font-semibold text-green-700">{form.expectedReturn}% em {form.periodMonths} meses</div>
+              </div>
+            )}
+          </div>
+
+          {/* CPF */}
+          <div>
+            <Label>CPF do responsável</Label>
+            <Input
+              placeholder="000.000.000-00"
+              value={form.cpf}
+              onChange={e => set('cpf', e.target.value)}
+              className={`w-full border rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 transition ${
+                form.cpf && !cpfOk ? 'border-red-300 focus:ring-red-400' : 'border-gray-300 focus:ring-[#16a34a]'
+              }`}
+            />
+            {form.cpf && !cpfOk && <p className="text-xs text-red-500 mt-1">CPF inválido</p>}
+            {cpfOk && <p className="text-xs text-green-600 mt-1">✓ CPF válido</p>}
+          </div>
+
+          {/* Checkboxes de conformidade */}
+          <div className="space-y-3">
+            {[
+              { key: 'aceitaTermos', label: 'Declaro que as informações sobre o ativo são verídicas e de minha responsabilidade.' },
+              { key: 'aceitaCVM', label: 'Estou ciente de que tokens de segurança (recebíveis) exigem conformidade com a CVM Resolução 88. Este token está registrado como ativo de utilidade (Utility Token) em fase piloto.' },
+              { key: 'aceitaPiloto', label: 'Concordo com os Termos de Uso da plataforma AgroToken e entendo que esta é uma fase piloto sem registro em blockchain.' },
+            ].map(({ key, label }) => (
+              <label key={key} className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={!!form[key as keyof typeof form]}
+                  onChange={e => set(key, e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#16a34a] flex-shrink-0"
+                />
+                <span className="text-sm text-slate-600 leading-snug">{label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+            <button onClick={() => setStep(3)} className="flex-1 border border-gray-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors">
               Voltar
             </button>
             <button

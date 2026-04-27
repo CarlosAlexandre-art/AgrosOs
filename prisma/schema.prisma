@@ -43,8 +43,11 @@ model User {
   stripeCustomerId  String?
   avatarUrl         String?
   phone             String?
+  cpf               String?
+  kycVerified       Boolean            @default(false)
   properties        Property[]
   pushSubscriptions PushSubscription[]
+  tokenTransactions TokenTransaction[]
   createdAt         DateTime           @default(now())
 }
 
@@ -52,6 +55,14 @@ model PushSubscription {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+model LaunchSubscriber {
+  id        String   @id @default(uuid())
   endpoint  String   @unique
   p256dh    String
   auth      String
@@ -354,11 +365,32 @@ model AgroToken {
   machineYear  Int?
   usageHours   Decimal?
 
-  contractUrl  String?
-  blockchainTx String?
+  contractUrl    String?
+  blockchainTx   String?
+  originacaoFee  Decimal?
+  successFee     Decimal?
+
+  transactions TokenTransaction[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([propertyId])
+}
+
+model TokenTransaction {
+  id            String    @id @default(uuid())
+  tokenId       String
+  token         AgroToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  buyerId       String
+  buyer         User      @relation(fields: [buyerId], references: [id])
+  quantity      Int
+  pricePerToken Decimal
+  totalAmount   Decimal
+  commission    Decimal
+  type          String    @default("BUY")
+  createdAt     DateTime  @default(now())
+
+  @@index([tokenId])
+  @@index([buyerId])
 }
