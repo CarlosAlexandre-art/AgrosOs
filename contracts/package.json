@@ -1,8 +1,12 @@
+
+
+
 {
   "name": "agrotoken-contracts",
   "version": "1.0.0",
   "description": "Smart contracts AgroToken — ERC-1155 Security Token (Polygon)",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "compile": "hardhat compile",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network amoy",

@@ -4,12 +4,15 @@ import * as dotenv from 'dotenv'
 dotenv.config({ path: '../.env.local' })
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY ?? ''
-const DEPLOYER_PRIVATE_KEY = process.env.BLOCKCHAIN_DEPLOYER_KEY ?? '0x' + '0'.repeat(64)
+const DEPLOYER_PRIVATE_KEY = process.env.BLOCKCHAIN_MINTER_KEY ?? process.env.BLOCKCHAIN_DEPLOYER_KEY ?? '0x' + '0'.repeat(64)
 
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.24',
-    settings: { optimizer: { enabled: true, runs: 200 } },
+    settings: {
+      optimizer: { enabled: true, runs: 200 },
+      evmVersion: 'cancun',
+    },
   },
   networks: {
     // Testnet gratuito — faucet: faucet.polygon.technology
