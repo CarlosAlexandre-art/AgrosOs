@@ -74,6 +74,7 @@ export default function TokenHubPage() {
       cta: 'Começar emissão',
       accent: '#4ade80',
       glow: 'rgba(74,222,128,.18)',
+      colorClass: 'green',
     },
     {
       href: '/dashboard/token/mercado',
@@ -83,6 +84,7 @@ export default function TokenHubPage() {
       cta: 'Ver mercado',
       accent: '#d4a843',
       glow: 'rgba(212,168,67,.18)',
+      colorClass: 'gold',
     },
     {
       href: '/dashboard/token/investimentos',
@@ -92,6 +94,7 @@ export default function TokenHubPage() {
       cta: 'Ver carteira',
       accent: '#60a5fa',
       glow: 'rgba(96,165,250,.18)',
+      colorClass: 'blue',
     },
   ]
 
@@ -162,10 +165,12 @@ export default function TokenHubPage() {
         .action-card {
           transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
           cursor: pointer;
+          border: 1px solid rgba(255,255,255,.07);
         }
-        .action-card:hover {
-          transform: translateY(-4px);
-        }
+        .action-card.green:hover  { transform: translateY(-4px); border-color: rgba(74,222,128,.35)  !important; box-shadow: 0 0 40px rgba(74,222,128,.18),  0 8px 32px rgba(0,0,0,.4); }
+        .action-card.gold:hover   { transform: translateY(-4px); border-color: rgba(212,168,67,.35) !important; box-shadow: 0 0 40px rgba(212,168,67,.18), 0 8px 32px rgba(0,0,0,.4); }
+        .action-card.blue:hover   { transform: translateY(-4px); border-color: rgba(96,165,250,.35) !important; box-shadow: 0 0 40px rgba(96,165,250,.18), 0 8px 32px rgba(0,0,0,.4); }
+        .action-card a, .action-card a:hover { color: inherit; text-decoration: none; }
         .live-dot {
           width: 8px; height: 8px;
           background: #4ade80;
@@ -340,28 +345,17 @@ export default function TokenHubPage() {
             marginBottom: 48,
           }}>
             {cards.map((card, i) => (
-              <Link key={card.href} href={card.href} style={{ textDecoration: 'none' }}>
+              <Link key={card.href} href={card.href} style={{ textDecoration: 'none', display: 'block' }}>
                 <div
-                  className="action-card"
+                  className={`action-card ${card.colorClass}`}
                   style={{
                     animationDelay: `${200 + i * 120}ms`,
                     animation: 'float-up .7s cubic-bezier(.16,1,.3,1) both',
                     background: 'linear-gradient(135deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%)',
-                    border: `1px solid rgba(255,255,255,.07)`,
                     borderRadius: 24,
                     padding: 28,
                     position: 'relative',
                     overflow: 'hidden',
-                  }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.borderColor = `${card.accent}40`
-                    el.style.boxShadow = `0 0 40px ${card.glow}, 0 8px 32px rgba(0,0,0,.4)`
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.borderColor = 'rgba(255,255,255,.07)'
-                    el.style.boxShadow = 'none'
                   }}
                 >
                   {/* Corner glow */}

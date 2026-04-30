@@ -91,9 +91,10 @@ export default function InvestimentosPage() {
         </div>
       )}
 
-      {/* Disclaimer */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700">
-        Fase piloto — investimentos simulados. Blockchain Polygon e contratos jurídicos em breve.
+      {/* Blockchain live */}
+      <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-xs text-green-700 flex items-center gap-2">
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a', display: 'inline-block', flexShrink: 0 }} />
+        Tokens registrados on-chain na Polygon Mainnet. Posição visível no PolygonScan.
       </div>
 
       {/* List */}
