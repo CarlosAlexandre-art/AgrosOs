@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 
 type Stats = { activeTokens: number; totalValue: number; investors: number; totalTokens: number }
 
@@ -204,7 +203,7 @@ export default function TokenHubPage() {
         {/* Action cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18, marginBottom: 44 }}>
           {CARDS.map((card, i) => (
-            <Link
+            <a
               key={card.href}
               href={card.href}
               style={{ textDecoration: 'none', display: 'block', animation: `fadeUp .7s cubic-bezier(.16,1,.3,1) ${180 + i * 100}ms both` }}
@@ -248,7 +247,7 @@ export default function TokenHubPage() {
                   </svg>
                 </span>
               </div>
-            </Link>
+            </a>
           ))}
         </div>
 
