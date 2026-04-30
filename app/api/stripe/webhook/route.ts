@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
+import { transferTokensToInvestor } from '@/lib/wallet'
 
 export const runtime = 'nodejs'
 
@@ -55,6 +56,14 @@ export async function POST(req: NextRequest) {
             data: { soldTokens: { increment: qty } },
           }),
         ])
+
+        // Transfere tokens on-chain para a wallet do investidor (falha silenciosa)
+        transferTokensToInvestor({
+          buyerUserId: meta.buyerId,
+          agroTokenId: meta.tokenId,
+          quantity: qty,
+        }).catch(() => {})
+
         break
       }
 

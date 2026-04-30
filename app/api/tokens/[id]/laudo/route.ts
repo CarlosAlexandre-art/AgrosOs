@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
+import { validateAgroToken } from '@/lib/agro-data'
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -47,6 +48,16 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
   const nivel = confianca >= 80 ? 'ALTO' : confianca >= 50 ? 'MÉDIO' : 'INICIAL'
 
+  // Validação climática e produtividade (OpenMeteo + CONAB) — falha silenciosa
+  let agroValidation = null
+  if (token.commodity) {
+    agroValidation = await validateAgroToken({
+      commodity: token.commodity,
+      areaHa: area,
+      quantidadeKg: token.quantityKg ? Number(token.quantityKg) : undefined,
+    }).catch(() => null)
+  }
+
   return NextResponse.json({
     produtor: p.user.name,
     kycVerificado: p.user.kycVerified,
@@ -63,5 +74,6 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     scoreConfianca: confianca,
     nivelConfianca: nivel,
     emitidoEm: p.user.createdAt,
+    validacaoClimatica: agroValidation,
   })
 }

@@ -366,10 +366,14 @@ model AgroToken {
   machineYear  Int?
   usageHours   Decimal?
 
-  contractUrl    String?
-  blockchainTx   String?
-  originacaoFee  Decimal?
-  successFee     Decimal?
+  contractUrl       String?
+  blockchainTx      String?
+  originacaoFee     Decimal?
+  successFee        Decimal?
+
+  clicksignDocKey   String?
+  clicksignSignerKey String?
+  signedAt          DateTime?
 
   transactions TokenTransaction[]
 
