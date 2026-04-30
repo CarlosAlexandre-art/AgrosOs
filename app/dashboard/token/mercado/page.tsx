@@ -132,15 +132,28 @@ function BuyModal({ token, onClose, onSuccess }: {
 export default function MercadoPage() {
   const [tokens, setTokens] = useState<MarketToken[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [filter, setFilter] = useState<'ALL' | 'SAFRA' | 'MATERIAL' | 'MAQUINARIO'>('ALL')
   const [buying, setBuying] = useState<MarketToken | null>(null)
   const [success, setSuccess] = useState(false)
 
   function load() {
     setLoading(true)
+    setError('')
     fetch('/api/tokens/mercado')
       .then(r => r.json())
-      .then(d => { setTokens(d); setLoading(false) })
+      .then(d => {
+        if (Array.isArray(d)) {
+          setTokens(d)
+        } else {
+          setError(d?.error || 'Erro ao carregar tokens')
+        }
+        setLoading(false)
+      })
+      .catch(() => {
+        setError('Falha na conexão. Tente novamente.')
+        setLoading(false)
+      })
   }
 
   useEffect(() => { load() }, [])
@@ -199,7 +212,16 @@ export default function MercadoPage() {
 
       {/* Token cards */}
       {loading ? (
-        <div className="text-center py-12 text-slate-400">Carregando...</div>
+        <div className="text-center py-12 text-slate-500 font-medium">Carregando tokens...</div>
+      ) : error ? (
+        <div className="text-center py-16">
+          <div className="text-4xl mb-3">⚠️</div>
+          <p className="text-slate-700 font-semibold mb-1">Erro ao carregar</p>
+          <p className="text-sm text-slate-500 mb-4">{error}</p>
+          <button onClick={load} className="bg-[#16a34a] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
+            Tentar novamente
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <div className="text-4xl mb-3">🌾</div>

@@ -51,14 +51,33 @@ function fmt(v: number) {
 export default function InvestimentosPage() {
   const [data, setData] = useState<Portfolio | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetch('/api/tokens/meus-investimentos')
       .then(r => r.json())
-      .then(d => { setData(d); setLoading(false) })
+      .then(d => {
+        if (d && Array.isArray(d.transactions)) {
+          setData(d)
+        } else {
+          setError(d?.error || 'Erro ao carregar investimentos')
+        }
+        setLoading(false)
+      })
+      .catch(() => {
+        setError('Falha na conexão. Tente novamente.')
+        setLoading(false)
+      })
   }, [])
 
-  if (loading) return <div className="p-8 text-center text-slate-400">Carregando...</div>
+  if (loading) return <div className="p-8 text-center text-slate-500 font-medium">Carregando investimentos...</div>
+  if (error) return (
+    <div className="p-8 text-center">
+      <div className="text-4xl mb-3">⚠️</div>
+      <p className="text-slate-700 font-semibold mb-1">Erro ao carregar</p>
+      <p className="text-sm text-slate-500">{error}</p>
+    </div>
+  )
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-5">
