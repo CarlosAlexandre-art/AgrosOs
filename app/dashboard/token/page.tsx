@@ -190,7 +190,7 @@ export default function TokenHubPage() {
 
       <div className="hub-bg">
         {/* Grain overlay */}
-        <div className="grain-overlay" />
+        <div className="grain-overlay" style={{ pointerEvents: 'none' }} />
 
         {/* Background mesh */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
