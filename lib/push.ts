@@ -1,12 +1,19 @@
 import webpush from 'web-push'
 import { prisma } from '@/lib/prisma'
 
-if (process.env.VAPID_EMAIL && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    process.env.VAPID_EMAIL,
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  )
+try {
+  const subject = process.env.VAPID_EMAIL ?? ''
+  const pub = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''
+  const priv = process.env.VAPID_PRIVATE_KEY ?? ''
+  if (subject && pub && priv) {
+    webpush.setVapidDetails(
+      subject.startsWith('mailto:') ? subject : `mailto:${subject}`,
+      pub,
+      priv
+    )
+  }
+} catch {
+  // push notifications indisponíveis se VAPID mal configurado
 }
 
 export async function sendPushToUser(userId: string, payload: { title: string; body: string; url?: string }) {
