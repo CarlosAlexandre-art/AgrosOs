@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function SucessoPage() {
+function SucessoContent() {
   const params = useSearchParams()
   const sessionId = params.get('session_id')
   const [counted, setCounted] = useState(false)
@@ -68,5 +68,13 @@ export default function SucessoPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SucessoPage() {
+  return (
+    <Suspense fallback={<div className="min-h-full flex items-center justify-center bg-[#020c08]" />}>
+      <SucessoContent />
+    </Suspense>
   )
 }
