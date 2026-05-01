@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function GET() {
   const supabase = await createClient()
@@ -15,7 +15,7 @@ export async function GET() {
   if (!accountId) return NextResponse.json({ connected: false })
 
   try {
-    const account = await stripe.accounts.retrieve(accountId)
+    const account = await getStripe().accounts.retrieve(accountId)
     const connected = account.charges_enabled && account.payouts_enabled
     return NextResponse.json({ connected, accountId, chargesEnabled: account.charges_enabled, payoutsEnabled: account.payouts_enabled })
   } catch {

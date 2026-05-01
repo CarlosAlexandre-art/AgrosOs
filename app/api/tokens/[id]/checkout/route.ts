@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { stripe, PLATFORM_FEE_RATE } from '@/lib/stripe'
+import { getStripe, PLATFORM_FEE_RATE } from '@/lib/stripe'
+import Stripe from 'stripe'
 
 export async function POST(
   request: Request,
@@ -17,7 +18,7 @@ export async function POST(
 
   const token = await prisma.agroToken.findUnique({
     where: { id },
-    include: { user: true },
+    include: { user: true } as any,
   })
   if (!token) return NextResponse.json({ error: 'Token não encontrado' }, { status: 404 })
   if (token.status !== 'ACTIVE') return NextResponse.json({ error: 'Token não está ativo' }, { status: 400 })
@@ -33,15 +34,14 @@ export async function POST(
 
   const pricePerToken = Number(token.tokenPrice)
   const totalBRL = quantity * pricePerToken
-  // Stripe usa centavos inteiros
   const totalCentavos = Math.round(totalBRL * 100)
   const feeCentavos = Math.round(totalCentavos * PLATFORM_FEE_RATE)
 
-  const producerAccountId = (token.user as any).stripeAccountId as string | null
+  const producerAccountId = (token as any).user?.stripeAccountId as string | null
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agros-os.vercel.app'
 
-  const sessionData: Parameters<typeof stripe.checkout.sessions.create>[0] = {
+  const sessionData: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: [
@@ -68,7 +68,6 @@ export async function POST(
     },
   }
 
-  // Se produtor tem conta Stripe conectada, ativa split automático
   if (producerAccountId) {
     sessionData.payment_intent_data = {
       application_fee_amount: feeCentavos,
@@ -76,7 +75,7 @@ export async function POST(
     }
   }
 
-  const session = await stripe.checkout.sessions.create(sessionData)
+  const session = await getStripe().checkout.sessions.create(sessionData)
 
   return NextResponse.json({ url: session.url, sessionId: session.id })
 }

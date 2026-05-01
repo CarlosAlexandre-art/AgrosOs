@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function POST() {
   const supabase = await createClient()
@@ -15,7 +15,7 @@ export async function POST() {
   let accountId = (dbUser as any).stripeAccountId as string | null
 
   if (!accountId) {
-    const account = await stripe.accounts.create({
+    const account = await getStripe().accounts.create({
       type: 'express',
       country: 'BR',
       email: dbUser.email,
@@ -35,7 +35,7 @@ export async function POST() {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agros-os.vercel.app'
 
-  const link = await stripe.accountLinks.create({
+  const link = await getStripe().accountLinks.create({
     account: accountId,
     refresh_url: `${appUrl}/dashboard/token?stripe=refresh`,
     return_url: `${appUrl}/dashboard/token?stripe=success`,

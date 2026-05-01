@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { transferTokensToInvestor } from '@/lib/wallet'
+import { getStripe } from '@/lib/stripe'
 
 export const runtime = 'nodejs'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const PRO_PRICE_ID = 'price_1TLVBkHOdd4LjuVT865UeWY0'
 const ENTERPRISE_PRICE_ID = 'price_1TLVCSHOdd4LjuVTHZEme1gr'
@@ -24,7 +23,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret!)
+    event = getStripe().webhooks.constructEvent(body, sig, webhookSecret!)
   } catch {
     return NextResponse.json({ error: 'Webhook inválido' }, { status: 400 })
   }
@@ -74,7 +73,7 @@ export async function POST(req: NextRequest) {
 
       let plan = 'pro'
       if (session.subscription) {
-        const sub = await stripe.subscriptions.retrieve(session.subscription as string)
+        const sub = await getStripe().subscriptions.retrieve(session.subscription as string)
         const priceId = sub.items.data[0]?.price.id
         plan = getPlanFromPriceId(priceId)
       }

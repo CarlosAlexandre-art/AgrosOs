@@ -1,8 +1,11 @@
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY!)
+}
 
 export async function sendWelcomeEmail(name: string, email: string) {
+  const resend = getResend()
   await resend.emails.send({
     from: 'AgroOS <onboarding@resend.dev>',
     to: email,
