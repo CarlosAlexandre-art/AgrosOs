@@ -96,13 +96,16 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     fetch(`/api/tokens/${id}`)
       .then(r => r.json())
-      .then(d => { setToken(d); setLoading(false) })
+      .then(d => { setToken(d?.id ? d : null); setLoading(false) })
+      .catch(() => setLoading(false))
     fetch(`/api/tokens/${id}/transactions`)
       .then(r => r.json())
       .then(d => { setTransactions(d.transactions ?? []); setTotalCommission(d.totalCommission ?? 0) })
+      .catch(() => {})
     fetch(`/api/tokens/${id}/laudo`)
       .then(r => r.json())
       .then(d => { if (!d.error) setLaudo(d) })
+      .catch(() => {})
   }, [id])
 
   async function handleResgatar() {
