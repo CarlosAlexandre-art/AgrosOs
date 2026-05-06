@@ -112,10 +112,7 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
     if (!confirm('Confirmar resgate do token? O status mudará para Resgatado e a taxa de sucesso (3%) será cobrada sobre o valor captado.')) return
     setResgatando(true)
     const res = await fetch(`/api/tokens/${id}/resgatar`, { method: 'POST' })
-    if (res.ok) {
-      const data = await res.json()
-      setToken(data.token)
-    }
+    if (res.ok) setToken(prev => prev ? { ...prev, status: 'REDEEMED' } : prev)
     setResgatando(false)
   }
 
@@ -126,7 +123,7 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'PENDING_REVIEW' }),
     })
-    if (res.ok) setToken(await res.json())
+    if (res.ok) setToken(prev => prev ? { ...prev, status: 'PENDING_REVIEW' } : prev)
     setSubmitting(false)
   }
 
