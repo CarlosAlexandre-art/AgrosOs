@@ -46,7 +46,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
               </div>
 
               <div style="text-align:center;margin-bottom:24px;">
-                <a href="https://agros-os.vercel.app/dashboard" style="display:inline-block;background:#16a34a;color:#ffffff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
+                <a href="https://agroos.site/dashboard" style="display:inline-block;background:#16a34a;color:#ffffff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
                   Acessar o dashboard →
                 </a>
               </div>

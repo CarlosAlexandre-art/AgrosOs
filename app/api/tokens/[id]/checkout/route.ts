@@ -39,7 +39,7 @@ export async function POST(
 
   const producerAccountId = (token as any).user?.stripeAccountId as string | null
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agros-os.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agroos.site'
 
   const sessionData: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',

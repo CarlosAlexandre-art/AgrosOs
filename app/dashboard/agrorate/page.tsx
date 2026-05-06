@@ -200,7 +200,7 @@ export default function AgroRateDashboard() {
             <p style={{color:'rgba(255,255,255,.35)',fontSize:13,lineHeight:1.6,marginBottom:24}}>
               O AgroRate é calculado com os dados da sua propriedade no AgroOS. Registre receitas, custos e atividades para começar.
             </p>
-            <a href="https://agros-os.vercel.app" target="_blank" rel="noopener noreferrer"
+            <a href="https://agroos.site" target="_blank" rel="noopener noreferrer"
               style={{display:'inline-flex',alignItems:'center',gap:8,background:'linear-gradient(135deg,#16a34a,#059669)',color:'#fff',fontWeight:700,padding:'12px 24px',borderRadius:12,textDecoration:'none',boxShadow:'0 0 24px rgba(22,163,74,.35)'}}>
               Abrir AgroOS →
             </a>

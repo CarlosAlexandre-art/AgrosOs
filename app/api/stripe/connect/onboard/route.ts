@@ -33,7 +33,7 @@ export async function POST() {
     `
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agros-os.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agroos.site'
 
   const link = await getStripe().accountLinks.create({
     account: accountId,

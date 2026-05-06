@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   const { priceId } = await req.json()
   if (!priceId) return NextResponse.json({ error: 'Price ID obrigatório' }, { status: 400 })
 
-  const origin = req.headers.get('origin') || 'https://agros-os.vercel.app'
+  const origin = req.headers.get('origin') || 'https://agroos.site'
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
