@@ -131,7 +131,7 @@ model Activity {
   type              String
   description       String?
   status            ActivityStatus @default(PENDING)
-  executor          ExecutorType   @default(INTERNAL)
+  executor          ExecutorType?  @default(INTERNAL)
   agrolinkServiceId     String?
   agrolinkStatus        String?
   startDate         DateTime
