@@ -305,7 +305,7 @@ export default function MercadoPage() {
                     { label: 'Valor total',   value: fmt(Number(token.totalValue)) },
                     ...(token.expectedReturn ? [{ label: 'Rendimento',     value: `${token.expectedReturn}%${token.periodMonths ? ` / ${token.periodMonths}m` : ''}` }] : []),
                     ...(token.deliveryDate    ? [{ label: 'Vencimento',     value: new Date(token.deliveryDate).toLocaleDateString('pt-BR') }] : []),
-                    { label: 'Disponíveis',   value: `${available.toLocaleString('pt-BR')} tkns` },
+                    { label: 'Disponíveis',   value: `${available.toLocaleString('pt-BR')} tokens` },
                   ].map(s => (
                     <div key={s.label} style={{ background: 'rgba(2,12,8,0.92)', padding: '12px 14px' }}>
                       <div style={{ fontSize: 9, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>

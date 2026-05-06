@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type Property = { id: string; name: string; sizeHectares: number }
-type Field = { id: string; name: string; sizeHectares: number }
+type Field    = { id: string; name: string; sizeHectares: number }
 
 const TOKEN_TYPES = [
   {
@@ -13,69 +13,54 @@ const TOKEN_TYPES = [
     label: 'Safra',
     desc: 'Tokenize sua produção futura — soja, milho, café, algodão. Investidores financiam sua safra antecipadamente.',
     icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
       </svg>
     ),
-    color: 'border-green-300 bg-green-50 text-green-700',
-    active: 'border-green-500 bg-green-100',
+    accent: '#4ade80',
+    accentBg: 'rgba(74,222,128,0.09)',
+    border: 'rgba(74,222,128,0.18)',
+    borderActive: 'rgba(74,222,128,0.55)',
+    bgActive: 'rgba(74,222,128,0.07)',
   },
   {
     type: 'MATERIAL',
     label: 'Material / Insumo',
     desc: 'Tokenize seu estoque de sementes, fertilizantes ou defensivos. Venda para outros produtores ou investidores.',
     icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
       </svg>
     ),
-    color: 'border-amber-300 bg-amber-50 text-amber-700',
-    active: 'border-amber-500 bg-amber-100',
+    accent: '#fbbf24',
+    accentBg: 'rgba(251,191,36,0.09)',
+    border: 'rgba(251,191,36,0.18)',
+    borderActive: 'rgba(251,191,36,0.55)',
+    bgActive: 'rgba(251,191,36,0.07)',
   },
   {
     type: 'MAQUINARIO',
     label: 'Maquinário',
     desc: 'Tokenize tratores, colheitadeiras ou implementos. Ofereça direito de uso ou fracionamento de propriedade.',
     icon: (
-      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
       </svg>
     ),
-    color: 'border-blue-300 bg-blue-50 text-blue-700',
-    active: 'border-blue-500 bg-blue-100',
+    accent: '#60a5fa',
+    accentBg: 'rgba(96,165,250,0.09)',
+    border: 'rgba(96,165,250,0.18)',
+    borderActive: 'rgba(96,165,250,0.55)',
+    bgActive: 'rgba(96,165,250,0.07)',
   },
 ]
 
 const COMMODITIES = ['Soja', 'Milho', 'Café', 'Algodão', 'Cana-de-açúcar', 'Trigo', 'Arroz', 'Feijão', 'Outros']
-const MATERIALS = ['Sementes certificadas', 'Fertilizante (NPK)', 'Ureia', 'MAP', 'KCl', 'Herbicida', 'Fungicida', 'Inseticida', 'Calcário', 'Outros']
-const MACHINES = ['Trator', 'Colheitadeira', 'Pulverizador', 'Plantadeira', 'Grade aradora', 'Subsolador', 'Carreta graneleira', 'Outros']
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <label className="block text-sm font-medium text-slate-700 mb-1.5">{children}</label>
-}
-
-function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition"
-    />
-  )
-}
-
-function Select({ children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      {...props}
-      className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent transition bg-white"
-    >
-      {children}
-    </select>
-  )
-}
+const MATERIALS   = ['Sementes certificadas', 'Fertilizante (NPK)', 'Ureia', 'MAP', 'KCl', 'Herbicida', 'Fungicida', 'Inseticida', 'Calcário', 'Outros']
+const MACHINES    = ['Trator', 'Colheitadeira', 'Pulverizador', 'Plantadeira', 'Grade aradora', 'Subsolador', 'Carreta graneleira', 'Outros']
 
 const ORIGINACAO_RATE = 0.02
-const SUCESSO_RATE = 0.03
+const SUCESSO_RATE    = 0.03
 
 function validateCPF(cpf: string) {
   const c = cpf.replace(/\D/g, '')
@@ -90,6 +75,100 @@ function validateCPF(cpf: string) {
   r = (sum * 10) % 11
   if (r === 10 || r === 11) r = 0
   return r === parseInt(c[10])
+}
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap');
+
+.nt-wrap { font-family: 'Outfit', sans-serif; }
+
+@keyframes nt-fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes nt-spin { to { transform: rotate(360deg); } }
+
+.nt-wrap .nt-header { animation: nt-fadeUp .45s ease both; }
+.nt-wrap .nt-body   { animation: nt-fadeUp .45s ease .08s both; }
+.nt-spin { animation: nt-spin .75s linear infinite; }
+
+.nt-wrap input[type=number]                        { -moz-appearance: textfield; appearance: textfield; }
+.nt-wrap input[type=number]::-webkit-inner-spin-button,
+.nt-wrap input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.nt-input {
+  width: 100%;
+  background: rgba(2,12,8,0.85);
+  border: 1px solid rgba(22,163,74,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: 'Outfit', sans-serif;
+  color: #e2faea;
+  outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.nt-input::placeholder { color: #2a5c3a; }
+.nt-input:focus { border-color: rgba(74,222,128,0.45); }
+.nt-input option { background: #020c08; color: #e2faea; }
+
+.nt-textarea {
+  width: 100%;
+  background: rgba(2,12,8,0.85);
+  border: 1px solid rgba(22,163,74,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: 'Outfit', sans-serif;
+  color: #e2faea;
+  outline: none;
+  resize: vertical;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.nt-textarea::placeholder { color: #2a5c3a; }
+.nt-textarea:focus { border-color: rgba(74,222,128,0.45); }
+
+.nt-btn-back {
+  flex: 1;
+  border: 1px solid rgba(22,163,74,0.2);
+  background: transparent;
+  color: #3a6648;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.nt-btn-back:hover { border-color: rgba(22,163,74,0.4); color: #4ade80; }
+
+.nt-btn-next {
+  flex: 1;
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .15s, opacity .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.nt-btn-next:hover:not(:disabled) { background: #15803d; }
+.nt-btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+`
+
+function DarkLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: 11, fontWeight: 600, color: '#3d7a52', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+      {children}
+    </div>
+  )
 }
 
 export default function NovoTokenPage() {
@@ -111,21 +190,17 @@ export default function NovoTokenPage() {
     tokenPrice: '100',
     expectedReturn: '',
     periodMonths: '',
-    // Safra
     commodity: '',
     quantityKg: '',
     deliveryDate: '',
     fieldId: '',
-    // Material
     materialType: '',
     quantity: '',
     unit: 'kg',
-    // Maquinário
     machineType: '',
     machineModel: '',
     machineYear: '',
     usageHours: '',
-    // Compliance
     cpf: '',
     aceitaTermos: false,
     aceitaCVM: false,
@@ -138,9 +213,7 @@ export default function NovoTokenPage() {
   }
 
   async function verifyCPF() {
-    setCpfVerifying(true)
-    setCpfError('')
-    setCpfResult(null)
+    setCpfVerifying(true); setCpfError(''); setCpfResult(null)
     try {
       const res = await fetch('/api/cpf/verify', {
         method: 'POST',
@@ -148,11 +221,8 @@ export default function NovoTokenPage() {
         body: JSON.stringify({ cpf: form.cpf }),
       })
       const data = await res.json()
-      if (res.ok) {
-        setCpfResult({ nome: data.nome, nasc: data.nasc })
-      } else {
-        setCpfError(data.error || 'Erro na verificação')
-      }
+      if (res.ok) setCpfResult({ nome: data.nome, nasc: data.nasc })
+      else setCpfError(data.error || 'Erro na verificação')
     } catch {
       setCpfError('Erro de conexão com o serviço de verificação')
     } finally {
@@ -183,7 +253,6 @@ export default function NovoTokenPage() {
   async function handleSubmit() {
     setSaving(true)
     try {
-      // Save CPF to user profile
       if (form.cpf) {
         await fetch('/api/user/profile', {
           method: 'PATCH',
@@ -206,430 +275,515 @@ export default function NovoTokenPage() {
   }
 
   const selectedType = TOKEN_TYPES.find(t => t.type === form.type)
-
   const tv = parseFloat(form.totalValue) || 0
   const feeOriginacao = tv * ORIGINACAO_RATE
-  const feeSucesso = tv * SUCESSO_RATE
+  const feeSucesso    = tv * SUCESSO_RATE
   const liquidoProdutor = tv - feeOriginacao
   const cpfOk = validateCPF(form.cpf)
 
   const canGoStep2 = !!form.type && !!form.propertyId
   const canGoStep3 = !!form.title && !!form.totalValue && !!form.tokenPrice
   const canGoStep4 = canGoStep3 && (
-    form.type === 'SAFRA' ? !!form.commodity && !!form.deliveryDate :
-    form.type === 'MATERIAL' ? !!form.materialType && !!form.quantity :
+    form.type === 'SAFRA'      ? !!form.commodity && !!form.deliveryDate :
+    form.type === 'MATERIAL'   ? !!form.materialType && !!form.quantity :
     !!form.machineType
   )
   const canSubmit = canGoStep4 && cpfOk && !!cpfResult && form.aceitaTermos && form.aceitaCVM && form.aceitaPiloto
 
+  const STEP_LABEL = ['Tipo e propriedade', 'Valores e retorno', 'Detalhes do ativo', 'Simulação e conformidade']
+
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/token" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Novo token</h1>
-          <p className="text-sm text-slate-500">Tokenize um ativo agrícola</p>
-        </div>
-      </div>
+    <div className="nt-wrap" style={{
+      background: 'linear-gradient(160deg, #020c08 0%, #041409 60%, #030e07 100%)',
+      minHeight: '100%', position: 'relative',
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      {/* Steps */}
-      <div className="flex gap-2">
-        {[1, 2, 3, 4].map(s => (
-          <div key={s} className={`flex-1 h-1.5 rounded-full ${step >= s ? 'bg-[#16a34a]' : 'bg-gray-200'}`} />
-        ))}
-      </div>
-      <div className="text-xs text-slate-400 -mt-4">
-        {step === 1 ? 'Tipo e propriedade' : step === 2 ? 'Valores e retorno' : step === 3 ? 'Detalhes do ativo' : 'Simulação e conformidade'}
-      </div>
+      {/* Hex grid bg */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 0L56 16.2V49L28 65.2L0 49V16.2Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3Cpath d='M28 33.8L56 50V82.8L28 99L0 82.8V50Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3C/svg%3E")`,
+        backgroundSize: '56px 100px', opacity: 0.8,
+      }} />
 
-      {/* Step 1 — Tipo e propriedade */}
-      {step === 1 && (
-        <div className="space-y-5">
+      <div style={{ position: 'relative', zIndex: 1, padding: '40px 24px 72px', maxWidth: 640, margin: '0 auto' }}>
+
+        {/* Header */}
+        <div className="nt-header" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
+          <Link href="/dashboard/token" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 38, height: 38, borderRadius: 10,
+            border: '1px solid rgba(22,163,74,0.15)',
+            background: 'rgba(22,163,74,0.06)',
+            color: '#4ade80', textDecoration: 'none',
+          }}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+          </Link>
           <div>
-            <Label>Tipo de ativo</Label>
-            <div className="grid gap-3">
-              {TOKEN_TYPES.map(t => (
-                <button
-                  key={t.type}
-                  onClick={() => set('type', t.type)}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${form.type === t.type ? t.active : 'border-gray-200 bg-white hover:border-gray-300'}`}
-                >
-                  <span className={form.type === t.type ? t.color.split(' ')[2] : 'text-slate-400'}>
-                    {t.icon}
-                  </span>
+            <h1 style={{
+              fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800,
+              color: '#e8faf0', margin: 0, letterSpacing: '-0.02em',
+            }}>Novo token</h1>
+            <p style={{ fontSize: 13, color: '#2a5c3a', margin: '2px 0 0' }}>
+              Tokenize um ativo agrícola
+            </p>
+          </div>
+        </div>
+
+        {/* Progress steps */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {[1,2,3,4].map(s => (
+            <div key={s} style={{
+              flex: 1, height: 3, borderRadius: 99,
+              background: step >= s ? '#16a34a' : 'rgba(22,163,74,0.1)',
+              transition: 'background .3s',
+            }} />
+          ))}
+        </div>
+        <p style={{ fontSize: 11, color: '#2a5c3a', marginBottom: 28, fontWeight: 500 }}>
+          Etapa {step} de 4 · {STEP_LABEL[step - 1]}
+        </p>
+
+        {/* ─── STEP 1 ─── */}
+        {step === 1 && (
+          <div className="nt-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div>
+              <DarkLabel>Tipo de ativo</DarkLabel>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {TOKEN_TYPES.map(t => {
+                  const isActive = form.type === t.type
+                  return (
+                    <button
+                      key={t.type}
+                      onClick={() => set('type', t.type)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 16,
+                        padding: '16px 18px', textAlign: 'left',
+                        background: isActive ? t.bgActive : 'rgba(6,18,11,0.85)',
+                        border: `2px solid ${isActive ? t.borderActive : t.border}`,
+                        borderRadius: 14, cursor: 'pointer',
+                        transition: 'border-color .15s, background .15s',
+                      }}
+                    >
+                      <div style={{
+                        width: 46, height: 46, borderRadius: 11, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: isActive ? t.accentBg : 'rgba(22,163,74,0.04)',
+                        color: isActive ? t.accent : '#3a6648',
+                        transition: 'color .15s, background .15s',
+                      }}>
+                        {t.icon}
+                      </div>
+                      <div>
+                        <div style={{
+                          fontFamily: 'Syne, sans-serif', fontSize: 14, fontWeight: 700,
+                          color: isActive ? '#e2faea' : '#86efac', marginBottom: 3,
+                        }}>
+                          {t.label}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#2a5c3a', lineHeight: 1.5 }}>{t.desc}</div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div>
+              <DarkLabel>Propriedade</DarkLabel>
+              <select
+                className="nt-input"
+                value={form.propertyId}
+                onChange={e => set('propertyId', e.target.value)}
+              >
+                <option value="">Selecionar propriedade</option>
+                {properties.map(p => (
+                  <option key={p.id} value={p.id}>{p.name} ({p.sizeHectares} ha)</option>
+                ))}
+              </select>
+            </div>
+
+            <button className="nt-btn-next" style={{ flex: 'none', width: '100%' }} onClick={() => setStep(2)} disabled={!canGoStep2}>
+              Continuar
+            </button>
+          </div>
+        )}
+
+        {/* ─── STEP 2 ─── */}
+        {step === 2 && (
+          <div className="nt-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div>
+              <DarkLabel>Título do token</DarkLabel>
+              <input
+                className="nt-input"
+                placeholder={
+                  form.type === 'SAFRA' ? 'Ex: Soja Safra 2025/26 — Fazenda São João' :
+                  form.type === 'MATERIAL' ? 'Ex: Semente Soja Intacta RR2 — 500 sacas' :
+                  'Ex: Trator John Deere 7200 — 200h de uso'
+                }
+                value={form.title}
+                onChange={e => set('title', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <DarkLabel>Descrição (opcional)</DarkLabel>
+              <textarea
+                className="nt-textarea"
+                rows={3}
+                placeholder="Descreva o ativo, condições, garantias..."
+                value={form.description}
+                onChange={e => set('description', e.target.value)}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div>
+                <DarkLabel>Valor total (R$)</DarkLabel>
+                <input className="nt-input" type="number" min="0" placeholder="500000" value={form.totalValue} onChange={e => set('totalValue', e.target.value)} />
+              </div>
+              <div>
+                <DarkLabel>Preço por token (R$)</DarkLabel>
+                <input className="nt-input" type="number" min="1" placeholder="100" value={form.tokenPrice} onChange={e => set('tokenPrice', e.target.value)} />
+              </div>
+            </div>
+
+            {totalTokens > 0 && (
+              <div style={{
+                background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.15)',
+                borderRadius: 10, padding: '12px 16px', fontSize: 14, color: '#4ade80',
+              }}>
+                Serão emitidos <strong>{totalTokens.toLocaleString('pt-BR')} tokens</strong> de{' '}
+                R$ {parseFloat(form.tokenPrice).toLocaleString('pt-BR')} cada
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div>
+                <DarkLabel>Rendimento esperado (%)</DarkLabel>
+                <input className="nt-input" type="number" step="0.1" placeholder="8.5" value={form.expectedReturn} onChange={e => set('expectedReturn', e.target.value)} />
+              </div>
+              <div>
+                <DarkLabel>Prazo (meses)</DarkLabel>
+                <input className="nt-input" type="number" min="1" placeholder="12" value={form.periodMonths} onChange={e => set('periodMonths', e.target.value)} />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="nt-btn-back" onClick={() => setStep(1)}>Voltar</button>
+              <button className="nt-btn-next" onClick={() => setStep(3)} disabled={!canGoStep3}>Continuar</button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── STEP 3 ─── */}
+        {step === 3 && (
+          <div className="nt-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {selectedType && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '12px 16px',
+                background: selectedType.bgActive,
+                border: `1px solid ${selectedType.borderActive}`,
+                borderRadius: 12,
+              }}>
+                <span style={{ color: selectedType.accent }}>{selectedType.icon}</span>
+                <div>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#e2faea' }}>{selectedType.label}</div>
+                  <div style={{ fontSize: 12, color: '#3a6648', marginTop: 2 }}>{selectedType.desc}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Safra */}
+            {form.type === 'SAFRA' && (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                   <div>
-                    <div className="font-semibold text-slate-900 text-sm">{t.label}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{t.desc}</div>
+                    <DarkLabel>Commodity</DarkLabel>
+                    <select className="nt-input" value={form.commodity} onChange={e => set('commodity', e.target.value)}>
+                      <option value="">Selecionar</option>
+                      {COMMODITIES.map(c => <option key={c}>{c}</option>)}
+                    </select>
                   </div>
+                  <div>
+                    <DarkLabel>Quantidade prometida (kg)</DarkLabel>
+                    <input className="nt-input" type="number" min="0" placeholder="1500000" value={form.quantityKg} onChange={e => set('quantityKg', e.target.value)} />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div>
+                    <DarkLabel>Data de entrega</DarkLabel>
+                    <input className="nt-input" type="date" value={form.deliveryDate} onChange={e => set('deliveryDate', e.target.value)} />
+                  </div>
+                  {fields.length > 0 && (
+                    <div>
+                      <DarkLabel>Talhão (opcional)</DarkLabel>
+                      <select className="nt-input" value={form.fieldId} onChange={e => set('fieldId', e.target.value)}>
+                        <option value="">Toda a propriedade</option>
+                        {fields.map(f => <option key={f.id} value={f.id}>{f.name} ({f.sizeHectares} ha)</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Material */}
+            {form.type === 'MATERIAL' && (
+              <>
+                <div>
+                  <DarkLabel>Tipo de insumo</DarkLabel>
+                  <select className="nt-input" value={form.materialType} onChange={e => set('materialType', e.target.value)}>
+                    <option value="">Selecionar</option>
+                    {MATERIALS.map(m => <option key={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div>
+                    <DarkLabel>Quantidade</DarkLabel>
+                    <input className="nt-input" type="number" min="0" placeholder="500" value={form.quantity} onChange={e => set('quantity', e.target.value)} />
+                  </div>
+                  <div>
+                    <DarkLabel>Unidade</DarkLabel>
+                    <select className="nt-input" value={form.unit} onChange={e => set('unit', e.target.value)}>
+                      {['kg', 'L', 'sacas', 'toneladas', 'unidades'].map(u => <option key={u}>{u}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Maquinário */}
+            {form.type === 'MAQUINARIO' && (
+              <>
+                <div>
+                  <DarkLabel>Tipo de máquina</DarkLabel>
+                  <select className="nt-input" value={form.machineType} onChange={e => set('machineType', e.target.value)}>
+                    <option value="">Selecionar</option>
+                    {MACHINES.map(m => <option key={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div>
+                    <DarkLabel>Modelo</DarkLabel>
+                    <input className="nt-input" placeholder="Ex: John Deere 7200" value={form.machineModel} onChange={e => set('machineModel', e.target.value)} />
+                  </div>
+                  <div>
+                    <DarkLabel>Ano</DarkLabel>
+                    <input className="nt-input" type="number" min="1990" max="2030" placeholder="2022" value={form.machineYear} onChange={e => set('machineYear', e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <DarkLabel>Horas de uso disponíveis (modelo B)</DarkLabel>
+                  <input className="nt-input" type="number" min="0" placeholder="200" value={form.usageHours} onChange={e => set('usageHours', e.target.value)} />
+                  <p style={{ fontSize: 11, color: '#2a5c3a', marginTop: 5 }}>
+                    Deixe em branco para modelo de co-propriedade
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Preview */}
+            {form.title && form.totalValue && (
+              <div style={{
+                background: 'rgba(4,14,9,0.8)', border: '1px solid rgba(22,163,74,0.12)',
+                borderRadius: 14, padding: '16px 18px',
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
+                  Resumo do token
+                </div>
+                <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#e2faea', fontSize: 15, marginBottom: 10 }}>
+                  {form.title}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {[
+                    { label: 'Valor total', value: `R$ ${parseFloat(form.totalValue).toLocaleString('pt-BR')}` },
+                    { label: 'Tokens', value: `${totalTokens.toLocaleString('pt-BR')} × R$ ${parseFloat(form.tokenPrice || '0').toLocaleString('pt-BR')}` },
+                    ...(form.expectedReturn ? [{ label: 'Rendimento', value: `${form.expectedReturn}% / ${form.periodMonths || '?'}m` }] : []),
+                  ].map(s => (
+                    <div key={s.label}>
+                      <div style={{ fontSize: 10, color: '#2a5c3a', marginBottom: 2 }}>{s.label}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#86efac' }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="nt-btn-back" onClick={() => setStep(2)}>Voltar</button>
+              <button className="nt-btn-next" onClick={() => setStep(4)} disabled={!canGoStep4}>Continuar</button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── STEP 4 ─── */}
+        {step === 4 && (
+          <div className="nt-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Simulação financeira */}
+            <div style={{
+              background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.14)',
+              borderRadius: 16, padding: '20px 20px',
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>
+                Simulação financeira
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { label: 'Valor total do ativo', value: `R$ ${tv.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`, color: '#86efac' },
+                  { label: 'Taxa de originação (2%) — ao ser aprovado', value: `− R$ ${feeOriginacao.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`, color: '#f87171' },
+                ].map(r => (
+                  <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: '#3a6648' }}>{r.label}</span>
+                    <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: r.color }}>{r.value}</span>
+                  </div>
+                ))}
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  borderTop: '1px solid rgba(22,163,74,0.12)', paddingTop: 10, marginTop: 4,
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#4ade80' }}>Você capta líquido</span>
+                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#4ade80' }}>
+                    R$ {liquidoProdutor.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 11, color: '#2a5c3a' }}>Taxa de sucesso (3%) — na liquidação</span>
+                  <span style={{ fontSize: 11, color: '#2a5c3a' }}>− R$ {feeSucesso.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} sobre captado</span>
+                </div>
+              </div>
+              {form.expectedReturn && form.periodMonths && (
+                <div style={{
+                  marginTop: 14,
+                  background: 'rgba(2,12,8,0.7)', border: '1px solid rgba(22,163,74,0.1)',
+                  borderRadius: 10, padding: '12px 14px',
+                }}>
+                  <div style={{ fontSize: 10, color: '#2a5c3a', marginBottom: 4 }}>Retorno projetado para investidores</div>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#4ade80' }}>
+                    {form.expectedReturn}% em {form.periodMonths} meses
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* CPF */}
+            <div>
+              <DarkLabel>CPF do responsável</DarkLabel>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input
+                  className="nt-input"
+                  style={{
+                    flex: 1,
+                    borderColor: form.cpf && !cpfOk
+                      ? 'rgba(248,113,113,0.5)'
+                      : cpfResult
+                        ? 'rgba(74,222,128,0.45)'
+                        : undefined,
+                    opacity: cpfResult ? 0.7 : 1,
+                  }}
+                  placeholder="000.000.000-00"
+                  value={form.cpf}
+                  onChange={e => set('cpf', e.target.value)}
+                  disabled={!!cpfResult}
+                />
+                <button
+                  onClick={verifyCPF}
+                  disabled={!cpfOk || cpfVerifying || !!cpfResult}
+                  style={{
+                    padding: '10px 18px', borderRadius: 10, border: 'none',
+                    background: cpfResult ? 'rgba(74,222,128,0.15)' : '#16a34a',
+                    color: cpfResult ? '#4ade80' : '#fff',
+                    fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13,
+                    cursor: !cpfOk || cpfVerifying || cpfResult ? 'not-allowed' : 'pointer',
+                    opacity: !cpfOk || cpfVerifying || cpfResult ? 0.6 : 1,
+                    whiteSpace: 'nowrap',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  {cpfVerifying ? (
+                    <svg className="nt-spin" width="14" height="14" fill="none" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
+                      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                  ) : cpfResult ? '✓ Verificado' : 'Verificar'}
                 </button>
+              </div>
+
+              {form.cpf && !cpfOk && (
+                <p style={{ fontSize: 11, color: '#f87171', marginTop: 5 }}>CPF inválido</p>
+              )}
+              {cpfError && (
+                <p style={{ fontSize: 11, color: '#f87171', marginTop: 5 }}>{cpfError}</p>
+              )}
+              {cpfResult && (
+                <div style={{
+                  marginTop: 10,
+                  background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.2)',
+                  borderRadius: 12, padding: '12px 16px',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                }}>
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#4ade80" strokeWidth={2} style={{ flexShrink: 0 }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#4ade80' }}>{cpfResult.nome}</div>
+                    {cpfResult.nasc && (
+                      <div style={{ fontSize: 12, color: '#3a6648', marginTop: 2 }}>Nascimento: {cpfResult.nasc}</div>
+                    )}
+                    <div style={{ fontSize: 11, color: '#2a5c3a', marginTop: 2 }}>Identidade confirmada via Receita Federal</div>
+                  </div>
+                </div>
+              )}
+              {cpfOk && !cpfResult && !cpfError && (
+                <p style={{ fontSize: 11, color: '#2a5c3a', marginTop: 5 }}>
+                  Clique em "Verificar" para confirmar sua identidade via Receita Federal
+                </p>
+              )}
+            </div>
+
+            {/* Conformidade */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { key: 'aceitaTermos',  label: 'Declaro que as informações sobre o ativo são verídicas e de minha responsabilidade.' },
+                { key: 'aceitaCVM',     label: 'Estou ciente de que tokens de segurança (recebíveis) exigem conformidade com a CVM Resolução 88. Este token está registrado como ativo de utilidade (Utility Token) em fase piloto.' },
+                { key: 'aceitaPiloto', label: 'Concordo com os Termos de Uso da plataforma AgroToken e entendo que esta é uma fase piloto sem registro em blockchain.' },
+              ].map(({ key, label }) => (
+                <label
+                  key={key}
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!form[key as keyof typeof form]}
+                    onChange={e => set(key, e.target.checked)}
+                    style={{ marginTop: 2, width: 16, height: 16, accentColor: '#16a34a', flexShrink: 0, cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: 13, color: '#3a6648', lineHeight: 1.55 }}>{label}</span>
+                </label>
               ))}
             </div>
-          </div>
 
-          <div>
-            <Label>Propriedade</Label>
-            <Select value={form.propertyId} onChange={e => set('propertyId', e.target.value)}>
-              <option value="">Selecionar propriedade</option>
-              {properties.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sizeHectares} ha)</option>)}
-            </Select>
-          </div>
-
-          <button
-            onClick={() => setStep(2)}
-            disabled={!canGoStep2}
-            className="w-full bg-[#16a34a] text-white font-semibold py-3 rounded-xl disabled:opacity-40 hover:bg-[#15803d] transition-colors"
-          >
-            Continuar
-          </button>
-        </div>
-      )}
-
-      {/* Step 2 — Valores */}
-      {step === 2 && (
-        <div className="space-y-5">
-          <div>
-            <Label>Título do token</Label>
-            <Input
-              placeholder={`Ex: ${form.type === 'SAFRA' ? 'Soja Safra 2025/26 — Fazenda São João' : form.type === 'MATERIAL' ? 'Semente Soja Intacta RR2 — 500 sacas' : 'Trator John Deere 7200 — 200h de uso'}`}
-              value={form.title}
-              onChange={e => set('title', e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label>Descrição (opcional)</Label>
-            <textarea
-              className="w-full border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16a34a] resize-none"
-              rows={3}
-              placeholder="Descreva o ativo, condições, garantias..."
-              value={form.description}
-              onChange={e => set('description', e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Valor total (R$)</Label>
-              <Input
-                type="number"
-                min="0"
-                placeholder="500000"
-                value={form.totalValue}
-                onChange={e => set('totalValue', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label>Preço por token (R$)</Label>
-              <Input
-                type="number"
-                min="1"
-                placeholder="100"
-                value={form.tokenPrice}
-                onChange={e => set('tokenPrice', e.target.value)}
-              />
-            </div>
-          </div>
-
-          {totalTokens > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-800">
-              Serão emitidos <strong>{totalTokens.toLocaleString('pt-BR')} tokens</strong> de R$ {parseFloat(form.tokenPrice).toLocaleString('pt-BR')} cada
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Rendimento esperado (%)</Label>
-              <Input
-                type="number"
-                step="0.1"
-                placeholder="8.5"
-                value={form.expectedReturn}
-                onChange={e => set('expectedReturn', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label>Prazo (meses)</Label>
-              <Input
-                type="number"
-                min="1"
-                placeholder="12"
-                value={form.periodMonths}
-                onChange={e => set('periodMonths', e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button onClick={() => setStep(1)} className="flex-1 border border-gray-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors">
-              Voltar
-            </button>
-            <button
-              onClick={() => setStep(3)}
-              disabled={!canGoStep3}
-              className="flex-1 bg-[#16a34a] text-white font-semibold py-3 rounded-xl disabled:opacity-40 hover:bg-[#15803d] transition-colors"
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Step 3 — Detalhes específicos */}
-      {step === 3 && (
-        <div className="space-y-5">
-          <div className={`p-3 rounded-xl border ${selectedType?.color}`}>
-            <div className="font-semibold text-sm">{selectedType?.label}</div>
-            <div className="text-xs mt-0.5 opacity-80">{selectedType?.desc}</div>
-          </div>
-
-          {/* Safra */}
-          {form.type === 'SAFRA' && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Commodity</Label>
-                  <Select value={form.commodity} onChange={e => set('commodity', e.target.value)}>
-                    <option value="">Selecionar</option>
-                    {COMMODITIES.map(c => <option key={c}>{c}</option>)}
-                  </Select>
-                </div>
-                <div>
-                  <Label>Quantidade prometida (kg)</Label>
-                  <Input type="number" min="0" placeholder="1500000" value={form.quantityKg} onChange={e => set('quantityKg', e.target.value)} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Data de entrega</Label>
-                  <Input type="date" value={form.deliveryDate} onChange={e => set('deliveryDate', e.target.value)} />
-                </div>
-                {fields.length > 0 && (
-                  <div>
-                    <Label>Talhão (opcional)</Label>
-                    <Select value={form.fieldId} onChange={e => set('fieldId', e.target.value)}>
-                      <option value="">Toda a propriedade</option>
-                      {fields.map(f => <option key={f.id} value={f.id}>{f.name} ({f.sizeHectares} ha)</option>)}
-                    </Select>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Material */}
-          {form.type === 'MATERIAL' && (
-            <>
-              <div>
-                <Label>Tipo de insumo</Label>
-                <Select value={form.materialType} onChange={e => set('materialType', e.target.value)}>
-                  <option value="">Selecionar</option>
-                  {MATERIALS.map(m => <option key={m}>{m}</option>)}
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Quantidade</Label>
-                  <Input type="number" min="0" placeholder="500" value={form.quantity} onChange={e => set('quantity', e.target.value)} />
-                </div>
-                <div>
-                  <Label>Unidade</Label>
-                  <Select value={form.unit} onChange={e => set('unit', e.target.value)}>
-                    {['kg', 'L', 'sacas', 'toneladas', 'unidades'].map(u => <option key={u}>{u}</option>)}
-                  </Select>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Maquinário */}
-          {form.type === 'MAQUINARIO' && (
-            <>
-              <div>
-                <Label>Tipo de máquina</Label>
-                <Select value={form.machineType} onChange={e => set('machineType', e.target.value)}>
-                  <option value="">Selecionar</option>
-                  {MACHINES.map(m => <option key={m}>{m}</option>)}
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Modelo</Label>
-                  <Input placeholder="Ex: John Deere 7200" value={form.machineModel} onChange={e => set('machineModel', e.target.value)} />
-                </div>
-                <div>
-                  <Label>Ano</Label>
-                  <Input type="number" min="1990" max="2030" placeholder="2022" value={form.machineYear} onChange={e => set('machineYear', e.target.value)} />
-                </div>
-              </div>
-              <div>
-                <Label>Horas de uso disponíveis (modelo B)</Label>
-                <Input type="number" min="0" placeholder="200" value={form.usageHours} onChange={e => set('usageHours', e.target.value)} />
-                <p className="text-xs text-slate-400 mt-1">Deixe em branco para modelo de co-propriedade</p>
-              </div>
-            </>
-          )}
-
-          {/* Preview */}
-          {form.title && form.totalValue && (
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Resumo do token</div>
-              <div className="font-bold text-slate-900">{form.title}</div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="text-slate-400">Valor total:</span> <span className="font-semibold">R$ {parseFloat(form.totalValue).toLocaleString('pt-BR')}</span></div>
-                <div><span className="text-slate-400">Tokens:</span> <span className="font-semibold">{totalTokens.toLocaleString('pt-BR')} × R$ {parseFloat(form.tokenPrice || '0').toLocaleString('pt-BR')}</span></div>
-                {form.expectedReturn && <div><span className="text-slate-400">Rendimento:</span> <span className="font-semibold text-green-700">{form.expectedReturn}% / {form.periodMonths || '?'}m</span></div>}
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <button onClick={() => setStep(2)} className="flex-1 border border-gray-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors">
-              Voltar
-            </button>
-            <button
-              onClick={() => setStep(4)}
-              disabled={!canGoStep4}
-              className="flex-1 bg-[#16a34a] text-white font-semibold py-3 rounded-xl disabled:opacity-40 hover:bg-[#15803d] transition-colors"
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Step 4 — Simulação e Conformidade */}
-      {step === 4 && (
-        <div className="space-y-5">
-          {/* Simulador financeiro */}
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-5">
-            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Simulação financeira</div>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Valor total do ativo</span>
-                <span className="font-semibold text-slate-900">R$ {tv.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Taxa de originação (2%) — ao ser aprovado</span>
-                <span className="font-semibold text-red-600">− R$ {feeOriginacao.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
-              </div>
-              <div className="flex justify-between text-sm border-t border-green-200 pt-3">
-                <span className="font-semibold text-slate-700">Você capta líquido</span>
-                <span className="font-bold text-green-700">R$ {liquidoProdutor.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500 text-xs">Taxa de sucesso (3%) — na liquidação</span>
-                <span className="text-xs text-slate-500">− R$ {feeSucesso.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} sobre captado</span>
-              </div>
-            </div>
-            {form.expectedReturn && form.periodMonths && (
-              <div className="mt-4 bg-white rounded-xl p-3 text-sm">
-                <div className="text-xs text-slate-400 mb-1">Retorno projetado para investidores</div>
-                <div className="font-semibold text-green-700">{form.expectedReturn}% em {form.periodMonths} meses</div>
-              </div>
-            )}
-          </div>
-
-          {/* CPF */}
-          <div>
-            <Label>CPF do responsável</Label>
-            <div className="flex gap-2">
-              <input
-                placeholder="000.000.000-00"
-                value={form.cpf}
-                onChange={e => set('cpf', e.target.value)}
-                disabled={!!cpfResult}
-                className={`flex-1 border rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 transition ${
-                  form.cpf && !cpfOk ? 'border-red-300 focus:ring-red-400' :
-                  cpfResult ? 'border-green-400 bg-green-50 focus:ring-green-500' :
-                  'border-gray-300 focus:ring-[#16a34a]'
-                }`}
-              />
-              <button
-                type="button"
-                onClick={verifyCPF}
-                disabled={!cpfOk || cpfVerifying || !!cpfResult}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#16a34a] text-white disabled:opacity-40 hover:bg-[#15803d] transition-colors whitespace-nowrap"
-              >
-                {cpfVerifying ? (
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                ) : cpfResult ? '✓ Verificado' : 'Verificar'}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="nt-btn-back" onClick={() => setStep(3)}>Voltar</button>
+              <button className="nt-btn-next" onClick={handleSubmit} disabled={!canSubmit || saving}>
+                {saving ? (
+                  <>
+                    <svg className="nt-spin" width="14" height="14" fill="none" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
+                      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
+                    Criando...
+                  </>
+                ) : 'Criar token'}
               </button>
             </div>
-
-            {form.cpf && !cpfOk && (
-              <p className="text-xs text-red-500 mt-1">CPF inválido</p>
-            )}
-            {cpfError && (
-              <p className="text-xs text-red-500 mt-1">{cpfError}</p>
-            )}
-            {cpfResult && (
-              <div className="mt-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
-                <svg className="w-5 h-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <div className="text-sm font-semibold text-green-800">{cpfResult.nome}</div>
-                  {cpfResult.nasc && (
-                    <div className="text-xs text-green-600">Nascimento: {cpfResult.nasc}</div>
-                  )}
-                  <div className="text-xs text-green-500 mt-0.5">Identidade confirmada via Receita Federal</div>
-                </div>
-              </div>
-            )}
-            {cpfOk && !cpfResult && !cpfError && (
-              <p className="text-xs text-slate-400 mt-1">Clique em "Verificar" para confirmar sua identidade via Receita Federal</p>
-            )}
           </div>
-
-          {/* Checkboxes de conformidade */}
-          <div className="space-y-3">
-            {[
-              { key: 'aceitaTermos', label: 'Declaro que as informações sobre o ativo são verídicas e de minha responsabilidade.' },
-              { key: 'aceitaCVM', label: 'Estou ciente de que tokens de segurança (recebíveis) exigem conformidade com a CVM Resolução 88. Este token está registrado como ativo de utilidade (Utility Token) em fase piloto.' },
-              { key: 'aceitaPiloto', label: 'Concordo com os Termos de Uso da plataforma AgroToken e entendo que esta é uma fase piloto sem registro em blockchain.' },
-            ].map(({ key, label }) => (
-              <label key={key} className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={!!form[key as keyof typeof form]}
-                  onChange={e => set(key, e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#16a34a] flex-shrink-0"
-                />
-                <span className="text-sm text-slate-600 leading-snug">{label}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="flex gap-3">
-            <button onClick={() => setStep(3)} className="flex-1 border border-gray-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors">
-              Voltar
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!canSubmit || saving}
-              className="flex-1 bg-[#16a34a] text-white font-semibold py-3 rounded-xl disabled:opacity-40 hover:bg-[#15803d] transition-colors flex items-center justify-center gap-2"
-            >
-              {saving ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Criando...
-                </>
-              ) : 'Criar token'}
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
