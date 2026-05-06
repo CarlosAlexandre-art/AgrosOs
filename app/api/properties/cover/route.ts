@@ -48,11 +48,20 @@ export async function POST(req: NextRequest) {
       } catch { /* ignora */ }
     }
 
+    // Garante que o bucket existe
+    const { error: bucketErr } = await admin.storage.createBucket('property-covers', { public: true }).catch(() => ({ error: null }))
+    if (bucketErr && !bucketErr.message?.includes('already exists')) {
+      // bucket já existe — tudo bem
+    }
+
     const { error: uploadError } = await admin.storage
       .from('property-covers')
       .upload(path, bytes, { contentType: file.type, upsert: true })
 
-    if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
+    if (uploadError) {
+      console.error('Erro upload capa:', uploadError)
+      return NextResponse.json({ error: `Erro ao enviar imagem: ${uploadError.message}` }, { status: 500 })
+    }
 
     const { data: { publicUrl } } = admin.storage.from('property-covers').getPublicUrl(path)
 

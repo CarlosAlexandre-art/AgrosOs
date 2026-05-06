@@ -105,6 +105,32 @@ export default async function FinanceiroPage() {
         </div>
       </div>
 
+      {/* Mobile action strip */}
+      <div className="sm:hidden flex items-center gap-2 overflow-x-auto pb-1 -mt-2">
+        <GerarRelatorio />
+        {isPago ? (
+          <FinanceiroExport
+            propertyName={property?.name || 'Fazenda'}
+            costs={costs.map((c: any) => ({ ...c, amount: Number(c.amount), date: c.date.toISOString() }))}
+            totalGeral={totalCosts}
+            costPerHa={costPerHa}
+            sizeHa={sizeHa}
+          />
+        ) : (
+          <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-3 py-2 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors whitespace-nowrap flex-shrink-0">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            Exportar
+          </Link>
+        )}
+        {isPago && <NovaReceitaButton propertyId={property?.id || ''} />}
+        {!isPago && (
+          <Link href="/dashboard/planos" className="flex items-center gap-1.5 border border-slate-200 text-slate-400 text-sm font-semibold px-3 py-2 rounded-xl hover:border-amber-300 hover:text-amber-600 transition-colors whitespace-nowrap flex-shrink-0">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            Receitas
+          </Link>
+        )}
+      </div>
+
       {/* Resultado líquido destaque */}
       <div className={`rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${isPositive ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
         <div>

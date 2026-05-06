@@ -110,16 +110,14 @@ export default async function MetasPage() {
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5 hidden sm:block">Objetivos sincronizados com a operação real</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="hidden sm:block">
-            <MetasExport
-              propertyName={property?.name || 'Fazenda'}
-              goals={goals.map((g: any) => ({
-                title: g.title, type: g.type,
-                targetValue: Number(g.targetValue), currentValue: Number(g.currentValue),
-                isCompleted: g.isCompleted, deadline: g.deadline?.toISOString() || null,
-              }))}
-            />
-          </div>
+          <MetasExport
+            propertyName={property?.name || 'Fazenda'}
+            goals={goals.map((g: any) => ({
+              title: g.title, type: g.type,
+              targetValue: Number(g.targetValue), currentValue: Number(g.currentValue),
+              isCompleted: g.isCompleted, deadline: g.deadline?.toISOString() || null,
+            }))}
+          />
           <Link href="/dashboard/metas/nova" className="flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             <span className="hidden sm:inline">Nova meta</span>
