@@ -18,7 +18,7 @@ export async function POST(
 
   const token = await prisma.agroToken.findUnique({
     where: { id },
-    include: { user: true } as any,
+    include: { property: { include: { user: { select: { stripeAccountId: true } } } } },
   })
   if (!token) return NextResponse.json({ error: 'Token não encontrado' }, { status: 404 })
   if (token.status !== 'ACTIVE') return NextResponse.json({ error: 'Token não está ativo' }, { status: 400 })
@@ -37,7 +37,7 @@ export async function POST(
   const totalCentavos = Math.round(totalBRL * 100)
   const feeCentavos = Math.round(totalCentavos * PLATFORM_FEE_RATE)
 
-  const producerAccountId = (token as any).user?.stripeAccountId as string | null
+  const producerAccountId = token.property.user.stripeAccountId ?? null
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agroos.site'
 
