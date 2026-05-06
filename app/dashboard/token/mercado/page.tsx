@@ -21,15 +21,61 @@ type Token = {
 }
 
 const TYPE_LABEL: Record<string, string> = { SAFRA: 'Safra', MATERIAL: 'Material', MAQUINARIO: 'Maquinário' }
-const TYPE_COLOR: Record<string, string> = {
-  SAFRA: 'bg-green-100 text-green-700',
-  MATERIAL: 'bg-amber-100 text-amber-700',
-  MAQUINARIO: 'bg-blue-100 text-blue-700',
+
+const TYPE_STYLE: Record<string, { color: string; bg: string }> = {
+  SAFRA:      { color: '#4ade80', bg: 'rgba(74,222,128,0.1)' },
+  MATERIAL:   { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+  MAQUINARIO: { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
 }
 
 function fmt(v: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v)
 }
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap');
+
+.am-wrap { font-family: 'Outfit', sans-serif; }
+
+@keyframes am-fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes am-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
+  50%      { box-shadow: 0 0 0 5px rgba(22,163,74,0); }
+}
+@keyframes am-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes am-barGrow {
+  from { width: 0%; }
+}
+
+.am-wrap .am-header   { animation: am-fadeUp .45s ease both; }
+.am-wrap .am-badge    { animation: am-fadeUp .45s ease .08s both; }
+.am-wrap .am-card     { animation: am-fadeUp .5s ease both; transition: border-color .2s, transform .2s; }
+.am-wrap .am-card:hover { transform: translateY(-2px); }
+
+.am-wrap .am-bar-fill { animation: am-barGrow .8s cubic-bezier(.4,0,.2,1) both; }
+
+.am-wrap .am-btn {
+  transition: background .15s, transform .1s, opacity .15s;
+}
+.am-wrap .am-btn:active { transform: scale(0.97); }
+
+.am-wrap .am-qty-btn {
+  transition: background .15s, color .15s;
+}
+.am-wrap .am-qty-btn:hover { background: rgba(22,163,74,0.12); color: #4ade80; }
+
+.am-spin { animation: am-spin .75s linear infinite; }
+.am-dot  { animation: am-pulse 2.5s ease infinite; }
+
+.am-wrap input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.am-wrap input[type=number]::-webkit-inner-spin-button,
+.am-wrap input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+`
 
 export default function MercadoPage() {
   const router = useRouter()
@@ -73,161 +119,331 @@ export default function MercadoPage() {
     }
   }
 
-  if (loading) return (
-    <div className="p-8 flex items-center justify-center min-h-[400px]">
-      <div className="text-slate-400 text-sm">Carregando mercado...</div>
-    </div>
-  )
-
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/token" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
-          <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Mercado AgroToken</h1>
-          <p className="text-sm text-slate-400">Tokens ativos disponíveis para investimento</p>
-        </div>
-      </div>
+    <div className="am-wrap" style={{
+      background: 'linear-gradient(160deg, #020c08 0%, #041409 60%, #030e07 100%)',
+      minHeight: '100%',
+      position: 'relative',
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      {/* Blockchain badge */}
-      <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-xs text-green-700 flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
-        Tokens registrados on-chain na Polygon Mainnet — posição visível no PolygonScan
-      </div>
+      {/* Hexagonal grid bg */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 0L56 16.2V49L28 65.2L0 49V16.2Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3Cpath d='M28 33.8L56 50V82.8L28 99L0 82.8V50Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3C/svg%3E")`,
+        backgroundSize: '56px 100px',
+        opacity: 0.8,
+      }} />
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">{error}</div>
-      )}
+      <div style={{ position: 'relative', zIndex: 1, padding: '40px 24px 64px', maxWidth: 780, margin: '0 auto' }}>
 
-      {!loading && !error && tokens.length === 0 && (
-        <div className="text-center py-20">
-          <div className="text-5xl mb-4">🌾</div>
-          <p className="text-slate-500 font-medium">Nenhum token ativo no momento</p>
-          <p className="text-sm text-slate-400 mt-1">Seja o primeiro a tokenizar um ativo agrícola</p>
-          <Link href="/dashboard/token/novo" className="inline-block mt-5 bg-[#16a34a] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-colors">
-            Criar token
+        {/* Header */}
+        <div className="am-header" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
+          <Link href="/dashboard/token" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 38, height: 38, borderRadius: 10,
+            border: '1px solid rgba(22,163,74,0.15)',
+            background: 'rgba(22,163,74,0.06)',
+            color: '#4ade80',
+            textDecoration: 'none',
+            transition: 'border-color .2s, background .2s',
+          }}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
           </Link>
+          <div>
+            <h1 style={{
+              fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800,
+              color: '#e8faf0', margin: 0, letterSpacing: '-0.02em',
+            }}>Mercado AgroToken</h1>
+            <p style={{ fontSize: 13, color: '#2a5c3a', margin: '2px 0 0', fontWeight: 400 }}>
+              Tokens ativos disponíveis para investimento
+            </p>
+          </div>
         </div>
-      )}
 
-      <div className="grid gap-4">
-        {tokens.map(token => {
-          const available = token.totalTokens - token.soldTokens
-          const soldPct = token.totalTokens > 0 ? (token.soldTokens / token.totalTokens) * 100 : 0
-          const q = parseInt(qty[token.id] || '1') || 1
-          const total = q * Number(token.tokenPrice)
+        {/* Blockchain badge */}
+        <div className="am-badge" style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: '12px 16px',
+          background: 'rgba(4, 14, 9, 0.6)',
+          border: '1px solid rgba(22,163,74,0.09)',
+          borderRadius: 12,
+          marginBottom: 24,
+        }}>
+          <div className="am-dot" style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: '#16a34a', flexShrink: 0,
+          }} />
+          <p style={{ fontSize: 12, color: '#2a5c3a', margin: 0 }}>
+            <strong style={{ color: '#3d7a52', fontWeight: 600 }}>Polygon Mainnet</strong>
+            {' '}— tokens registrados on-chain · posição visível no PolygonScan
+          </p>
+        </div>
 
-          return (
-            <div key={token.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-gray-300 transition-colors">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${TYPE_COLOR[token.type]}`}>
-                      {TYPE_LABEL[token.type]}
-                    </span>
-                    {token.commodity && (
-                      <span className="text-xs text-slate-400">{token.commodity}</span>
-                    )}
+        {error && (
+          <div style={{
+            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+            borderRadius: 12, padding: '14px 18px',
+            fontSize: 14, color: '#f87171', marginBottom: 20,
+          }}>{error}</div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <svg className="am-spin" width="28" height="28" fill="none" viewBox="0 0 24 24" style={{ margin: '0 auto', display: 'block', color: '#16a34a' }}>
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.2" />
+              <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <p style={{ color: '#2a5c3a', fontSize: 14, marginTop: 14 }}>Carregando mercado...</p>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && tokens.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🌾</div>
+            <p style={{ color: '#3a6648', fontWeight: 600, fontSize: 15, margin: '0 0 6px' }}>
+              Nenhum token ativo no momento
+            </p>
+            <p style={{ color: '#2a5c3a', fontSize: 13, margin: '0 0 24px' }}>
+              Seja o primeiro a tokenizar um ativo agrícola
+            </p>
+            <Link href="/dashboard/token/novo" style={{
+              display: 'inline-block',
+              background: '#16a34a', color: '#fff',
+              fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14,
+              padding: '12px 26px', borderRadius: 12,
+              textDecoration: 'none',
+            }}>
+              Criar token
+            </Link>
+          </div>
+        )}
+
+        {/* Token cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {tokens.map((token, idx) => {
+            const available = token.totalTokens - token.soldTokens
+            const soldPct = token.totalTokens > 0 ? (token.soldTokens / token.totalTokens) * 100 : 0
+            const q = parseInt(qty[token.id] || '1') || 1
+            const total = q * Number(token.tokenPrice)
+            const typeStyle = TYPE_STYLE[token.type] ?? { color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }
+
+            return (
+              <div
+                key={token.id}
+                className="am-card"
+                style={{
+                  background: 'rgba(6, 18, 11, 0.9)',
+                  border: '1px solid rgba(22,163,74,0.1)',
+                  borderRadius: 16,
+                  padding: '22px 22px 18px',
+                  animationDelay: `${idx * 0.07}s`,
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(22,163,74,0.28)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(22,163,74,0.1)' }}
+              >
+                {/* Top row */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 16 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: typeStyle.color, background: typeStyle.bg,
+                        padding: '3px 9px', borderRadius: 99,
+                      }}>
+                        {TYPE_LABEL[token.type]}
+                      </span>
+                      {token.commodity && (
+                        <span style={{ fontSize: 11, color: '#3a6648', fontWeight: 400 }}>{token.commodity}</span>
+                      )}
+                    </div>
+                    <Link
+                      href={`/dashboard/token/${token.id}`}
+                      style={{
+                        fontFamily: 'Syne, sans-serif', fontSize: 16, fontWeight: 700,
+                        color: '#dcfce7', textDecoration: 'none',
+                        display: 'block', marginBottom: 4,
+                        transition: 'color .15s',
+                      }}
+                      onMouseEnter={e => { (e.target as HTMLElement).style.color = '#4ade80' }}
+                      onMouseLeave={e => { (e.target as HTMLElement).style.color = '#dcfce7' }}
+                    >
+                      {token.title}
+                    </Link>
+                    <p style={{ fontSize: 12, color: '#2a5c3a', margin: 0, fontWeight: 400 }}>
+                      {token.property.name}{token.property.location ? ` · ${token.property.location}` : ''}
+                    </p>
                   </div>
-                  <Link href={`/dashboard/token/${token.id}`} className="font-bold text-slate-900 hover:text-[#16a34a] transition-colors">
-                    {token.title}
-                  </Link>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {token.property.name}{token.property.location ? ` · ${token.property.location}` : ''}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="text-lg font-bold text-slate-900">{fmt(Number(token.tokenPrice))}</div>
-                  <div className="text-xs text-slate-400">por token</div>
-                </div>
-              </div>
-
-              {/* Stats grid */}
-              <div className="grid grid-cols-3 gap-3 bg-slate-50 rounded-xl p-3 text-sm mb-4">
-                <div>
-                  <div className="text-xs text-slate-400">Valor total</div>
-                  <div className="font-semibold text-slate-800">{fmt(Number(token.totalValue))}</div>
-                </div>
-                {token.expectedReturn && (
-                  <div>
-                    <div className="text-xs text-slate-400">Rendimento esperado</div>
-                    <div className="font-semibold text-green-700">{token.expectedReturn}%{token.periodMonths ? ` / ${token.periodMonths}m` : ''}</div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{
+                      fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800,
+                      color: '#e2faea', letterSpacing: '-0.02em',
+                    }}>
+                      {fmt(Number(token.tokenPrice))}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#2a5c3a', marginTop: 2 }}>por token</div>
                   </div>
-                )}
-                {token.deliveryDate && (
-                  <div>
-                    <div className="text-xs text-slate-400">Vencimento</div>
-                    <div className="font-semibold text-slate-800">{new Date(token.deliveryDate).toLocaleDateString('pt-BR')}</div>
+                </div>
+
+                {/* Stats grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+                  gap: 1,
+                  background: 'rgba(22,163,74,0.08)',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  marginBottom: 14,
+                  border: '1px solid rgba(22,163,74,0.1)',
+                }}>
+                  {[
+                    { label: 'Valor total',   value: fmt(Number(token.totalValue)) },
+                    ...(token.expectedReturn ? [{ label: 'Rendimento',     value: `${token.expectedReturn}%${token.periodMonths ? ` / ${token.periodMonths}m` : ''}` }] : []),
+                    ...(token.deliveryDate    ? [{ label: 'Vencimento',     value: new Date(token.deliveryDate).toLocaleDateString('pt-BR') }] : []),
+                    { label: 'Disponíveis',   value: `${available.toLocaleString('pt-BR')} tkns` },
+                  ].map(s => (
+                    <div key={s.label} style={{ background: 'rgba(2,12,8,0.92)', padding: '12px 14px' }}>
+                      <div style={{ fontSize: 9, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+                        {s.label}
+                      </div>
+                      <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 14, fontWeight: 700, color: '#d1fae5' }}>
+                        {s.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Progress bar */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#2a5c3a', marginBottom: 6 }}>
+                    <span>{token.soldTokens.toLocaleString('pt-BR')} vendidos</span>
+                    <span style={{ color: soldPct > 70 ? '#4ade80' : '#2a5c3a' }}>{soldPct.toFixed(0)}% captado</span>
                   </div>
-                )}
-                <div>
-                  <div className="text-xs text-slate-400">Disponíveis</div>
-                  <div className="font-semibold text-slate-800">{available.toLocaleString('pt-BR')} tokens</div>
-                </div>
-              </div>
-
-              {/* Progress bar */}
-              <div className="mb-4">
-                <div className="flex justify-between text-xs text-slate-400 mb-1">
-                  <span>{token.soldTokens.toLocaleString('pt-BR')} vendidos</span>
-                  <span>{soldPct.toFixed(0)}% captado</span>
-                </div>
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#16a34a] rounded-full transition-all" style={{ width: `${Math.min(soldPct, 100)}%` }} />
-                </div>
-              </div>
-
-              {/* Buy controls */}
-              {available > 0 ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => setQty(prev => ({ ...prev, [token.id]: String(Math.max(1, (parseInt(prev[token.id] || '1') || 1) - 1) ) }))}
-                      className="px-3 py-2 text-slate-500 hover:bg-gray-50 transition-colors font-medium"
-                    >−</button>
-                    <input
-                      type="number"
-                      min="1"
-                      max={available}
-                      value={qty[token.id] || '1'}
-                      onChange={e => setQty(prev => ({ ...prev, [token.id]: e.target.value }))}
-                      className="w-14 text-center py-2 text-sm font-semibold text-slate-900 focus:outline-none border-x border-gray-200"
+                  <div style={{
+                    height: 4, background: 'rgba(22,163,74,0.1)',
+                    borderRadius: 99, overflow: 'hidden',
+                  }}>
+                    <div
+                      className="am-bar-fill"
+                      style={{
+                        height: '100%',
+                        width: `${Math.min(soldPct, 100)}%`,
+                        background: soldPct > 80
+                          ? 'linear-gradient(90deg, #16a34a, #4ade80)'
+                          : '#16a34a',
+                        borderRadius: 99,
+                      }}
                     />
-                    <button
-                      onClick={() => setQty(prev => ({ ...prev, [token.id]: String(Math.min(available, (parseInt(prev[token.id] || '1') || 1) + 1) ) }))}
-                      className="px-3 py-2 text-slate-500 hover:bg-gray-50 transition-colors font-medium"
-                    >+</button>
                   </div>
-                  <div className="text-sm text-slate-500 flex-1">
-                    Total: <span className="font-bold text-slate-900">{fmt(total)}</span>
-                  </div>
-                  <button
-                    onClick={() => handleComprar(token)}
-                    disabled={buying === token.id}
-                    className="bg-[#16a34a] text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-[#15803d] transition-colors disabled:opacity-60 flex items-center gap-2"
-                  >
-                    {buying === token.id ? (
-                      <>
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Aguarde...
-                      </>
-                    ) : 'Comprar'}
-                  </button>
                 </div>
-              ) : (
-                <div className="text-center py-2 text-sm text-slate-400 font-medium">Token esgotado</div>
-              )}
-            </div>
-          )
-        })}
+
+                {/* Buy controls */}
+                {available > 0 ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    {/* Quantity stepper */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center',
+                      border: '1px solid rgba(22,163,74,0.18)',
+                      borderRadius: 10, overflow: 'hidden',
+                      background: 'rgba(2,12,8,0.8)',
+                    }}>
+                      <button
+                        className="am-qty-btn"
+                        onClick={() => setQty(prev => ({ ...prev, [token.id]: String(Math.max(1, (parseInt(prev[token.id] || '1') || 1) - 1)) }))}
+                        style={{
+                          padding: '8px 13px', background: 'transparent',
+                          border: 'none', cursor: 'pointer',
+                          color: '#3a6648', fontSize: 16, fontWeight: 600,
+                          lineHeight: 1,
+                        }}
+                      >−</button>
+                      <input
+                        type="number"
+                        min="1"
+                        max={available}
+                        value={qty[token.id] || '1'}
+                        onChange={e => setQty(prev => ({ ...prev, [token.id]: e.target.value }))}
+                        style={{
+                          width: 48, textAlign: 'center',
+                          padding: '8px 0',
+                          background: 'transparent',
+                          border: 'none',
+                          borderLeft: '1px solid rgba(22,163,74,0.12)',
+                          borderRight: '1px solid rgba(22,163,74,0.12)',
+                          color: '#e2faea',
+                          fontFamily: 'Syne, sans-serif', fontSize: 14, fontWeight: 700,
+                          outline: 'none',
+                        }}
+                      />
+                      <button
+                        className="am-qty-btn"
+                        onClick={() => setQty(prev => ({ ...prev, [token.id]: String(Math.min(available, (parseInt(prev[token.id] || '1') || 1) + 1)) }))}
+                        style={{
+                          padding: '8px 13px', background: 'transparent',
+                          border: 'none', cursor: 'pointer',
+                          color: '#3a6648', fontSize: 16, fontWeight: 600,
+                          lineHeight: 1,
+                        }}
+                      >+</button>
+                    </div>
+
+                    {/* Total */}
+                    <div style={{ flex: 1, fontSize: 13, color: '#3a6648', minWidth: 80 }}>
+                      Total:{' '}
+                      <span style={{
+                        fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                        color: '#86efac', fontSize: 15,
+                      }}>{fmt(total)}</span>
+                    </div>
+
+                    {/* Buy button */}
+                    <button
+                      className="am-btn"
+                      onClick={() => handleComprar(token)}
+                      disabled={buying === token.id}
+                      style={{
+                        background: buying === token.id ? 'rgba(22,163,74,0.4)' : '#16a34a',
+                        color: '#fff',
+                        fontFamily: 'Syne, sans-serif', fontWeight: 700,
+                        fontSize: 14,
+                        padding: '10px 22px',
+                        borderRadius: 10,
+                        border: 'none', cursor: buying === token.id ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        opacity: buying === token.id ? 0.7 : 1,
+                      }}
+                    >
+                      {buying === token.id ? (
+                        <>
+                          <svg className="am-spin" width="14" height="14" fill="none" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.25" />
+                            <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                          </svg>
+                          Aguarde...
+                        </>
+                      ) : 'Comprar'}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{
+                    textAlign: 'center', padding: '10px 0',
+                    fontSize: 13, color: '#2a5c3a', fontWeight: 500,
+                    border: '1px solid rgba(22,163,74,0.08)',
+                    borderRadius: 10, background: 'rgba(22,163,74,0.03)',
+                  }}>
+                    Token esgotado
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
       </div>
     </div>
   )
