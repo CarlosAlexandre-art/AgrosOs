@@ -24,7 +24,7 @@ export default function AIAssistant() {
     if (open && messages.length === 0) {
       setMessages([{
         role: 'assistant',
-        content: 'Olá! Sou o Assistente IA do AgroOS. Tenho acesso aos dados reais da sua fazenda. Como posso ajudar?',
+        content: 'Olá! Sou o Assistente IA do SmartAgroOS. Tenho acesso aos dados reais da sua fazenda. Como posso ajudar?',
       }])
     }
     if (open) {

@@ -3,8 +3,8 @@ import type { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',
-    name: 'AgroOS — Sistema Operacional da Fazenda',
-    short_name: 'AgroOS',
+    name: 'SmartAgroOS — Sistema Operacional da Fazenda',
+    short_name: 'SmartAgroOS',
     description: 'Planeje, execute e controle toda a operação da sua fazenda em um único lugar.',
     start_url: '/dashboard',
     scope: '/',

@@ -30,7 +30,7 @@ export function exportFinanceiroExcel(data: {
   autoWidth(ws, rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Financeiro')
-  XLSX.writeFile(wb, `AgroOS-Financeiro-${data.propertyName.replace(/\s/g, '_')}.xlsx`)
+  XLSX.writeFile(wb, `SmartAgroOS-Financeiro-${data.propertyName.replace(/\s/g, '_')}.xlsx`)
 }
 
 export function exportOperacoesExcel(data: {
@@ -54,7 +54,7 @@ export function exportOperacoesExcel(data: {
   autoWidth(ws, rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Operações')
-  XLSX.writeFile(wb, `AgroOS-Operacoes-${data.propertyName.replace(/\s/g, '_')}.xlsx`)
+  XLSX.writeFile(wb, `SmartAgroOS-Operacoes-${data.propertyName.replace(/\s/g, '_')}.xlsx`)
 }
 
 export function exportMetasExcel(data: {
@@ -78,7 +78,7 @@ export function exportMetasExcel(data: {
   autoWidth(ws, rows)
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Metas')
-  XLSX.writeFile(wb, `AgroOS-Metas-${data.propertyName.replace(/\s/g, '_')}.xlsx`)
+  XLSX.writeFile(wb, `SmartAgroOS-Metas-${data.propertyName.replace(/\s/g, '_')}.xlsx`)
 }
 
 export function exportPropriedadeExcel(data: {
@@ -108,5 +108,5 @@ export function exportPropriedadeExcel(data: {
   autoWidth(wsTeam, teamRows)
   XLSX.utils.book_append_sheet(wb, wsTeam, 'Equipe')
 
-  XLSX.writeFile(wb, `AgroOS-Propriedade-${data.property.name.replace(/\s/g, '_')}.xlsx`)
+  XLSX.writeFile(wb, `SmartAgroOS-Propriedade-${data.property.name.replace(/\s/g, '_')}.xlsx`)
 }

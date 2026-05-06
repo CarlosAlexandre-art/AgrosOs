@@ -11,10 +11,10 @@ const SERVICOS = [
 ]
 
 const PASSOS = [
-  { num: '01', title: 'Crie a atividade no AgroOS', desc: 'Defina o tipo de serviço, talhão e data desejada.' },
+  { num: '01', title: 'Crie a atividade no SmartAgroOS', desc: 'Defina o tipo de serviço, talhão e data desejada.' },
   { num: '02', title: 'Selecione "Via AgroCore"', desc: 'O sistema abre a solicitação direto na plataforma.' },
   { num: '03', title: 'Prestador é acionado', desc: 'A AgroCore conecta ao prestador mais adequado.' },
-  { num: '04', title: 'Execução rastreada', desc: 'Status atualizado em tempo real dentro do AgroOS.' },
+  { num: '04', title: 'Execução rastreada', desc: 'Status atualizado em tempo real dentro do SmartAgroOS.' },
   { num: '05', title: 'Custo entra no relatório', desc: 'O valor é registrado automaticamente no financeiro.' },
 ]
 
@@ -32,10 +32,10 @@ export default function AgroCoreExternalPage() {
               <span className="w-2 h-2 rounded-full animate-pulse" style={{background:'#679d3f'}} /> AgroCore — Soluções Sustentáveis do Campo
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-[#0f172a] leading-tight mb-6">
-              O braço que executa<br />o que o AgroOS planeja
+              O braço que executa<br />o que o SmartAgroOS planeja
             </h1>
             <p className="text-xl text-[#64748b] max-w-2xl mx-auto mb-10 leading-relaxed">
-              O AgroCore é o marketplace de serviços agrícolas integrado ao AgroOS. Contrate pulverização, colheita, transporte e muito mais — sem sair do sistema, sem ligação, sem imprevisto.
+              O AgroCore é o marketplace de serviços agrícolas integrado ao SmartAgroOS. Contrate pulverização, colheita, transporte e muito mais — sem sair do sistema, sem ligação, sem imprevisto.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
@@ -56,7 +56,7 @@ export default function AgroCoreExternalPage() {
           </div>
         </section>
 
-        {/* Diferença AgroOS vs AgroCore */}
+        {/* Diferença SmartAgroOS vs AgroCore */}
         <section className="px-6 py-16 bg-[#f8fafc]">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-[#0f172a] text-center mb-4">Dois sistemas, uma operação</h2>
@@ -64,7 +64,7 @@ export default function AgroCoreExternalPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white rounded-2xl p-8 border-2 border-[#e2e8f0] shadow-sm">
                 <div className="text-4xl mb-4">🧠</div>
-                <div className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-2">AgroOS</div>
+                <div className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-2">SmartAgroOS</div>
                 <h3 className="text-xl font-bold text-[#0f172a] mb-4">O cérebro da fazenda</h3>
                 <ul className="space-y-2.5">
                   {['Planejamento e gestão de atividades', 'Controle financeiro e custo/ha', 'Gestão de equipe interna', 'Análise de dados e alertas IA', 'Visão consolidada da operação'].map(item => (
@@ -87,7 +87,7 @@ export default function AgroCoreExternalPage() {
                 <div className="text-xs font-bold text-green-400 uppercase tracking-wider mb-2">AgroCore</div>
                 <h3 className="text-xl font-bold text-white mb-4">O braço de execução</h3>
                 <ul className="space-y-2.5">
-                  {['Marketplace de serviços agrícolas', 'Rede de prestadores qualificados', 'Contratação sem burocracia', 'Acompanhamento em tempo real', 'Custo integrado ao AgroOS'].map(item => (
+                  {['Marketplace de serviços agrícolas', 'Rede de prestadores qualificados', 'Contratação sem burocracia', 'Acompanhamento em tempo real', 'Custo integrado ao SmartAgroOS'].map(item => (
                     <li key={item} className="flex items-center gap-2 text-sm text-gray-300">
                       <svg className="w-4 h-4 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
@@ -105,7 +105,7 @@ export default function AgroCoreExternalPage() {
         <section className="px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <h2 className="text-3xl font-bold text-[#0f172a] text-center mb-4">Serviços disponíveis no AgroCore</h2>
-            <p className="text-center text-[#64748b] mb-12">Todos contratáveis direto pelo AgroOS — com rastreabilidade total.</p>
+            <p className="text-center text-[#64748b] mb-12">Todos contratáveis direto pelo SmartAgroOS — com rastreabilidade total.</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
               {SERVICOS.map(s => (
                 <div key={s.nome} className="bg-[#f8fafc] rounded-2xl p-6 border border-gray-100 hover:border-green-200 hover:shadow-md transition-all group cursor-default">
@@ -122,7 +122,7 @@ export default function AgroCoreExternalPage() {
         <section className="px-6 py-16 bg-[#f8fafc]">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-[#0f172a] text-center mb-4">Como funciona na prática</h2>
-            <p className="text-center text-[#64748b] mb-14">Do pedido ao custo no relatório — tudo sem sair do AgroOS.</p>
+            <p className="text-center text-[#64748b] mb-14">Do pedido ao custo no relatório — tudo sem sair do SmartAgroOS.</p>
             <div className="relative">
               <div className="absolute left-8 top-0 bottom-0 w-px bg-gray-200 hidden md:block" />
               <div className="space-y-8">
@@ -169,10 +169,10 @@ export default function AgroCoreExternalPage() {
             <div className="relative">
               <div className="text-5xl mb-4">🔗</div>
               <h3 className="text-3xl font-bold text-white mb-4">Pronto para operar de verdade?</h3>
-              <p className="text-gray-400 mb-8 leading-relaxed">Crie sua conta no AgroOS e tenha acesso ao AgroCore integrado desde o primeiro dia.</p>
+              <p className="text-gray-400 mb-8 leading-relaxed">Crie sua conta no SmartAgroOS e tenha acesso ao AgroCore integrado desde o primeiro dia.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-[#16a34a] text-white font-bold px-8 py-4 rounded-xl hover:bg-[#15803d] transition-colors text-lg">
-                  Começar grátis no AgroOS
+                  Começar grátis no SmartAgroOS
                 </Link>
                 <a href="https://agrocore.com.br" target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 border border-white/20 text-white font-semibold px-8 py-4 rounded-xl hover:border-white/40 transition-colors text-lg">

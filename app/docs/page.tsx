@@ -42,7 +42,7 @@ const DOCS = [
     items: [
       { title: 'O que é o AgroCore', desc: 'Entenda a integração e como ela funciona.' },
       { title: 'Solicitando um serviço', desc: 'Passo a passo para contratar via AgroCore.' },
-      { title: 'Acompanhando a execução', desc: 'Como o status aparece no AgroOS.' },
+      { title: 'Acompanhando a execução', desc: 'Como o status aparece no SmartAgroOS.' },
       { title: 'Custos AgroCore no financeiro', desc: 'Como o gasto entra nos relatórios.' },
     ],
   },
@@ -61,7 +61,7 @@ export default function DocsPage() {
                 📚 Documentação
               </div>
               <h1 className="text-3xl sm:text-5xl font-bold text-[#0f172a] mb-4">Guias e tutoriais</h1>
-              <p className="text-[#64748b] text-base sm:text-lg max-w-xl mx-auto">Tudo que você precisa para dominar o AgroOS e tirar o máximo da sua operação.</p>
+              <p className="text-[#64748b] text-base sm:text-lg max-w-xl mx-auto">Tudo que você precisa para dominar o SmartAgroOS e tirar o máximo da sua operação.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

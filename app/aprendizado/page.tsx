@@ -15,7 +15,7 @@ const CATEGORIAS = [
     titulo: 'Gestão Operacional',
     desc: 'Como organizar tarefas, executar atividades no campo e eliminar gargalos.',
     aulas: [
-      { titulo: 'Como criar e organizar atividades no AgroOS', nivel: 'Iniciante', url: 'https://youtu.be/mFPE2grkp9I?si=L6oDrnAySR1hfKXt' },
+      { titulo: 'Como criar e organizar atividades no SmartAgroOS', nivel: 'Iniciante', url: 'https://youtu.be/mFPE2grkp9I?si=L6oDrnAySR1hfKXt' },
       { titulo: 'Planejamento de safra do zero ao fim', nivel: 'Intermediário', url: 'https://youtu.be/-ZsBPCZUByU?si=l5_KkU5RQKw7B1ks' },
       { titulo: 'Como eliminar o "apagão de informações" no campo', nivel: 'Iniciante', url: 'https://youtu.be/d0TEuOIrB98?si=eGCQto1IKh5xkDao' },
       { titulo: 'Checklist operacional semanal para fazendas', nivel: 'Iniciante', url: 'https://youtu.be/akC7On2pPJM?si=6ewOR2np5c9ZQrpq' },
@@ -140,7 +140,7 @@ export default function AprendizadoPage() {
               Aprenda a operar<br />no nível mais alto
             </h1>
             <p className="text-base sm:text-xl text-[#64748b] max-w-2xl mx-auto leading-relaxed mb-8">
-              Vídeos no YouTube ensinando como dominar cada módulo do AgroOS.
+              Vídeos no YouTube ensinando como dominar cada módulo do SmartAgroOS.
             </p>
             <a
               href={CANAL_YT}
@@ -267,7 +267,7 @@ export default function AprendizadoPage() {
           <div className="max-w-2xl mx-auto">
             <div className="text-4xl mb-4">🎓</div>
             <h2 className="text-2xl sm:text-3xl font-bold text-[#0f172a] mb-3">Aprendeu? Agora aplique.</h2>
-            <p className="text-[#64748b] mb-8 text-sm sm:text-base">Crie sua conta grátis no AgroOS e coloque em prática o que você aprendeu.</p>
+            <p className="text-[#64748b] mb-8 text-sm sm:text-base">Crie sua conta grátis no SmartAgroOS e coloque em prática o que você aprendeu.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login" className="inline-flex items-center justify-center bg-[#16a34a] text-white font-bold px-8 py-4 rounded-2xl hover:bg-[#15803d] transition-colors shadow-lg shadow-green-200 text-base sm:text-lg">
                 Começar grátis

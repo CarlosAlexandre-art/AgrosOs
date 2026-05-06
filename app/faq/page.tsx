@@ -5,16 +5,16 @@ import Link from 'next/link'
 import Nav from '@/components/Nav'
 
 const FAQ = [
-  { categoria: 'Geral', pergunta: 'O que é o AgroOS?', resposta: 'O AgroOS é o sistema operacional da fazenda moderna. Ele centraliza a gestão de operações, equipe, financeiro e propriedades em um único lugar, integrado ao AgroCore para contratação de serviços externos.' },
-  { categoria: 'Geral', pergunta: 'Preciso instalar algum aplicativo?', resposta: 'Não. O AgroOS funciona direto no navegador, em qualquer dispositivo. Pode ser instalado como PWA no celular para acesso rápido, mas não é obrigatório.' },
+  { categoria: 'Geral', pergunta: 'O que é o SmartAgroOS?', resposta: 'O SmartAgroOS é o sistema operacional da fazenda moderna. Ele centraliza a gestão de operações, equipe, financeiro e propriedades em um único lugar, integrado ao AgroCore para contratação de serviços externos.' },
+  { categoria: 'Geral', pergunta: 'Preciso instalar algum aplicativo?', resposta: 'Não. O SmartAgroOS funciona direto no navegador, em qualquer dispositivo. Pode ser instalado como PWA no celular para acesso rápido, mas não é obrigatório.' },
   { categoria: 'Geral', pergunta: 'Funciona sem internet?', resposta: 'Algumas funcionalidades básicas ficam disponíveis offline. Os dados são sincronizados automaticamente quando a conexão é restabelecida — essencial para o campo.' },
   { categoria: 'Conta', pergunta: 'Como criar minha conta?', resposta: 'Basta clicar em "Começar grátis", informar nome, e-mail e senha. Em menos de 2 minutos você já está dentro do sistema.' },
   { categoria: 'Conta', pergunta: 'Posso ter mais de um usuário na minha fazenda?', resposta: 'Sim. Você pode convidar membros da equipe com diferentes níveis de acesso: administrador, gerente ou operador.' },
-  { categoria: 'AgroCore', pergunta: 'O que é o AgroCore?', resposta: 'O AgroCore é o marketplace de serviços agrícolas integrado ao AgroOS. Por ele, você contrata prestadores de pulverização, colheita, transporte e outros serviços diretamente pelo sistema, sem sair do AgroOS.' },
-  { categoria: 'AgroCore', pergunta: 'Como funciona a integração com o AgroCore?', resposta: 'Dentro do AgroOS, ao criar uma atividade você pode optar por executar via AgroCore. O sistema abre a solicitação, você acompanha a execução e o custo entra automaticamente no relatório financeiro.' },
+  { categoria: 'AgroCore', pergunta: 'O que é o AgroCore?', resposta: 'O AgroCore é o marketplace de serviços agrícolas integrado ao SmartAgroOS. Por ele, você contrata prestadores de pulverização, colheita, transporte e outros serviços diretamente pelo sistema, sem sair do SmartAgroOS.' },
+  { categoria: 'AgroCore', pergunta: 'Como funciona a integração com o AgroCore?', resposta: 'Dentro do SmartAgroOS, ao criar uma atividade você pode optar por executar via AgroCore. O sistema abre a solicitação, você acompanha a execução e o custo entra automaticamente no relatório financeiro.' },
   { categoria: 'Financeiro', pergunta: 'Como o custo por hectare é calculado?', resposta: 'O sistema soma todos os custos associados a atividades de um talhão e divide pela área em hectares definida no cadastro da propriedade. O cálculo é automático e em tempo real.' },
   { categoria: 'Financeiro', pergunta: 'Os dados financeiros são seguros?', resposta: 'Sim. Todos os dados são criptografados e armazenados em servidores seguros. Nenhuma informação financeira é compartilhada com terceiros.' },
-  { categoria: 'Técnico', pergunta: 'O AgroOS funciona em celular?', resposta: 'Sim, o sistema é totalmente responsivo e funciona muito bem em smartphones e tablets. Pode ser instalado na tela inicial como um aplicativo nativo.' },
+  { categoria: 'Técnico', pergunta: 'O SmartAgroOS funciona em celular?', resposta: 'Sim, o sistema é totalmente responsivo e funciona muito bem em smartphones e tablets. Pode ser instalado na tela inicial como um aplicativo nativo.' },
 ]
 
 const CATEGORIAS = ['Todos', ...Array.from(new Set(FAQ.map(f => f.categoria)))]
@@ -56,7 +56,7 @@ export default function FaqPage() {
               ❓ Perguntas frequentes
             </div>
             <h1 className="text-5xl font-bold text-[#0f172a] mb-4">Tem alguma dúvida?</h1>
-            <p className="text-[#64748b] text-lg">Encontre respostas para as perguntas mais comuns sobre o AgroOS.</p>
+            <p className="text-[#64748b] text-lg">Encontre respostas para as perguntas mais comuns sobre o SmartAgroOS.</p>
           </div>
         </section>
 

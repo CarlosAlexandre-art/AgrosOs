@@ -102,7 +102,7 @@ export default async function AgroCoreInternalPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold px-3 py-1.5 rounded-full mb-3 uppercase tracking-widest">
                 <span style={{width:6,height:6,borderRadius:'50%',background:'#4ade80',animation:'blink 1.4s ease-in-out infinite',display:'inline-block'}}/>
-                Integrado ao AgroOS
+                Integrado ao SmartAgroOS
               </div>
               <h1 className="text-3xl font-black text-white">
                 Agro<span className="agrocore-shimmer">Core</span>
@@ -187,7 +187,7 @@ export default async function AgroCoreInternalPage() {
           <div className="grid lg:grid-cols-3 gap-6" style={{animation:'rise .5s ease .24s both'}}>
             {/* How it works */}
             <div className="lg:col-span-2" style={{background:'rgba(255,255,255,.02)',border:'1px solid rgba(255,255,255,.06)',borderRadius:20,padding:24}}>
-              <h2 style={{fontWeight:700,color:'rgba(255,255,255,.8)',fontSize:14,marginBottom:20}}>Como usar o AgroCore pelo AgroOS</h2>
+              <h2 style={{fontWeight:700,color:'rgba(255,255,255,.8)',fontSize:14,marginBottom:20}}>Como usar o AgroCore pelo SmartAgroOS</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 {STEPS.map(s => (
                   <div key={s.num} style={{display:'flex',alignItems:'flex-start',gap:14}}>

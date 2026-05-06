@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     const pending = acts.filter(a => a.status === 'PENDING')
     const done = acts.filter(a => a.status === 'DONE')
 
-    const systemPrompt = `Você é o Assistente IA do AgroOS. Responda SEMPRE em português brasileiro. Seja direto e prático. Máximo 4 parágrafos curtos.
+    const systemPrompt = `Você é o Assistente IA do SmartAgroOS. Responda SEMPRE em português brasileiro. Seja direto e prático. Máximo 4 parágrafos curtos.
 
 FAZENDA: ${p.name} | ${sizeHa > 0 ? sizeHa + ' ha' : 'área não informada'} | ${p.fields.length} talhões | ${p.teamMembers.length} membros
 

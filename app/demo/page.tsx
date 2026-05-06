@@ -45,7 +45,7 @@ const STEPS = [
     id: 4,
     icon: '🔗',
     title: 'Integre com o AgroCore',
-    desc: 'Precisa de serviço externo? Solicite via AgroCore sem sair do AgroOS. Custo já entra no relatório.',
+    desc: 'Precisa de serviço externo? Solicite via AgroCore sem sair do SmartAgroOS. Custo já entra no relatório.',
     details: ['Solicitação integrada', 'Acompanhamento em tempo real', 'Custo automático', 'Histórico completo'],
     mockup: [
       { label: 'Drone — Pulverização T3', value: 'AgroCore' },
@@ -70,7 +70,7 @@ export default function DemoPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
               Demonstração interativa
             </div>
-            <h1 className="text-5xl font-bold text-[#0f172a] mb-4">Veja o AgroOS<br />
+            <h1 className="text-5xl font-bold text-[#0f172a] mb-4">Veja o SmartAgroOS<br />
               <span style={{background: 'linear-gradient(135deg, #16a34a, #059669)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>em ação</span>
             </h1>
             <p className="text-[#64748b] text-lg mb-8">Explore como o sistema funciona na prática, sem precisar de conta.</p>
@@ -112,7 +112,7 @@ export default function DemoPage() {
                     <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
                     <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
                   </div>
-                  <span className="text-xs text-[#94a3b8] ml-2">AgroOS — {step.title}</span>
+                  <span className="text-xs text-[#94a3b8] ml-2">SmartAgroOS — {step.title}</span>
                 </div>
                 <div className="space-y-3">
                   {step.mockup.map(m => (

@@ -7,9 +7,9 @@ function getResend() {
 export async function sendWelcomeEmail(name: string, email: string) {
   const resend = getResend()
   await resend.emails.send({
-    from: 'AgroOS <onboarding@resend.dev>',
+    from: 'SmartAgroOS <onboarding@resend.dev>',
     to: email,
-    subject: 'Bem-vindo ao AgroOS 🌾',
+    subject: 'Bem-vindo ao SmartAgroOS 🌾',
     html: `
       <!DOCTYPE html>
       <html>
@@ -23,7 +23,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
             <!-- Header -->
             <div style="background:#16a34a;padding:32px;text-align:center;">
               <div style="font-size:40px;margin-bottom:8px;">🌾</div>
-              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">AgroOS</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">SmartAgroOS</h1>
               <p style="margin:4px 0 0;color:#bbf7d0;font-size:14px;">Sistema Operacional da Fazenda</p>
             </div>
 
@@ -31,7 +31,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
             <div style="padding:32px;">
               <h2 style="margin:0 0 8px;color:#0f172a;font-size:20px;">Olá, ${name}! 👋</h2>
               <p style="margin:0 0 24px;color:#64748b;font-size:15px;line-height:1.6;">
-                Bem-vindo ao AgroOS. Sua conta foi criada com sucesso e você já pode começar a gerenciar sua operação agrícola.
+                Bem-vindo ao SmartAgroOS. Sua conta foi criada com sucesso e você já pode começar a gerenciar sua operação agrícola.
               </p>
 
               <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin-bottom:24px;">
@@ -58,7 +58,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
 
             <!-- Footer -->
             <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 32px;text-align:center;">
-              <p style="margin:0;color:#94a3b8;font-size:12px;">© 2025 AgroOS · Sistema Operacional da Fazenda</p>
+              <p style="margin:0;color:#94a3b8;font-size:12px;">© 2025 SmartAgroOS · Sistema Operacional da Fazenda</p>
             </div>
 
           </div>

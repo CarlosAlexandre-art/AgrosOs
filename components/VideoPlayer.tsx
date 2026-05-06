@@ -16,7 +16,7 @@ export default function VideoPlayer() {
       {/* Thumbnail do YouTube como fundo */}
       <img
         src={THUMBNAIL_URL}
-        alt="AgroOS — Demonstração"
+        alt="SmartAgroOS — Demonstração"
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
 
@@ -37,7 +37,7 @@ export default function VideoPlayer() {
 
       {/* Badge */}
       <div className="absolute top-4 left-4 bg-[#16a34a] text-white text-xs font-bold px-3 py-1.5 rounded-full">
-        AgroOS em ação
+        SmartAgroOS em ação
       </div>
     </a>
   )

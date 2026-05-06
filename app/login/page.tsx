@@ -37,7 +37,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <AgroOSLogo size={36} />
-            <span className="font-bold text-2xl text-[#0f172a]">AgroOS</span>
+            <span className="font-bold text-2xl text-[#0f172a]">SmartAgroOS</span>
           </Link>
           <h1 className="text-2xl font-bold text-[#0f172a]">Bem-vindo de volta</h1>
           <p className="text-[#64748b] mt-1 text-sm">Entre na sua conta para continuar</p>

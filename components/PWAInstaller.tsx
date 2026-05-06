@@ -62,9 +62,9 @@ export default function PWAInstaller() {
     return (
       <div className="fixed bottom-6 left-4 right-4 z-50 bg-[#0f172a] text-white rounded-2xl p-4 shadow-2xl border border-white/10 animate-in slide-in-from-bottom-4 max-w-sm mx-auto">
         <div className="flex items-start gap-3">
-          <img src="/icons/icon-192.png" alt="AgroOS" className="w-10 h-10 rounded-xl flex-shrink-0" />
+          <img src="/icons/icon-192.png" alt="SmartAgroOS" className="w-10 h-10 rounded-xl flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="font-semibold text-sm mb-0.5">Instalar AgroOS</div>
+            <div className="font-semibold text-sm mb-0.5">Instalar SmartAgroOS</div>
             <div className="text-xs text-slate-400 leading-relaxed">
               Toque em <span className="inline-flex items-center gap-0.5 text-white font-medium">
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M13.75 7h-3v5.296l1.943-2.048a.75.75 0 011.114 1.004l-3.25 3.5a.75.75 0 01-1.114 0l-3.25-3.5a.75.75 0 111.114-1.004l1.943 2.048V7h-3a.75.75 0 010-1.5h8.5a.75.75 0 010 1.5z" /></svg>
@@ -85,9 +85,9 @@ export default function PWAInstaller() {
   return (
     <div className="fixed bottom-6 left-4 right-4 z-50 bg-[#0f172a] text-white rounded-2xl overflow-hidden shadow-2xl border border-white/10 max-w-sm mx-auto">
       <div className="bg-[#16a34a] px-4 py-3 flex items-center gap-3">
-        <img src="/icons/icon-192.png" alt="AgroOS" className="w-10 h-10 rounded-xl flex-shrink-0" />
+        <img src="/icons/icon-192.png" alt="SmartAgroOS" className="w-10 h-10 rounded-xl flex-shrink-0" />
         <div>
-          <div className="text-white font-bold text-sm">Instalar AgroOS</div>
+          <div className="text-white font-bold text-sm">Instalar SmartAgroOS</div>
           <div className="text-green-200 text-xs">Sistema Operacional da Fazenda</div>
         </div>
       </div>

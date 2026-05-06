@@ -32,7 +32,7 @@ const STEPS = [
     badge: 'Para produtores',
     title: 'Capte capital em 4 passos',
     desc: 'Como produtor, você cria um token representando o valor da sua safra ou ativo. Investidores compram frações e você recebe o capital para financiar a produção.',
-    detail: 'Cada token passa por análise (aprovação da equipe AgroToken), laudo de capacidade produtiva gerado automaticamente com seus dados do AgroOS, e fica disponível no marketplace.',
+    detail: 'Cada token passa por análise (aprovação da equipe AgroToken), laudo de capacidade produtiva gerado automaticamente com seus dados do SmartAgroOS, e fica disponível no marketplace.',
     visual: (
       <div className="space-y-2">
         {[

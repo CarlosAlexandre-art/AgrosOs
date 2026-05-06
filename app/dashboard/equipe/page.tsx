@@ -21,7 +21,11 @@ export default async function EquipePage() {
       properties: {
         include: {
           teamMembers: {
-            include: { activities: { orderBy: { createdAt: 'desc' }, take: 3 } },
+            include: {
+              activities: {
+                select: { id: true, status: true },
+              },
+            },
           },
         },
       },

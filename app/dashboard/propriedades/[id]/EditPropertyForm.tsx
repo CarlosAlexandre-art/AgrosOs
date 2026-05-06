@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   property: {
@@ -29,20 +28,22 @@ export default function EditPropertyForm({ property }: Props) {
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
+    e.target.value = ''
     if (!file) return
     setUploading(true)
-    const supabase = createClient()
-    const ext = file.name.split('.').pop()
-    const path = `property-covers/${property.id}-${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage.from('property-covers').upload(path, file, { upsert: true })
-    if (uploadError) {
-      setError('Erro ao fazer upload da foto.')
-      setUploading(false)
+    setError('')
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('propertyId', property.id)
+    const res = await fetch('/api/properties/cover', { method: 'POST', body: fd })
+    setUploading(false)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Erro desconhecido' }))
+      setError(err.error || 'Erro ao fazer upload da foto.')
       return
     }
-    const { data } = supabase.storage.from('property-covers').getPublicUrl(path)
-    setCoverUrl(data.publicUrl)
-    setUploading(false)
+    const { coverUrl: newUrl } = await res.json()
+    setCoverUrl(newUrl)
   }
 
   async function handleSave(e: { preventDefault(): void }) {

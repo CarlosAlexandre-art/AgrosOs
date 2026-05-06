@@ -276,7 +276,7 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
           </div>
-          <p className="text-xs text-slate-400 mt-3">Laudo gerado automaticamente com base nos dados operacionais do AgroOS.</p>
+          <p className="text-xs text-slate-400 mt-3">Laudo gerado automaticamente com base nos dados operacionais do SmartAgroOS.</p>
         </div>
       )}
 

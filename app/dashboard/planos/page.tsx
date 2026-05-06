@@ -108,7 +108,7 @@ export default function PlanosPage() {
     <div className="p-6 space-y-8 max-w-5xl mx-auto">
       <div className="text-center">
         <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-          🌱 Planos AgroOS
+          🌱 Planos SmartAgroOS
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Escolha o plano ideal</h1>
         <p className="text-slate-500 max-w-md mx-auto">

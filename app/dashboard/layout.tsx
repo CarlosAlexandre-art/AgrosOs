@@ -270,7 +270,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Link href="/" className="flex items-center gap-2.5">
           <AgroOSLogo size={34} />
           <div>
-            <div className="font-bold text-white text-base leading-none">AgroOS</div>
+            <div className="font-bold text-white text-base leading-none">SmartAgroOS</div>
             <div className="text-[10px] text-slate-500 mt-0.5 leading-none">Sistema Operacional</div>
           </div>
         </Link>
@@ -406,7 +406,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
 
           <div className="hidden md:flex items-center gap-2 text-sm text-slate-500">
-            <span className="font-medium text-slate-800">AgroOS</span>
+            <span className="font-medium text-slate-800">SmartAgroOS</span>
           </div>
 
           <div className="flex items-center gap-3 ml-auto">

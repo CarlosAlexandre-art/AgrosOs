@@ -8,6 +8,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   Operações: 'bg-blue-100 text-blue-700',
   AgroLink: 'bg-green-100 text-green-700',
   Equipe: 'bg-orange-100 text-orange-700',
+  Agronegócio: 'bg-amber-100 text-amber-700',
 }
 
 export async function generateStaticParams() {
@@ -22,9 +23,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   // Converte markdown básico para HTML simples
   const html = post.content
+    .replace(/^---$/gm, '<hr class="my-8 border-slate-200"/>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`)
     .replace(/\n\n/g, '</p><p>')
@@ -85,7 +88,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <div className="mt-12 bg-[#f0fdf4] rounded-2xl border border-green-200 p-8 text-center">
             <div className="text-3xl mb-3">🌾</div>
             <h3 className="text-xl font-bold text-[#0f172a] mb-2">Pronto para colocar em prática?</h3>
-            <p className="text-[#64748b] mb-6">Comece a usar o AgroOS gratuitamente e leve o controle para sua fazenda.</p>
+            <p className="text-[#64748b] mb-6">Comece a usar o SmartAgroOS gratuitamente e leve o controle para sua fazenda.</p>
             <Link href="/cadastro" className="inline-flex items-center gap-2 bg-[#16a34a] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#15803d] transition-colors shadow-md shadow-green-200">
               Criar conta grátis →
             </Link>
@@ -98,7 +101,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             </div>
             <div>
               <div className="font-semibold text-sm text-[#0f172a]">{post.author}</div>
-              <div className="text-xs text-[#94a3b8]">AgroOS</div>
+              <div className="text-xs text-[#94a3b8]">SmartAgroOS</div>
             </div>
           </div>
         </article>

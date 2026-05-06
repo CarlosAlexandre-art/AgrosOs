@@ -63,7 +63,7 @@ const PASSOS = [
     num: '03',
     fase: 'Gestão',
     titulo: 'Gerencie operação, equipe e financeiro',
-    desc: 'Crie atividades, atribua à equipe, acompanhe o andamento e veja os custos entrando automaticamente. O AgroOS organiza tudo para que você passe menos tempo gerenciando e mais tempo decidindo.',
+    desc: 'Crie atividades, atribua à equipe, acompanhe o andamento e veja os custos entrando automaticamente. O SmartAgroOS organiza tudo para que você passe menos tempo gerenciando e mais tempo decidindo.',
     detalhes: ['Atividades com prazo, responsável e status', 'Custo por hectare calculado automaticamente', 'Alertas inteligentes quando algo sai do padrão'],
     cor: 'bg-orange-50 border-orange-200',
     numCor: 'text-orange-600',
@@ -90,7 +90,7 @@ const PASSOS = [
     num: '04',
     fase: 'Expansão',
     titulo: 'Expanda com o AgroCore',
-    desc: 'Quando precisar de serviços externos — pulverização aérea, análise de solo, transporte — acesse o AgroCore direto do AgroOS. Contrate, acompanhe e veja o custo entrar no relatório automaticamente.',
+    desc: 'Quando precisar de serviços externos — pulverização aérea, análise de solo, transporte — acesse o AgroCore direto do SmartAgroOS. Contrate, acompanhe e veja o custo entrar no relatório automaticamente.',
     detalhes: ['Marketplace com prestadores qualificados', 'Rastreabilidade da execução em tempo real', 'Custo externo integrado ao financeiro'],
     cor: 'bg-purple-50 border-purple-200',
     numCor: 'text-purple-600',
@@ -200,9 +200,9 @@ export default function ComoFuncionaPage() {
             <h2 className="text-3xl font-bold text-[#0f172a] text-center mb-12">Perguntas rápidas</h2>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
               {[
-                { p: 'Preciso instalar alguma coisa?', r: 'Não. O AgroOS roda direto no navegador. Em celulares, pode ser adicionado à tela inicial como app — mas não é obrigatório.' },
+                { p: 'Preciso instalar alguma coisa?', r: 'Não. O SmartAgroOS roda direto no navegador. Em celulares, pode ser adicionado à tela inicial como app — mas não é obrigatório.' },
                 { p: 'Minha equipe no campo precisa de treinamento?', r: 'Não. A interface foi desenhada para ser intuitiva. A maioria dos usuários opera sem qualquer treinamento formal.' },
-                { p: 'Posso usar o AgroOS sem o AgroCore?', r: 'Sim. O AgroCore é opcional. Você tem controle completo da operação interna independente da integração.' },
+                { p: 'Posso usar o SmartAgroOS sem o AgroCore?', r: 'Sim. O AgroCore é opcional. Você tem controle completo da operação interna independente da integração.' },
                 { p: 'Os dados financeiros ficam seguros?', r: 'Sim. Todos os dados são criptografados e hospedados em servidores seguros. Nenhuma informação é compartilhada com terceiros.' },
               ].map(faq => (
                 <div key={faq.p} className="px-8 py-5">

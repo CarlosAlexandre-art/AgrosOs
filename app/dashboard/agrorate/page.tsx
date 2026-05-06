@@ -198,11 +198,11 @@ export default function AgroRateDashboard() {
             <div style={{fontSize:48,marginBottom:16}}>🌾</div>
             <h2 style={{fontWeight:800,color:'rgba(255,255,255,.85)',fontSize:18,marginBottom:8}}>Configure sua fazenda para gerar o score</h2>
             <p style={{color:'rgba(255,255,255,.35)',fontSize:13,lineHeight:1.6,marginBottom:24}}>
-              O AgroRate é calculado com os dados da sua propriedade no AgroOS. Registre receitas, custos e atividades para começar.
+              O AgroRate é calculado com os dados da sua propriedade no SmartAgroOS. Registre receitas, custos e atividades para começar.
             </p>
             <a href="https://agroos.site" target="_blank" rel="noopener noreferrer"
               style={{display:'inline-flex',alignItems:'center',gap:8,background:'linear-gradient(135deg,#16a34a,#059669)',color:'#fff',fontWeight:700,padding:'12px 24px',borderRadius:12,textDecoration:'none',boxShadow:'0 0 24px rgba(22,163,74,.35)'}}>
-              Abrir AgroOS →
+              Abrir SmartAgroOS →
             </a>
           </motion.div>
         ) : (
@@ -302,7 +302,7 @@ export default function AgroRateDashboard() {
                     <div style={{fontWeight:700,color:'rgba(255,255,255,.5)',fontSize:11,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:16}}>Como melhorar</div>
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
                       {[
-                        data.productionScore < 600 && { icon:'🌾', text:'Registre receitas de culturas no AgroOS para aumentar Produção', hi:true },
+                        data.productionScore < 600 && { icon:'🌾', text:'Registre receitas de culturas no SmartAgroOS para aumentar Produção', hi:true },
                         data.efficiencyScore < 600 && { icon:'💰', text:'Reduza custos ou aumente receita para melhorar Eficiência', hi:true },
                         data.behaviorScore < 600 && { icon:'📋', text:'Lance custos todo mês — consistência melhora Comportamento', hi:false },
                         data.dataCompleteness < 80 && { icon:'📊', text:'Complete o perfil da propriedade (talhões, culturas, equipe)', hi:false },

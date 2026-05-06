@@ -19,7 +19,7 @@ function header(doc: jsPDF, title: string, subtitle: string) {
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(20)
   doc.setFont('helvetica', 'bold')
-  doc.text('AgroOS', 14, 16)
+  doc.text('SmartAgroOS', 14, 16)
 
   doc.setFontSize(8)
   doc.setFont('helvetica', 'normal')
@@ -50,7 +50,7 @@ function footer(doc: jsPDF, pageNum: number) {
   doc.setFontSize(7)
   doc.setTextColor(100, 116, 139)
   doc.setFont('helvetica', 'normal')
-  doc.text('AgroOS — Sistema Operacional da Fazenda', 14, pageHeight - 4)
+  doc.text('SmartAgroOS — Sistema Operacional da Fazenda', 14, pageHeight - 4)
   doc.text(`Página ${pageNum}`, 196, pageHeight - 4, { align: 'right' })
 }
 
@@ -182,7 +182,7 @@ export function exportFinanceiroPDF(data: {
   doc.text('TOTAL GERAL', 17, y + 6.5)
   doc.text(`R$ ${data.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 195, y + 6.5, { align: 'right' })
 
-  doc.save(`AgroOS-Financeiro-${data.propertyName.replace(/\s/g, '_')}.pdf`)
+  doc.save(`SmartAgroOS-Financeiro-${data.propertyName.replace(/\s/g, '_')}.pdf`)
 }
 
 // ─── RELATÓRIO OPERAÇÕES ────────────────────────────────────────────────────
@@ -256,7 +256,7 @@ export function exportOperacoesPDF(data: {
     }
   })
 
-  doc.save(`AgroOS-Operacoes-${data.propertyName.replace(/\s/g, '_')}.pdf`)
+  doc.save(`SmartAgroOS-Operacoes-${data.propertyName.replace(/\s/g, '_')}.pdf`)
 }
 
 // ─── RELATÓRIO METAS ────────────────────────────────────────────────────────
@@ -334,7 +334,7 @@ export function exportMetasPDF(data: {
     }
   })
 
-  doc.save(`AgroOS-Metas-${data.propertyName.replace(/\s/g, '_')}.pdf`)
+  doc.save(`SmartAgroOS-Metas-${data.propertyName.replace(/\s/g, '_')}.pdf`)
 }
 
 // ─── RELATÓRIO PROPRIEDADE ──────────────────────────────────────────────────
@@ -430,5 +430,5 @@ export function exportPropriedadePDF(data: {
     })
   }
 
-  doc.save(`AgroOS-Propriedade-${data.property.name.replace(/\s/g, '_')}.pdf`)
+  doc.save(`SmartAgroOS-Propriedade-${data.property.name.replace(/\s/g, '_')}.pdf`)
 }

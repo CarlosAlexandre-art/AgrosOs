@@ -32,7 +32,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-base sm:text-xl text-[#64748b] max-w-2xl mx-auto mb-10 leading-relaxed">
-            O AgroOS centraliza planejamento, execução e controle da sua fazenda em um único lugar — e integra com o AgroCore para contratar serviços sem sair do sistema.
+            O SmartAgroOS centraliza planejamento, execução e controle da sua fazenda em um único lugar — e integra com o AgroCore para contratar serviços sem sair do sistema.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -148,7 +148,7 @@ export default function HomePage() {
               { icon: '👷', title: 'Equipe', desc: 'Atribua tarefas, acompanhe produtividade e meça desempenho de cada membro.', href: '/funcionalidades/equipe', color: 'bg-orange-50', iconBg: 'bg-orange-100' },
               { icon: '🌾', title: 'Propriedades', desc: 'Organize fazendas, divida em talhões e associe culturas. A base de tudo.', href: '/funcionalidades/propriedades', color: 'bg-green-50', iconBg: 'bg-green-100' },
               { icon: '🤖', title: 'Inteligência IA', desc: 'Alertas automáticos e insights que transformam dados em decisão estratégica.', href: '/funcionalidades/inteligencia', color: 'bg-rose-50', iconBg: 'bg-rose-100' },
-              { icon: '🔗', title: 'AgroCore', desc: 'Solicite serviços terceirizados integrados diretamente do AgroOS.', href: '/agrocore', color: 'bg-teal-50', iconBg: 'bg-teal-100' },
+              { icon: '🔗', title: 'AgroCore', desc: 'Solicite serviços terceirizados integrados diretamente do SmartAgroOS.', href: '/agrocore', color: 'bg-teal-50', iconBg: 'bg-teal-100' },
             ].map(f => (
               <Link key={f.title} href={f.href} className={`${f.color} rounded-2xl p-6 border border-white hover:shadow-lg hover:-translate-y-0.5 transition-all group`}>
                 <div className={`${f.iconBg} w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4`}>
@@ -171,7 +171,7 @@ export default function HomePage() {
           <div className="text-center mb-12">
             <div className="text-sm font-semibold text-[#16a34a] uppercase tracking-wider mb-3">Veja na prática</div>
             <h2 className="text-4xl font-bold text-[#0f172a]">Do campo ao controle,<br />em um único sistema</h2>
-            <p className="text-[#64748b] mt-3 max-w-xl mx-auto">Veja como o AgroOS transforma a operação de uma fazenda real.</p>
+            <p className="text-[#64748b] mt-3 max-w-xl mx-auto">Veja como o SmartAgroOS transforma a operação de uma fazenda real.</p>
           </div>
 
           <VideoPlayer />
@@ -194,7 +194,7 @@ export default function HomePage() {
             {[
               { step: '01', icon: '🌾', title: 'Cadastro e configuração', desc: 'Configure sua propriedade, talhões, culturas e equipe em menos de 10 minutos.' },
               { step: '02', icon: '📋', title: 'Organize as operações', desc: 'Crie atividades, atribua responsáveis e defina prazos. O campo organizado começa aqui.' },
-              { step: '03', icon: '🔗', title: 'Execute com o AgroCore', desc: 'Precisa de serviço externo? Solicite via AgroCore diretamente do AgroOS. Sem fricção.' },
+              { step: '03', icon: '🔗', title: 'Execute com o AgroCore', desc: 'Precisa de serviço externo? Solicite via AgroCore diretamente do SmartAgroOS. Sem fricção.' },
               { step: '04', icon: '📊', title: 'Analise e cresça', desc: 'Relatórios automáticos e alertas inteligentes mostram onde aumentar o faturamento.' },
             ].map(s => (
               <div key={s.step} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow flex gap-5">
@@ -227,7 +227,7 @@ export default function HomePage() {
                 </div>
                 <h2 className="text-4xl font-bold text-white mb-4">Conectado ao AgroCore</h2>
                 <p className="text-gray-400 leading-relaxed mb-8">
-                  O AgroCore é o marketplace de serviços agrícolas integrado ao AgroOS. Solicite pulverização, colheita, transporte e mais — sem sair do sistema, com controle total de custo e execução.
+                  O AgroCore é o marketplace de serviços agrícolas integrado ao SmartAgroOS. Solicite pulverização, colheita, transporte e mais — sem sair do sistema, com controle total de custo e execução.
                 </p>
                 <Link href="/agrocore" className="inline-flex items-center gap-2 bg-[#16a34a] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#15803d] transition-colors">
                   Acessar AgroCore
@@ -287,7 +287,7 @@ export default function HomePage() {
                 {[
                   { icon: '🏦', title: 'Captação de Capital', desc: 'Produtor tokeniza safra e capta recursos de múltiplos investidores' },
                   { icon: '📈', title: 'Retorno Real', desc: 'Investidor recebe retorno lastreado em produção agrícola verificada' },
-                  { icon: '📋', title: 'Laudo Automático', desc: 'Capacidade produtiva calculada com dados reais do AgroOS' },
+                  { icon: '📋', title: 'Laudo Automático', desc: 'Capacidade produtiva calculada com dados reais do SmartAgroOS' },
                   { icon: '🔒', title: 'Conformidade CVM', desc: 'Operação estruturada dentro da Resolução CVM 88' },
                 ].map(item => (
                   <div key={item.title} className="bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/8 transition-colors">
@@ -320,7 +320,7 @@ export default function HomePage() {
       </section>
 
       <footer className="px-6 py-8 border-t border-gray-100 text-center text-sm text-[#94a3b8]">
-        © 2026 AgroOS · O sistema operacional da fazenda moderna
+        © 2026 SmartAgroOS · O sistema operacional da fazenda moderna
       </footer>
     </div>
   )

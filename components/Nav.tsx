@@ -93,7 +93,7 @@ export default function Nav() {
     <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-white/90 backdrop-blur-md border-b border-gray-100">
       <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
         <AgroOSLogo size={34} />
-        <span className="font-bold text-xl text-[#0f172a]">AgroOS</span>
+        <span className="font-bold text-xl text-[#0f172a]">SmartAgroOS</span>
       </Link>
 
       <nav ref={navRef} className="hidden md:flex items-center gap-1 text-sm font-medium text-[#64748b]">

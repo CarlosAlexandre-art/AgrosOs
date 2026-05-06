@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { Suspense } from 'react'
 import MarkReadButton from './MarkReadButton'
+import MarkOneButton from './MarkOneButton'
 import TabNav from './TabNav'
 
 const ALERT_ICON: Record<string, string> = {
@@ -17,7 +18,7 @@ const ALERT_MEANING: Record<string, string> = {
   LATE:    'Atividade atrasada — tarefa não concluída após a data limite',
   COST:    'Custo registrado — novo lançamento financeiro na propriedade',
   WEATHER: 'Alerta climático — condição meteorológica relevante para a safra',
-  SYSTEM:  'Sistema — atualização ou notificação da plataforma AgroOS',
+  SYSTEM:  'Sistema — atualização ou notificação da plataforma SmartAgroOS',
   INFO:    'Informação — comunicado geral sobre sua operação',
 }
 
@@ -101,6 +102,9 @@ function AbaAtivos({ alerts }: { alerts: any[] }) {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-slate-900">{a.message}</p>
                   <p className="text-xs text-slate-400 mt-1">{fmtDate(a.createdAt)}</p>
+                  <div className="mt-2">
+                    <MarkOneButton alertId={a.id} />
+                  </div>
                 </div>
                 <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-1" />
               </div>
@@ -163,7 +167,7 @@ function AbaHistorico({ alerts }: { alerts: any[] }) {
                   <p className="text-xs text-slate-400 mt-0.5">{fmtDate(a.createdAt)}</p>
                   <p className="text-xs text-slate-500 mt-1.5 leading-relaxed border-t border-slate-50 pt-1.5">
                     <span className="font-semibold">O que significa: </span>
-                    {ALERT_MEANING[a.type] ?? 'Alerta da plataforma AgroOS'}
+                    {ALERT_MEANING[a.type] ?? 'Alerta da plataforma SmartAgroOS'}
                   </p>
                 </div>
               </div>

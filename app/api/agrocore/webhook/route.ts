@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { sendPushToUser } from '@/lib/push'
 import { createAlert } from '@/lib/alerts'
 
-// Mapeia status do AgroCore → status da atividade no AgroOS
+// Mapeia status do AgroCore → status da atividade no SmartAgroOS
 const STATUS_MAP: Record<string, string> = {
   PROCURANDO:          'IN_PROGRESS',
   AGUARDANDO_PROPOSTA: 'IN_PROGRESS',
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
-  const { serviceId, status, prestadorNome } = await req.json()
+  const { serviceId, status, prestadorNome, valor, tipo } = await req.json()
   if (!serviceId || !status) {
     return NextResponse.json({ error: 'serviceId e status obrigatórios' }, { status: 400 })
   }
@@ -65,6 +65,19 @@ export async function POST(req: NextRequest) {
     where: { id: activity.id },
     data: updateData,
   })
+
+  // Registrar custo quando serviço concluído
+  if (status === 'CONCLUIDO' && valor && Number(valor) > 0) {
+    await prisma.cost.create({
+      data: {
+        propertyId: activity.propertyId,
+        activityId: activity.id,
+        amount: Number(valor),
+        category: 'AGROLINK',
+        description: tipo ? `Serviço AgroCore: ${tipo}` : 'Serviço AgroCore',
+      },
+    }).catch(() => {})
+  }
 
   // Push + alerta para o dono da propriedade
   const notif = STATUS_NOTIF[status]

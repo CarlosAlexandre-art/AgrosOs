@@ -6,7 +6,7 @@ import PWAInstaller from '@/components/PWAInstaller'
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' })
 
 export const metadata: Metadata = {
-  title: 'AgroOS — Sistema Operacional da Fazenda',
+  title: 'SmartAgroOS — Sistema Operacional da Fazenda',
   description: 'Planeje, execute e controle toda a operação da sua fazenda em um único lugar.',
   icons: {
     icon: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'AgroOS',
+    title: 'SmartAgroOS',
   },
 }
 
