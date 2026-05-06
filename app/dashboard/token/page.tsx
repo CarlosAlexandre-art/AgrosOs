@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-type Stats = { totalTokens: number; activeTokens: number; totalCaptado: number; totalInvestido: number }
+type Stats = { totalTokens: number; activeTokens: number; totalValue: number; investors: number }
 
 function fmt(v: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v)
@@ -191,25 +191,25 @@ export default function TokenHubPage() {
         {/* Stats */}
         {stats && (
           <div className="at-stat-row" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
             border: '1px solid rgba(22,163,74,0.12)',
             borderRadius: 16, overflow: 'hidden',
             marginBottom: 28, gap: '1px',
             background: 'rgba(22,163,74,0.08)',
           }}>
             {[
-              { label: 'Seus tokens', value: String(stats.totalTokens) },
+              { label: 'Tokens vendidos', value: String(stats.totalTokens) },
               { label: 'Ativos', value: String(stats.activeTokens) },
-              { label: 'Captado', value: fmt(stats.totalCaptado) },
-              { label: 'Investido', value: fmt(stats.totalInvestido) },
+              { label: 'Volume captado', value: fmt(stats.totalValue) },
+              { label: 'Investidores', value: String(stats.investors) },
             ].map(s => (
               <div key={s.label} style={{
-                background: 'rgba(2,12,8,0.92)', padding: '18px 14px',
+                background: 'rgba(2,12,8,0.92)', padding: '16px 18px',
               }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
                   {s.label}
                 </div>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: '#e2faea' }}>
+                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800, color: '#e2faea' }}>
                   {s.value}
                 </div>
               </div>
