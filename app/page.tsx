@@ -36,7 +36,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link href="/login" className="inline-flex items-center justify-center bg-[#16a34a] text-white font-bold text-base px-8 py-4 rounded-2xl hover:bg-[#15803d] transition-all shadow-xl shadow-green-200 hover:shadow-green-300 hover:-translate-y-0.5">
+            <Link href="/login" className="btn-primary inline-flex items-center justify-center bg-[#16a34a] text-white font-bold text-base px-8 py-4 rounded-2xl hover:bg-[#15803d] shadow-xl shadow-green-200 hover:shadow-green-300/70 hover:shadow-2xl hover:-translate-y-0.5">
               Começar agora grátis
             </Link>
             <Link href="/demo" className="inline-flex items-center justify-center gap-2 border-2 border-[#e2e8f0] text-[#0f172a] font-semibold text-base px-8 py-4 rounded-2xl hover:border-[#16a34a] hover:text-[#16a34a] transition-all bg-white">

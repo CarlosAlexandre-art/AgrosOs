@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 type EnergySource = 'GRID' | 'SOLAR' | 'GERADOR' | 'HIBRIDO'
 type EnergyRecord = {
@@ -23,24 +23,13 @@ const SOURCE_META: Record<EnergySource, { label: string; icon: string; color: st
 
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
-const STORAGE_KEY = 'agroos_energy_records'
-
-function loadRecords(): EnergyRecord[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch { return [] }
-}
-
-function saveRecords(records: EnergyRecord[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)) } catch { /* ignore */ }
-}
-
 const curYear = new Date().getFullYear()
 const curMonth = new Date().getMonth() + 1
 
 export default function EnergiaPage() {
   const [records, setRecords] = useState<EnergyRecord[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
@@ -52,7 +41,15 @@ export default function EnergiaPage() {
   const [cost, setCost] = useState('')
   const [notes, setNotes] = useState('')
 
-  useEffect(() => { setRecords(loadRecords()) }, [])
+  const loadRecords = useCallback(async () => {
+    try {
+      const res = await fetch('/api/energia')
+      if (res.ok) setRecords(await res.json())
+    } catch { /* ignore */ }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { loadRecords() }, [loadRecords])
 
   function resetForm() {
     setEditId(null)
@@ -78,28 +75,46 @@ export default function EnergiaPage() {
     setShowForm(true)
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!consumption && !cost) return
-    const record: EnergyRecord = {
-      id: editId ?? crypto.randomUUID(),
+    setSaving(true)
+    const body = {
       month, year, source,
       consumption: Number(consumption) || 0,
       production: Number(production) || 0,
       cost: Number(cost) || 0,
       notes,
     }
-    const next = editId
-      ? records.map(r => r.id === editId ? record : r)
-      : [record, ...records]
-    setRecords(next)
-    saveRecords(next)
+    try {
+      if (editId) {
+        const res = await fetch(`/api/energia/${editId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (res.ok) {
+          const updated = await res.json()
+          setRecords(prev => prev.map(r => r.id === editId ? updated : r))
+        }
+      } else {
+        const res = await fetch('/api/energia', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+        if (res.ok) {
+          const created = await res.json()
+          setRecords(prev => [created, ...prev.filter(r => !(r.month === month && r.year === year))])
+        }
+      }
+    } catch { /* ignore */ }
+    setSaving(false)
     resetForm()
   }
 
-  function handleDelete(id: string) {
-    const next = records.filter(r => r.id !== id)
-    setRecords(next)
-    saveRecords(next)
+  async function handleDelete(id: string) {
+    setRecords(prev => prev.filter(r => r.id !== id))
+    await fetch(`/api/energia/${id}`, { method: 'DELETE' })
   }
 
   // Agregados
@@ -109,10 +124,15 @@ export default function EnergiaPage() {
   const totalProduction = yearRecords.reduce((s, r) => s + r.production, 0)
   const selfSufficiency = totalConsumption > 0 ? Math.min(100, Math.round((totalProduction / totalConsumption) * 100)) : 0
 
-  // Último mês
   const lastRecord = [...yearRecords].sort((a, b) => b.month - a.month)[0]
 
   const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v)
+
+  if (loading) return (
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4">
+      {[1,2,3].map(i => <div key={i} className="h-24 bg-slate-100 rounded-2xl animate-pulse"/>)}
+    </div>
+  )
 
   return (
     <div className="p-4 sm:p-6 space-y-5 max-w-4xl mx-auto">
@@ -151,11 +171,11 @@ export default function EnergiaPage() {
       {/* Último registro */}
       {lastRecord && (
         <div className="bg-gradient-to-r from-[#052e16] to-[#14532d] rounded-2xl p-5 text-white flex items-center gap-5">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${SOURCE_META[lastRecord.source].bg}`}>
-            {SOURCE_META[lastRecord.source].icon}
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${SOURCE_META[lastRecord.source as EnergySource]?.bg}`}>
+            {SOURCE_META[lastRecord.source as EnergySource]?.icon}
           </div>
           <div className="flex-1">
-            <div className="text-xs text-white/60 mb-0.5">{MONTHS[lastRecord.month - 1]}/{lastRecord.year} — {SOURCE_META[lastRecord.source].label}</div>
+            <div className="text-xs text-white/60 mb-0.5">{MONTHS[lastRecord.month - 1]}/{lastRecord.year} — {SOURCE_META[lastRecord.source as EnergySource]?.label}</div>
             <div className="font-bold text-white">{lastRecord.consumption} kWh consumidos · {fmt(lastRecord.cost)}</div>
             {lastRecord.production > 0 && (
               <div className="text-xs text-emerald-300 mt-0.5">{lastRecord.production} kWh gerados via solar</div>
@@ -173,7 +193,7 @@ export default function EnergiaPage() {
           </div>
           <div className="divide-y divide-slate-50">
             {[...records].sort((a, b) => b.year !== a.year ? b.year - a.year : b.month - a.month).map(r => {
-              const meta = SOURCE_META[r.source]
+              const meta = SOURCE_META[r.source as EnergySource] || SOURCE_META.GRID
               return (
                 <div key={r.id} className="px-5 py-4 flex items-center gap-4">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${meta.bg}`}>
@@ -236,7 +256,6 @@ export default function EnergiaPage() {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              {/* Mês / Ano */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Mês</label>
@@ -254,7 +273,6 @@ export default function EnergiaPage() {
                 </div>
               </div>
 
-              {/* Fonte */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Fonte de energia</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -268,7 +286,6 @@ export default function EnergiaPage() {
                 </div>
               </div>
 
-              {/* Consumo / Custo */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Consumo (kWh)</label>
@@ -284,7 +301,6 @@ export default function EnergiaPage() {
                 </div>
               </div>
 
-              {/* Produção solar */}
               {(source === 'SOLAR' || source === 'HIBRIDO') && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Produção solar (kWh)</label>
@@ -294,25 +310,21 @@ export default function EnergiaPage() {
                 </div>
               )}
 
-              {/* Observações */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Observações <span className="font-normal normal-case text-slate-400">(opcional)</span></label>
                 <input type="text" value={notes} onChange={e => setNotes(e.target.value)}
-                  placeholder="Ex: conta de luz alta por causa da seca"
+                  placeholder="Ex: fatura de maio, gerador 8h/dia..."
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#16a34a]"/>
               </div>
-
-              <div className="flex gap-3 pt-1">
-                <button type="button" onClick={resetForm}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                  Cancelar
-                </button>
-                <button type="button" onClick={handleSave}
-                  disabled={!consumption && !cost}
-                  className="flex-1 py-2.5 rounded-xl bg-[#16a34a] text-white text-sm font-semibold hover:bg-[#15803d] disabled:opacity-50 transition-colors">
-                  {editId ? 'Salvar' : 'Registrar'}
-                </button>
-              </div>
+            </div>
+            <div className="px-6 pb-6 flex gap-3">
+              <button onClick={resetForm} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={handleSave} disabled={saving || (!consumption && !cost)}
+                className="flex-1 py-2.5 rounded-xl bg-[#16a34a] text-white text-sm font-semibold hover:bg-[#15803d] transition-colors disabled:opacity-50">
+                {saving ? 'Salvando...' : editId ? 'Salvar' : 'Registrar'}
+              </button>
             </div>
           </div>
         </div>

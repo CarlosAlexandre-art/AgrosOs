@@ -87,7 +87,8 @@ model Property {
   goals        Goal[]
   agroRate     AgroRate?
   creditRequests CreditRequest[]
-  agroTokens   AgroToken[]
+  agroTokens    AgroToken[]
+  energyRecords EnergyRecord[]
   createdAt    DateTime     @default(now())
 }
 
@@ -398,4 +399,22 @@ model TokenTransaction {
 
   @@index([tokenId])
   @@index([buyerId])
+}
+
+model EnergyRecord {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  month       Int
+  year        Int
+  source      String
+  consumption Float    @default(0)
+  production  Float    @default(0)
+  cost        Float    @default(0)
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([propertyId, month, year])
+  @@index([propertyId])
 }

@@ -189,7 +189,7 @@ function SidebarLink({
       onClick={onClick}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative ${
         active
-          ? 'bg-[#16a34a] text-white shadow-sm'
+          ? 'bg-[#16a34a] text-white shadow-sm shadow-green-900/40'
           : 'text-slate-400 hover:text-white hover:bg-white/8'
       }`}
     >
@@ -273,7 +273,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const Sidebar = ({ mobile }: { mobile?: boolean }) => (
-    <aside className={`flex flex-col bg-[#0f172a] h-full ${mobile ? 'w-full' : 'w-64'}`}>
+    <aside className={`flex flex-col h-full ${mobile ? 'w-full' : 'w-64'}`} style={{background: 'linear-gradient(180deg, #0b1628 0%, #0f172a 60%, #0c1f0e 100%)'}}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8 flex-shrink-0">
         <Link href="/" className="flex items-center gap-2.5">
@@ -425,7 +425,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </svg>
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
             </Link>
-            <Link href="/dashboard/operacoes/nova" className="hidden sm:flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#15803d] transition-colors">
+            <Link href="/dashboard/operacoes/nova" className="btn-primary hidden sm:flex items-center gap-1.5 bg-[#16a34a] text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[#15803d] shadow-sm shadow-green-200 hover:shadow-green-300/50 hover:shadow-md">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>

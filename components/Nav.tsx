@@ -146,7 +146,7 @@ export default function Nav() {
               </div>
               <span className="font-medium text-[#0f172a] max-w-[120px] truncate">{userName}</span>
             </div>
-            <Link href="/dashboard" className="text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-all shadow-md shadow-green-200 flex items-center gap-1.5">
+            <Link href="/dashboard" className="btn-primary text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] shadow-md shadow-green-200 hover:shadow-green-300/60 hover:shadow-lg flex items-center gap-1.5">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
               Ir para o painel
             </Link>
@@ -156,7 +156,7 @@ export default function Nav() {
             <Link href="/login" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a] transition-colors px-4 py-2">
               Entrar
             </Link>
-            <Link href="/login" className="text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] transition-all shadow-md shadow-green-200">
+            <Link href="/login" className="btn-primary text-sm font-bold bg-[#16a34a] text-white px-5 py-2.5 rounded-xl hover:bg-[#15803d] shadow-md shadow-green-200 hover:shadow-green-300/60 hover:shadow-lg">
               Começar grátis
             </Link>
           </>
