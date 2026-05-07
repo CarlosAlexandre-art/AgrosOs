@@ -18,11 +18,15 @@ export async function GET() {
   const propertyId = await getPropertyId(user.id)
   if (!propertyId) return NextResponse.json([])
 
-  const records = await prisma.energyRecord.findMany({
-    where: { propertyId },
-    orderBy: [{ year: 'desc' }, { month: 'desc' }],
-  })
-  return NextResponse.json(records)
+  try {
+    const records = await prisma.energyRecord.findMany({
+      where: { propertyId },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    })
+    return NextResponse.json(records)
+  } catch {
+    return NextResponse.json([])
+  }
 }
 
 export async function POST(req: NextRequest) {
