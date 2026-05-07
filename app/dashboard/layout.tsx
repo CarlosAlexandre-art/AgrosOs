@@ -115,6 +115,15 @@ const NAV = [
         ),
       },
       {
+        href: '/dashboard/vegetacao',
+        label: 'Índice Vegetal',
+        icon: (
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-5.07-.7.7M6.29 17.71l-.7.7m12.02 0-.7-.7M6.29 6.29l-.7-.7M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        ),
+      },
+      {
         href: '/dashboard/inventario',
         label: 'Inventário Florestal',
         icon: (
