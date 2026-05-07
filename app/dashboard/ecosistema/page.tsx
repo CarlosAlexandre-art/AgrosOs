@@ -106,8 +106,9 @@ function ConstellationCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const ctxMaybe = canvas.getContext('2d')
+    if (!ctxMaybe) return
+    const ctx = ctxMaybe
 
     let raf: number
     let W = canvas.offsetWidth
@@ -380,7 +381,7 @@ export default function EcossistemaPage() {
 
           {/* CTA */}
           <div className="ory-hero-cta" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <a href="/dashboard" className="ory-cta-btn" style={{
+            <a href="/dashboard/agrocore" className="ory-cta-btn" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '13px 28px',
               background: '#22c55e',
@@ -391,12 +392,12 @@ export default function EcossistemaPage() {
               textDecoration: 'none',
               boxShadow: '0 8px 32px rgba(34,197,94,0.25)',
             }}>
-              Acessar plataforma
+              AgroCore
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </a>
-            <a href="#produtos" style={{
+            <a href="/dashboard/agrorate" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '13px 28px',
               background: 'transparent',
@@ -411,7 +412,7 @@ export default function EcossistemaPage() {
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.45)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4ade80' }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.22)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4a7c5c' }}
             >
-              Conhecer o ecossistema
+              AgroRate
             </a>
           </div>
         </div>
@@ -848,7 +849,7 @@ export default function EcossistemaPage() {
           </p>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/dashboard" className="ory-cta-btn" style={{
+            <a href="/dashboard/agrocore" className="ory-cta-btn" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '15px 36px',
               background: '#22c55e',
@@ -859,12 +860,12 @@ export default function EcossistemaPage() {
               textDecoration: 'none',
               boxShadow: '0 8px 40px rgba(34,197,94,0.22)',
             }}>
-              Acessar agora
+              AgroCore
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </a>
-            <a href="/dashboard/planos" style={{
+            <a href="/dashboard/agrorate" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '15px 36px',
               background: 'transparent',
@@ -879,7 +880,7 @@ export default function EcossistemaPage() {
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.42)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4ade80' }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.2)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4a7c5c' }}
             >
-              Ver planos
+              AgroRate
             </a>
           </div>
         </div>

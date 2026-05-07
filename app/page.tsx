@@ -302,6 +302,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* OryonAG Ecosystem Banner */}
+      <section className="px-6 py-20">
+        <div className="max-w-5xl mx-auto">
+          <Link href="/ecosistema" className="group block rounded-3xl overflow-hidden relative" style={{background: 'linear-gradient(135deg, #020c05 0%, #041409 60%, #030e07 100%)'}}>
+            {/* Constellation pattern */}
+            <div className="absolute inset-0 pointer-events-none opacity-40"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Ccircle cx='10' cy='10' r='1' fill='rgba(74,222,128,0.3)'/%3E%3Ccircle cx='50' cy='20' r='0.8' fill='rgba(74,222,128,0.25)'/%3E%3Ccircle cx='30' cy='50' r='1.2' fill='rgba(74,222,128,0.3)'/%3E%3Cline x1='10' y1='10' x2='50' y2='20' stroke='rgba(74,222,128,0.08)' stroke-width='0.5'/%3E%3Cline x1='50' y1='20' x2='30' y2='50' stroke='rgba(74,222,128,0.08)' stroke-width='0.5'/%3E%3C/svg%3E")`, backgroundSize: '60px 60px' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full blur-3xl" style={{background: 'radial-gradient(ellipse, rgba(34,197,94,0.08), transparent)'}} />
+            <div className="relative px-10 py-12 md:px-16 md:py-14 flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse" />
+                  <span className="text-[#4ade80] text-xs font-mono font-medium tracking-widest uppercase">Ecossistema OryonAG</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-[#f0fdf4] leading-tight mb-3" style={{fontFamily: 'Georgia, serif', letterSpacing: '-0.02em'}}>
+                  Inteligência que conecta<br />
+                  <span style={{color: '#4ade80'}}>o agro ao futuro.</span>
+                </h2>
+                <p className="text-[#3a6648] text-sm md:text-base leading-relaxed max-w-md">
+                  O SmartAgroOS é parte do OryonAG — um ecossistema com marketplace agrícola, sistema operacional e crédito rural integrados.
+                </p>
+              </div>
+              <div className="flex-shrink-0 flex items-center gap-3 text-[#4ade80] font-semibold text-sm group-hover:gap-5 transition-all">
+                Conhecer o ecossistema
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Final */}
       <section className="px-6 py-24 bg-[#f8fafc]">
         <div className="max-w-3xl mx-auto text-center">
