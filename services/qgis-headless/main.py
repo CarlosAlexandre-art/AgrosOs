@@ -6,6 +6,7 @@ Usage:
   uvicorn main:app --host 0.0.0.0 --port 8000
   docker compose up
 """
+import base64
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -14,6 +15,7 @@ from algorithms import (
     run_hbv96, run_hifd, run_atdi, run_gla, run_farm_hifd,
     HBVResult, HIFDResult, ATDIResult, GLAResult, FarmHIFDResult,
 )
+from netflora import list_models, detect, MODEL_REGISTRY
 
 app = FastAPI(
     title="QGIS Headless Microservice",
@@ -161,3 +163,60 @@ def gla(body: GLARequest):
         land_use=body.land_use,
     )
     return asdict(result)
+
+
+# ── Netflora ──────────────────────────────────────────────────────────────────
+@app.get("/netflora/models", response_model=list, summary="List Netflora Models")
+def netflora_models():
+    """Returns the list of available Netflora ONNX models with download status."""
+    return list_models()
+
+
+@app.get("/netflora/status/{model_id}", response_model=dict, summary="Netflora Model Status")
+def netflora_status(model_id: str):
+    """Returns download status and metadata for a specific Netflora model."""
+    if model_id not in MODEL_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Modelo desconhecido: {model_id}")
+    info = MODEL_REGISTRY[model_id]
+    from netflora import WEIGHTS_DIR
+    downloaded = (WEIGHTS_DIR / f"{model_id}.onnx").exists()
+    return {
+        "model_id": model_id,
+        "biome": info["biome"],
+        "category": info["category"],
+        "description": info["description"],
+        "n_classes": len(info["classes"]),
+        "downloaded": downloaded,
+    }
+
+
+class NetfloraDetectRequest(BaseModel):
+    model_id: str = Field(description="Model ID from MODEL_REGISTRY (e.g. 'amazonia_geral')")
+    image_b64: str = Field(description="Base64-encoded image bytes (JPEG or PNG)")
+    confidence_threshold: float = Field(default=0.5, ge=0.1, le=0.95, description="Minimum detection confidence")
+
+
+@app.post("/netflora/detect", response_model=dict, summary="Netflora Species Detection")
+def netflora_detect(body: NetfloraDetectRequest):
+    """
+    Runs Netflora YOLO/ONNX detection on a drone or satellite image.
+    Downloads the model on first use (~120-280 MB, cached locally).
+    Returns detected species with bounding boxes and confidence scores.
+    """
+    try:
+        image_bytes = base64.b64decode(body.image_b64)
+    except Exception:
+        raise HTTPException(status_code=422, detail="image_b64 não é base64 válido")
+
+    try:
+        result = detect(
+            model_id=body.model_id,
+            image_bytes=image_bytes,
+            confidence_threshold=body.confidence_threshold,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return result
