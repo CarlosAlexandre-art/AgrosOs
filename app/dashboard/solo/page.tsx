@@ -4,7 +4,7 @@ import { useState } from 'react'
 import HowToUse from '../../../components/HowToUse'
 
 const EXEMPLO_PERFIL = {
-  profiles: [
+  items: [
     {
       id: "perfil-001",
       name: "Perfil A — Área de plantio",

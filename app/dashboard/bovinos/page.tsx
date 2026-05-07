@@ -35,6 +35,32 @@ interface Transacao {
 
 type Tab = 'animal' | 'racas' | 'transacoes'
 
+const DEMO_TRANSITO: Transito = {
+  codigo: 'GTA-2024-001234',
+  animal: {
+    identificacao: 'BR 3512 0000 0012 345',
+    especie: 'Bovina',
+    raca: 'Nelore',
+    sexo: 'Macho',
+    nascimento: '2022-03-15',
+  },
+  estabelecimento_origem: { nome: 'Fazenda Boa Esperança', municipio: 'Uberlândia', uf: 'MG' },
+  estabelecimento_destino: { nome: 'Frigorífico Central MT', municipio: 'Cuiabá', uf: 'MT' },
+  data: '2024-11-08',
+  status: 'APROVADO',
+}
+
+const DEMO_TRANSACOES: Transacao[] = [
+  { token: 'BOV-TK-7F3A1C9E', data: '2024-11-08', protocolo: 'PROT-2024-001', status: 'CONCLUÍDA', animal: { identificacao: 'BR 3512 0000 0012 345' }, esg_score: 87 },
+  { token: 'BOV-TK-2D8B4F61', data: '2024-11-07', protocolo: 'PROT-2024-002', status: 'CONCLUÍDA', animal: { identificacao: 'BR 3512 0000 0098 712' }, esg_score: 72 },
+  { token: 'BOV-TK-A5C3E817', data: '2024-11-06', protocolo: 'PROT-2024-003', status: 'CONCLUÍDA', animal: { identificacao: 'BR 3512 0000 0045 891' }, esg_score: 91 },
+  { token: 'BOV-TK-9E2F7D40', data: '2024-11-05', protocolo: 'PROT-2024-004', status: 'PENDENTE',  animal: { identificacao: 'BR 3512 0000 0023 456' }, esg_score: 55 },
+  { token: 'BOV-TK-C1B6A3F2', data: '2024-11-04', protocolo: 'PROT-2024-005', status: 'CONCLUÍDA', animal: { identificacao: 'BR 3512 0000 0067 234' }, esg_score: 83 },
+  { token: 'BOV-TK-4D7E2C98', data: '2024-11-03', protocolo: 'PROT-2024-006', status: 'CONCLUÍDA', animal: { identificacao: 'BR 3512 0000 0011 789' }, esg_score: 66 },
+  { token: 'BOV-TK-F8A1B5D3', data: '2024-11-02', protocolo: 'PROT-2024-007', status: 'CONCLUÍDA', animal: { identificacao: 'BR 3512 0000 0089 345' }, esg_score: 94 },
+  { token: 'BOV-TK-3C9E4A71', data: '2024-11-01', protocolo: 'PROT-2024-008', status: 'CANCELADA', animal: { identificacao: 'BR 3512 0000 0034 567' }, esg_score: 38 },
+]
+
 export default function BovinosPage() {
   const [tab, setTab] = useState<Tab>('animal')
   const [codigo, setCodigo] = useState('')
@@ -46,12 +72,30 @@ export default function BovinosPage() {
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [pagina, setPagina] = useState(1)
+  const [modoDemo, setModoDemo] = useState(false)
 
   useEffect(() => {
     if (tab === 'racas' && racas.length === 0) carregarRacas()
     if (tab === 'transacoes') carregarTransacoes(1)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab])
+
+  useEffect(() => {
+    if (tab === 'transacoes') {
+      if (modoDemo) {
+        setTransacoes(DEMO_TRANSACOES)
+        setError('')
+      } else {
+        carregarTransacoes(1)
+      }
+    }
+    if (tab === 'animal' && modoDemo) {
+      setTransito(DEMO_TRANSITO)
+      setCodigo(DEMO_TRANSITO.codigo)
+      setError('')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modoDemo])
 
   async function carregarRacas() {
     setLoading(true); setError('')
@@ -65,6 +109,7 @@ export default function BovinosPage() {
   }
 
   const carregarTransacoes = useCallback(async (p: number) => {
+    if (modoDemo) { setTransacoes(DEMO_TRANSACOES); setPagina(1); return }
     setLoading(true); setError('')
     try {
       const params = new URLSearchParams({ pagina: String(p) })
@@ -77,9 +122,14 @@ export default function BovinosPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro')
     } finally { setLoading(false) }
-  }, [dataInicio, dataFim])
+  }, [dataInicio, dataFim, modoDemo])
 
   async function buscarAnimal() {
+    if (modoDemo) {
+      setTransito(DEMO_TRANSITO)
+      setError('')
+      return
+    }
     if (!codigo.trim()) return
     setLoading(true); setError(''); setTransito(null)
     try {
@@ -107,11 +157,32 @@ export default function BovinosPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
             </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-sm font-bold text-white">Rastreabilidade Bovina</h1>
             <p className="text-[10px] text-slate-500">BovTrace · Embrapa — rastreamento e auditoria ESG</p>
           </div>
+          {/* Demo toggle */}
+          <button
+            onClick={() => setModoDemo(v => !v)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+            style={modoDemo
+              ? { background: 'rgba(251,191,36,0.2)', border: '1px solid rgba(251,191,36,0.4)', color: '#fbbf24' }
+              : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#64748b' }
+            }
+          >
+            <span style={{ fontSize: 10 }}>●</span>
+            {modoDemo ? 'Demo ativo' : 'Modo demo'}
+          </button>
         </div>
+
+        {modoDemo && (
+          <div className="px-6 pb-3">
+            <div className="px-3 py-2 rounded-xl text-xs text-amber-300 flex items-center gap-2" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.15)' }}>
+              <span>⚠️</span>
+              <span>Modo demonstração — dados simulados. Desative para usar a API BovTrace real.</span>
+            </div>
+          </div>
+        )}
 
         <div className="px-6 pb-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           <HowToUse
@@ -146,7 +217,7 @@ export default function BovinosPage() {
           ))}
         </div>
 
-        {error && (
+        {error && !modoDemo && (
           <div className="px-4 py-3 rounded-xl text-sm text-red-400" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
             {error}
           </div>
@@ -160,19 +231,22 @@ export default function BovinosPage() {
               <div className="flex gap-3">
                 <input
                   type="text"
-                  placeholder="Ex: 1234567890"
+                  placeholder={modoDemo ? DEMO_TRANSITO.codigo : 'Ex: 1234567890'}
                   value={codigo}
                   onChange={e => setCodigo(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && buscarAnimal()}
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white placeholder-slate-500 outline-none"
                   style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
                 />
-                <button onClick={buscarAnimal} disabled={loading || !codigo.trim()}
+                <button onClick={buscarAnimal} disabled={loading || (!modoDemo && !codigo.trim())}
                   className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40"
                   style={{ background: '#d97706' }}>
                   {loading ? 'Buscando...' : 'Rastrear'}
                 </button>
               </div>
+              {modoDemo && (
+                <p className="text-[11px] text-amber-500/60 mt-2">Demo: clique em Rastrear para ver um animal de exemplo</p>
+              )}
             </div>
 
             {transito && (
@@ -181,6 +255,9 @@ export default function BovinosPage() {
                   <span className="text-amber-400 font-bold text-sm">Animal encontrado</span>
                   {transito.status && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>{transito.status}</span>
+                  )}
+                  {modoDemo && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24' }}>DEMO</span>
                   )}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -247,66 +324,90 @@ export default function BovinosPage() {
         {/* Tab: Transações */}
         {tab === 'transacoes' && (
           <div className="space-y-4">
-            <div className="flex flex-wrap gap-3 items-end rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div>
-                <label className="block text-[10px] text-slate-500 mb-1">Data início</label>
-                <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
-                  className="px-3 py-2 rounded-xl text-sm text-white outline-none"
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />
+            {!modoDemo && (
+              <div className="flex flex-wrap gap-3 items-end rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div>
+                  <label className="block text-[10px] text-slate-500 mb-1">Data início</label>
+                  <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)}
+                    className="px-3 py-2 rounded-xl text-sm text-white outline-none"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-500 mb-1">Data fim</label>
+                  <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
+                    className="px-3 py-2 rounded-xl text-sm text-white outline-none"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />
+                </div>
+                <button onClick={() => carregarTransacoes(1)} disabled={loading}
+                  className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40"
+                  style={{ background: '#d97706' }}>
+                  {loading ? 'Carregando...' : 'Filtrar'}
+                </button>
               </div>
-              <div>
-                <label className="block text-[10px] text-slate-500 mb-1">Data fim</label>
-                <input type="date" value={dataFim} onChange={e => setDataFim(e.target.value)}
-                  className="px-3 py-2 rounded-xl text-sm text-white outline-none"
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />
-              </div>
-              <button onClick={() => carregarTransacoes(1)} disabled={loading}
-                className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40"
-                style={{ background: '#d97706' }}>
-                {loading ? 'Carregando...' : 'Filtrar'}
-              </button>
-            </div>
+            )}
 
-            {transacoes.length > 0 && (
+            {(transacoes.length > 0 || modoDemo) && (
               <div className="space-y-2">
-                {transacoes.map(t => (
+                {(modoDemo ? DEMO_TRANSACOES : transacoes).map(t => (
                   <div key={t.token} className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-mono text-amber-400 truncate">{t.token}</span>
-                        {t.status && <span className="text-[10px] px-2 py-0.5 rounded-full text-green-400" style={{ background: 'rgba(34,197,94,0.1)' }}>{t.status}</span>}
+                        {t.status && (
+                          <span
+                            className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                            style={{
+                              background: t.status === 'CONCLUÍDA' ? 'rgba(34,197,94,0.1)' : t.status === 'PENDENTE' ? 'rgba(251,191,36,0.1)' : 'rgba(239,68,68,0.1)',
+                              color: t.status === 'CONCLUÍDA' ? '#22c55e' : t.status === 'PENDENTE' ? '#fbbf24' : '#ef4444',
+                            }}>
+                            {t.status}
+                          </span>
+                        )}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5">
                         {t.data && <span>{t.data}</span>}
+                        {t.protocolo && <span className="ml-2 text-slate-600">{t.protocolo}</span>}
                         {t.animal?.identificacao && <span className="ml-2">Animal: {t.animal.identificacao}</span>}
                       </div>
                     </div>
                     {t.esg_score !== undefined && (
                       <div className="text-right flex-shrink-0">
-                        <div className="text-[10px] text-slate-500">ESG</div>
-                        <div className="text-sm font-bold" style={{ color: t.esg_score >= 70 ? '#22c55e' : t.esg_score >= 40 ? '#fbbf24' : '#ef4444' }}>
+                        <div className="text-[10px] text-slate-500 mb-0.5">ESG Score</div>
+                        <div className="text-lg font-bold leading-none" style={{ color: t.esg_score >= 70 ? '#22c55e' : t.esg_score >= 40 ? '#fbbf24' : '#ef4444' }}>
                           {t.esg_score}
+                        </div>
+                        <div className="text-[9px] mt-0.5" style={{ color: t.esg_score >= 70 ? '#16a34a' : t.esg_score >= 40 ? '#d97706' : '#dc2626' }}>
+                          {t.esg_score >= 70 ? 'Bom' : t.esg_score >= 40 ? 'Regular' : 'Ruim'}
                         </div>
                       </div>
                     )}
                   </div>
                 ))}
-                <div className="flex items-center justify-center gap-2 pt-1">
-                  <button onClick={() => carregarTransacoes(pagina - 1)} disabled={pagina <= 1}
-                    className="px-3 py-1.5 rounded-lg text-xs text-slate-400 disabled:opacity-30"
-                    style={{ background: 'rgba(255,255,255,0.06)' }}>← Anterior</button>
-                  <span className="text-xs text-slate-500">Página {pagina}</span>
-                  <button onClick={() => carregarTransacoes(pagina + 1)} disabled={transacoes.length < 10}
-                    className="px-3 py-1.5 rounded-lg text-xs text-slate-400 disabled:opacity-30"
-                    style={{ background: 'rgba(255,255,255,0.06)' }}>Próxima →</button>
-                </div>
+                {!modoDemo && (
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    <button onClick={() => carregarTransacoes(pagina - 1)} disabled={pagina <= 1}
+                      className="px-3 py-1.5 rounded-lg text-xs text-slate-400 disabled:opacity-30"
+                      style={{ background: 'rgba(255,255,255,0.06)' }}>← Anterior</button>
+                    <span className="text-xs text-slate-500">Página {pagina}</span>
+                    <button onClick={() => carregarTransacoes(pagina + 1)} disabled={transacoes.length < 10}
+                      className="px-3 py-1.5 rounded-lg text-xs text-slate-400 disabled:opacity-30"
+                      style={{ background: 'rgba(255,255,255,0.06)' }}>Próxima →</button>
+                  </div>
+                )}
               </div>
             )}
 
-            {!loading && transacoes.length === 0 && (
+            {!loading && !modoDemo && transacoes.length === 0 && (
               <div className="text-center py-16">
                 <div className="text-5xl mb-3">📦</div>
                 <div className="text-slate-500 text-sm">Nenhuma transação encontrada para o período</div>
+                <button
+                  onClick={() => setModoDemo(true)}
+                  className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+                  style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}
+                >
+                  Ativar modo demo para visualizar exemplo
+                </button>
               </div>
             )}
           </div>
