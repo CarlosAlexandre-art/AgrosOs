@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160">
   <rect width="560" height="160" rx="12" fill="#f8fafc"/>
-  <text x="20" y="28" font-family="Montserrat, sans-serif" font-size="13" font-weight="700" fill="#0f172a">PALETA DE CORES — AgroOS</text>
+  <text x="20" y="28" font-family="Montserrat, sans-serif" font-size="13" font-weight="700" fill="#0f172a">PALETA DE CORES — SmartAgroOS</text>
 
   <!-- Cor 1: Primary -->
   <rect x="20" y="40" width="76" height="76" rx="10" fill="#16a34a"/>

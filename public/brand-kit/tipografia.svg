@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 200">
   <rect width="560" height="200" rx="12" fill="#f8fafc"/>
-  <text x="20" y="28" font-family="Montserrat, sans-serif" font-size="13" font-weight="700" fill="#0f172a">TIPOGRAFIA — AgroOS</text>
+  <text x="20" y="28" font-family="Montserrat, sans-serif" font-size="13" font-weight="700" fill="#0f172a">TIPOGRAFIA — SmartAgroOS</text>
   <line x1="20" y1="36" x2="540" y2="36" stroke="#e2e8f0" stroke-width="1"/>
 
   <!-- Fonte primária -->
@@ -11,7 +11,7 @@
   <line x1="20" y1="128" x2="540" y2="128" stroke="#e2e8f0" stroke-width="1"/>
 
   <!-- Exemplos de uso -->
-  <text x="20" y="150" font-family="Montserrat, sans-serif" font-size="22" font-weight="800" fill="#16a34a">AgroOS — Sistema Operacional</text>
+  <text x="20" y="150" font-family="Montserrat, sans-serif" font-size="22" font-weight="800" fill="#16a34a">SmartAgroOS — Sistema Operacional</text>
   <text x="20" y="172" font-family="Montserrat, sans-serif" font-size="14" font-weight="600" fill="#0f172a">Planeje, execute e controle sua fazenda</text>
   <text x="20" y="190" font-family="Montserrat, sans-serif" font-size="11" font-weight="400" fill="#64748b">Texto de corpo e descrições secundárias do sistema</text>
 </svg>

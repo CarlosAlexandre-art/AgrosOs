@@ -7,5 +7,5 @@
   <line x1="100" y1="68" x2="126" y2="56" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
   <line x1="100" y1="95" x2="68" y2="82" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
   <line x1="100" y1="95" x2="132" y2="82" stroke="#16a34a" stroke-width="3" stroke-linecap="round" opacity="0.1"/>
-  <text x="100" y="178" font-family="Montserrat, sans-serif" font-size="18" font-weight="800" fill="#16a34a" opacity="0.1" text-anchor="middle">AgroOS</text>
+  <text x="100" y="178" font-family="Montserrat, sans-serif" font-size="18" font-weight="800" fill="#16a34a" opacity="0.1" text-anchor="middle">SmartAgroOS</text>
 </svg>

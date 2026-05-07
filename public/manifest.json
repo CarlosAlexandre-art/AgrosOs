@@ -1,6 +1,6 @@
 {
-  "name": "AgroOS — Sistema Operacional da Fazenda",
-  "short_name": "AgroOS",
+  "name": "SmartAgroOS — Sistema Operacional da Fazenda",
+  "short_name": "SmartAgroOS",
   "description": "Planeje, execute e controle toda a operação da sua fazenda em um único lugar.",
   "start_url": "/dashboard",
   "display": "standalone",

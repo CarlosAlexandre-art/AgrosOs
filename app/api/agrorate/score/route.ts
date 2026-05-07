@@ -8,11 +8,22 @@ interface ScoreWeights {
   operational: number;
 }
 
+interface PropertyWithRelations {
+  id: string;
+  name: string;
+  sizeHectares: number;
+  revenues: Array<{ amount: number }>;
+  costs: Array<{ amount: number }>;
+  fields: Array<{ id: string }>;
+  activities: Array<{ id: string; status: string }>;
+  teamMembers: Array<{ id: string }>;
+}
+
 const WEIGHTS: ScoreWeights = {
-  production: 0.30,
-  efficiency: 0.25,
-  behavior: 0.25,
-  operational: 0.20,
+  production: 0.60,    // 60% fazenda (produção)
+  efficiency: 0.10,     // 10% eficiência (remanescente)
+  behavior: 0.10,       // 10% comportamento
+  operational: 0.20,    // 20% perfil (operacional + docs)
 };
 
 const BENCHMARKS = {
@@ -142,19 +153,22 @@ async function calculateOperationalScore(propertyId: string): Promise<number> {
 
   if (!property) return 0;
 
-  const dataCompleteness =
-    (property.fields.length > 0 ? 20 : 0) +
-    (property.teamMembers.length > 0 ? 20 : 0) +
-    (property.costs.length > 0 ? 30 : 0) +
-    (property.revenues.length > 0 ? 30 : 0);
+  // Score de perfil (10% do total): baseado em atividades e equipe
+  const profileScore = Math.min(1000, (property.activities.length / 6) * 1000) * 0.7 + 
+                      (property.teamMembers.length > 0 ? 300 : 0);
 
-  const activityScore = Math.min(1000, (property.activities.length / 6) * 1000);
-  const completenessScore = dataCompleteness * 10;
+  // Score de documentos (10% do total): baseado na completude de dados
+  const dataCompletenessScore = 
+    (property.fields.length > 0 ? 250 : 0) +
+    (property.teamMembers.length > 0 ? 250 : 0) +
+    (property.costs.length > 0 ? 250 : 0) +
+    (property.revenues.length > 0 ? 250 : 0);
 
-  return Math.round(activityScore * 0.4 + completenessScore * 0.6);
+  // Combinar perfil (50%) + documentos (50%) = score operacional (20% do total)
+  return Math.round(profileScore * 0.5 + dataCompletenessScore * 0.5);
 }
 
-function getCategory(score: number): string {
+function getCategory(score: number): 'ELITE' | 'HIGH' | 'GOOD' | 'REGULAR' | 'LOW' | 'CRITICAL' {
   if (score >= 900) return 'ELITE';
   if (score >= 750) return 'HIGH';
   if (score >= 600) return 'GOOD';
@@ -176,7 +190,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let targetPropertyId = propertyId;
+    let targetPropertyId: string | undefined = propertyId || undefined;
 
     if (!propertyId && userId) {
       const user = await prisma.user.findUnique({
@@ -223,8 +237,8 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const totalRevenue = property?.revenues.reduce((sum, r) => sum + Number(r.amount), 0) || 0;
-    const totalCosts = property?.costs.reduce((sum, c) => sum + Number(c.amount), 0) || 0;
+    const totalRevenue = property?.revenues?.reduce((sum: number, r: any) => sum + Number(r.amount), 0) || 0;
+    const totalCosts = property?.costs?.reduce((sum: number, c: any) => sum + Number(c.amount), 0) || 0;
     const productivity = totalRevenue / (Number(property?.sizeHectares) || 1);
     const marginRate = totalRevenue > 0 ? (totalRevenue - totalCosts) / totalRevenue : 0;
 
@@ -241,11 +255,11 @@ export async function GET(request: NextRequest) {
         totalCosts,
         productivity,
         marginRate,
-        activityCount: property?.activities.length || 0,
+        activityCount: property?.activities?.length || 0,
         dataCompleteness: (Number(property?.sizeHectares) > 0 ? 20 : 0) +
-                          (property?.fields.length > 0 ? 20 : 0) +
-                          (property?.costs.length > 0 ? 30 : 0) +
-                          (property?.revenues.length > 0 ? 30 : 0),
+                          (property?.fields?.length > 0 ? 20 : 0) +
+                          (property?.costs?.length > 0 ? 30 : 0) +
+                          (property?.revenues?.length > 0 ? 30 : 0),
         lastCalculated: new Date(),
         nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       },
@@ -261,7 +275,7 @@ export async function GET(request: NextRequest) {
         totalCosts,
         productivity,
         marginRate,
-        activityCount: property?.activities.length || 0,
+        activityCount: property?.activities?.length || 0,
         dataCompleteness: 0.5,
         lastCalculated: new Date(),
         nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)

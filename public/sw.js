@@ -1,6 +1,6 @@
 self.addEventListener('push', function (event) {
   const data = event.data?.json() || {}
-  const title = data.title || 'AgroOS'
+  const title = data.title || 'SmartAgroOS'
   const options = {
     body: data.body || '',
     icon: '/icon-192.png',

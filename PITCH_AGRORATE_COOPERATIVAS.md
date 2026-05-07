@@ -246,7 +246,7 @@ MÊS 2+
 
 ## FAQ
 
-**P: Nossos produtores precisam usar o sistema AgroOS?**
+**P: Nossos produtores precisam usar o sistema SmartAgroOS?**
 R: Não necessariamente. Podemos integrar com seus dados existentes ou coletar dados públicos.
 
 **P: Quem tem acesso aos dados dos produtores?**

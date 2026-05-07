@@ -1,5 +1,5 @@
 ========================================
-  BRAND KIT — AgroOS
+  BRAND KIT — SmartAgroOS
   Sistema Operacional da Fazenda
 ========================================
 
@@ -45,5 +45,5 @@ REGRAS DE USO
 
 PRODUTO
 -------
-AgroOS — Sistema Operacional da Fazenda
+SmartAgroOS — Sistema Operacional da Fazenda
 Plataforma de gestão operacional agrícola integrada ao ecossistema AgroCore
