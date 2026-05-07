@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 interface ExportButtonsProps {
   onExportPDF: () => void
@@ -9,10 +9,23 @@ interface ExportButtonsProps {
 
 export default function ExportButtons({ onExportPDF, onExportExcel }: ExportButtonsProps) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, right: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      })
+    }
+  }, [open])
 
   return (
     <div className="relative">
       <button
+        ref={btnRef}
         onClick={() => setOpen(o => !o)}
         className="flex items-center gap-2 border border-slate-200 bg-white text-slate-700 font-semibold text-sm px-4 py-2.5 rounded-xl hover:border-slate-300 hover:bg-slate-50 active:scale-95 transition-all"
       >
@@ -27,8 +40,11 @@ export default function ExportButtons({ onExportPDF, onExportExcel }: ExportButt
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl border border-slate-200 shadow-lg z-50 overflow-hidden">
+          <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
+          <div
+            className="fixed w-48 bg-white rounded-xl border border-slate-200 shadow-xl z-[9999] overflow-hidden"
+            style={{ top: pos.top, right: pos.right }}
+          >
             <button
               onClick={() => { onExportPDF(); setOpen(false) }}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
