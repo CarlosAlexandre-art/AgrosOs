@@ -79,7 +79,7 @@ const QUESTIONS = [
 
 // ─── Score labels ─────────────────────────────────────────────────────────────
 const SCORE_LABELS: Record<string, string> = {
-  solo: 'Tipo de solo', recarga: 'Recarga', geologia: 'Geologia',
+  solo: 'Tipo de solo', recarga: 'Recarga hídrica', geologia: 'Formação geológica',
   profundidade: 'Profundidade do lençol', usoSolo: 'Uso do solo',
 }
 
@@ -378,11 +378,6 @@ function ResultCard({ result, compact, onRedo }: { result: AnalysisResult; compa
       </div>
     </>
   )
-}
-
-const SCORE_LABELS: Record<string, string> = {
-  solo: 'Tipo de solo', recarga: 'Recarga hídrica', geologia: 'Formação geológica',
-  profundidade: 'Profundidade do lençol', usoSolo: 'Uso do solo',
 }
 
 function RecommendationList({ level }: { level: string }) {
