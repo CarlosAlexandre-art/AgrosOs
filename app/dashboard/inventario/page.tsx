@@ -28,7 +28,7 @@ type DetectionResult = {
   total: number
   detections: Detection[]
   summary: Record<string, { count: number; avg_confidence: number }>
-  source: 'qgis-microservice' | 'demo'
+  source: 'qgis-microservice' | 'local-onnx' | 'demo'
   demo_notice?: string
 }
 
@@ -386,7 +386,7 @@ export default function InventarioPage() {
         {/* Results */}
         {result && (
           <div className="space-y-4">
-            {/* Demo notice */}
+            {/* Demo notice — só exibe se source for 'demo' (legado) */}
             {result.source === 'demo' && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700 flex items-start gap-2">
                 <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -394,7 +394,6 @@ export default function InventarioPage() {
                 </svg>
                 <div>
                   <span className="font-semibold">Modo demonstração</span> — {result.demo_notice}
-                  <span className="block mt-0.5 text-xs text-amber-600">Configure <code className="font-mono">QGIS_SERVICE_URL</code> no ambiente para usar o microserviço real.</span>
                 </div>
               </div>
             )}
@@ -421,9 +420,11 @@ export default function InventarioPage() {
                 <div className={`text-xs font-bold px-2 py-1 rounded-full inline-block mt-1 ${
                   result.source === 'qgis-microservice'
                     ? 'bg-emerald-100 text-emerald-700'
+                    : result.source === 'local-onnx'
+                    ? 'bg-blue-100 text-blue-700'
                     : 'bg-amber-100 text-amber-700'
                 }`}>
-                  {result.source === 'qgis-microservice' ? 'MICROSERVIÇO' : 'DEMO'}
+                  {result.source === 'qgis-microservice' ? 'MICROSERVIÇO' : result.source === 'local-onnx' ? 'ONNX LOCAL' : 'DEMO'}
                 </div>
                 <div className="text-xs text-slate-500 mt-1.5">Fonte dos dados</div>
               </div>

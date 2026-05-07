@@ -1,79 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-
-const MODEL_REGISTRY: Record<string, { biome: string; category: string; description: string; classes: Record<number, string> }> = {
-  amazonia_geral: {
-    biome: 'Amazônia', category: 'Geral',
-    description: '59 espécies — palmeiras, madeireiras, não-madeireiras, açaí, castanheira',
-    classes: {
-      0:'Tucumã',1:'Jací',2:'Jauari',3:'Inajá',4:'Uricuri',5:'Babaçu',
-      6:'Cocão',7:'Murumuru',8:'Açaí solteiro',9:'Açaí solteiro produtivo',
-      10:'Buritirana',11:'Buriti',12:'Patauá',13:'Bacaba',14:'Paxiuba',
-      15:'Cedro',16:'Castanheira',17:'Cumaru',18:'Sucupira',19:'Cacau',
-      20:'Café',21:'Guaraná',22:'Açaí touceira',23:'Árvore morta',
-      24:'Clareira',25:'Invasora',
-    },
-  },
-  amazonia_palmeiras: {
-    biome: 'Amazônia', category: 'Palmeiras',
-    description: '15 espécies de palmeiras amazônicas',
-    classes: {
-      0:'Tucumã',1:'Jací',2:'Jauari',3:'Inajá',4:'Uricuri',
-      5:'Babaçu',6:'Cocão',7:'Murumuru',8:'Açaí solteiro',
-      9:'Buritirana',10:'Buriti',11:'Patauá',12:'Bacaba',13:'Paxiuba',14:'Açaí touceira',
-    },
-  },
-  amazonia_acai_solteiro: {
-    biome: 'Amazônia', category: 'Açaí-solteiro',
-    description: 'Euterpe precatoria — 2 categorias (solteiro / produtivo)',
-    classes: { 0:'Açaí solteiro', 1:'Açaí solteiro produtivo' },
-  },
-  amazonia_castanheira: {
-    biome: 'Amazônia', category: 'Castanheira',
-    description: 'Detecção de Castanha-do-brasil (Bertholletia excelsa)',
-    classes: { 0:'Castanheira' },
-  },
-  amazonia_invasora: {
-    biome: 'Amazônia', category: 'Invasora',
-    description: 'Detecção de espécies invasoras em florestas amazônicas',
-    classes: { 0:'Invasora' },
-  },
-  cerrado_palmeiras: {
-    biome: 'Cerrado', category: 'Palmeiras',
-    description: 'Palmeiras do bioma Cerrado',
-    classes: { 0:'Buriti', 1:'Babaçu', 2:'Macaúba' },
-  },
-  cerrado_carvao: {
-    biome: 'Cerrado', category: 'Carvão/Biomassa',
-    description: 'Espécies lenhosas para estimativa de biomassa/carvão',
-    classes: { 0:'Espécie lenhosa' },
-  },
-  mata_atlantica_araucaria: {
-    biome: 'Mata Atlântica', category: 'Araucária',
-    description: 'Araucaria angustifolia — Pinheiro-do-paraná',
-    classes: { 0:'Araucária' },
-  },
-  mata_atlantica_palmeiras: {
-    biome: 'Mata Atlântica', category: 'Palmeiras',
-    description: 'Palmeiras da Mata Atlântica (Euterpe edulis, Syagrus, etc.)',
-    classes: { 0:'Juçara', 1:'Jerivá', 2:'Macaúba' },
-  },
-  caatinga_palmeiras: {
-    biome: 'Caatinga', category: 'Palmeiras',
-    description: 'Palmeiras da Caatinga (Carnaubeira, Licuri, etc.)',
-    classes: { 0:'Carnaubeira', 1:'Licuri', 2:'Macaúba' },
-  },
-  pantanal_palmeiras: {
-    biome: 'Pantanal', category: 'Palmeiras',
-    description: 'Palmeiras do Pantanal',
-    classes: { 0:'Bocaiuva', 1:'Buriti' },
-  },
-  pampa_palmeiras: {
-    biome: 'Pampa', category: 'Palmeiras',
-    description: 'Palmeiras do Pampa gaúcho',
-    classes: { 0:'Butiá' },
-  },
-}
+import { MODEL_REGISTRY, detectLocal } from '@/lib/netflora-inference'
 
 export async function GET() {
   const supabase = await createClient()
@@ -89,7 +16,7 @@ export async function GET() {
       })
       if (res.ok) return NextResponse.json(await res.json())
     } catch (_) {
-      // fall through to static registry
+      // fall through to local registry
     }
   }
 
@@ -119,52 +46,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'image_b64 obrigatório' }, { status: 422 })
   }
 
+  const threshold = body.confidence_threshold ?? 0.5
+
+  // 1) Tenta microserviço externo (QGIS_SERVICE_URL)
   const qgisUrl = process.env.QGIS_SERVICE_URL
   if (qgisUrl) {
     try {
       const proxyRes = await fetch(`${qgisUrl}/netflora/detect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model_id: body.model_id,
-          image_b64: body.image_b64,
-          confidence_threshold: body.confidence_threshold ?? 0.5,
-        }),
-        signal: AbortSignal.timeout(30000),
+        body: JSON.stringify({ model_id: body.model_id, image_b64: body.image_b64, confidence_threshold: threshold }),
+        signal: AbortSignal.timeout(30_000),
       })
       if (proxyRes.ok) {
         return NextResponse.json({ ...(await proxyRes.json()), source: 'qgis-microservice' })
       }
     } catch (_) {
-      // fall through to demo mode
+      // fall through to local inference
     }
   }
 
-  // Demo mode — microservice not available; return simulated result
-  const modelInfo = MODEL_REGISTRY[body.model_id]
-  const classNames = Object.values(modelInfo.classes)
-  const demoDetections = classNames.slice(0, Math.min(3, classNames.length)).map((name, i) => ({
-    class_id: i,
-    class_name: name,
-    confidence: parseFloat((0.72 + i * 0.05).toFixed(3)),
-    x1: 50 + i * 80, y1: 60 + i * 40,
-    x2: 130 + i * 80, y2: 140 + i * 40,
-    width: 80, height: 80,
-  }))
-
-  const summary: Record<string, { count: number; avg_confidence: number }> = {}
-  for (const d of demoDetections) {
-    summary[d.class_name] = { count: 1, avg_confidence: d.confidence }
+  // 2) Inferência local com onnxruntime-node + modelos do GitHub Releases
+  try {
+    const imageBuffer = Buffer.from(body.image_b64, 'base64')
+    const result = await detectLocal(body.model_id, imageBuffer, threshold)
+    return NextResponse.json(result)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Erro desconhecido'
+    console.error('[netflora] Erro na inferência local:', msg)
+    return NextResponse.json({ error: `Inferência falhou: ${msg}` }, { status: 500 })
   }
-
-  return NextResponse.json({
-    model_id: body.model_id,
-    biome: modelInfo.biome,
-    category: modelInfo.category,
-    total: demoDetections.length,
-    detections: demoDetections,
-    summary,
-    source: 'demo',
-    demo_notice: 'Microserviço QGIS não configurado. Resultados simulados para demonstração.',
-  })
 }
