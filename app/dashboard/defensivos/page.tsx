@@ -1,7 +1,67 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import HowToUse from '../../../components/HowToUse'
+
+function CustomSelect({ value, onChange, options, placeholder }: {
+  value: string
+  onChange: (v: string) => void
+  options: string[]
+  placeholder: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-white outline-none w-full sm:w-auto"
+        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', minWidth: 160 }}
+      >
+        <span className="flex-1 text-left truncate" style={{ color: value ? 'white' : '#64748b' }}>
+          {value || placeholder}
+        </span>
+        <svg className="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute top-full mt-1 left-0 z-50 rounded-xl overflow-auto shadow-xl"
+          style={{ background: '#0f1f16', border: '1px solid rgba(255,255,255,0.12)', minWidth: '100%', maxHeight: 240 }}>
+          <button
+            type="button"
+            onClick={() => { onChange(''); setOpen(false) }}
+            className="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-white/8"
+            style={{ color: value === '' ? '#22c55e' : '#94a3b8' }}
+          >
+            {placeholder}
+          </button>
+          {options.map(o => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => { onChange(o); setOpen(false) }}
+              className="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-white/8"
+              style={{ color: value === o ? '#22c55e' : '#e2e8f0' }}
+            >
+              {o}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const CULTURAS = [
   'Soja','Milho','Café','Cana-de-açúcar','Algodão','Arroz','Feijão','Trigo',
@@ -132,24 +192,18 @@ export default function DefensivosPage() {
                 style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
               />
             </div>
-            <select
+            <CustomSelect
               value={cultura}
-              onChange={e => setCultura(e.target.value)}
-              className="px-3 py-2.5 rounded-xl text-sm text-white outline-none"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-            >
-              <option value="">Todas as culturas</option>
-              {CULTURAS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select
+              onChange={setCultura}
+              options={CULTURAS}
+              placeholder="Todas as culturas"
+            />
+            <CustomSelect
               value={categoria}
-              onChange={e => setCategoria(e.target.value)}
-              className="px-3 py-2.5 rounded-xl text-sm text-white outline-none"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-            >
-              <option value="">Todas as categorias</option>
-              {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+              onChange={setCategoria}
+              options={CATEGORIAS}
+              placeholder="Todas as categorias"
+            />
           </div>
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer select-none">
