@@ -141,18 +141,19 @@ export default function TokenHubPage() {
       background: 'linear-gradient(160deg, #020c08 0%, #041409 60%, #030e07 100%)',
       minHeight: '100%',
       position: 'relative',
+      overflow: 'hidden',
     }}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      {/* Hexagonal grid bg */}
+      {/* Hexagonal grid bg — absolute para não vazar no sidebar */}
       <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 0L56 16.2V49L28 65.2L0 49V16.2Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3Cpath d='M28 33.8L56 50V82.8L28 99L0 82.8V50Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3C/svg%3E")`,
         backgroundSize: '56px 100px',
         opacity: 0.8,
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, padding: '48px 28px 56px', maxWidth: 720, margin: '0 auto' }}>
+      <div style={{ position: 'relative', zIndex: 1, padding: 'clamp(24px, 5vw, 48px) clamp(16px, 4vw, 28px) 56px', maxWidth: 720, margin: '0 auto' }}>
 
         {/* Eyebrow */}
         <div style={{
@@ -204,12 +205,12 @@ export default function TokenHubPage() {
               { label: 'Investidores', value: String(stats.investors) },
             ].map(s => (
               <div key={s.label} style={{
-                background: 'rgba(2,12,8,0.92)', padding: '16px 18px',
+                background: 'rgba(2,12,8,0.92)', padding: 'clamp(12px,3vw,16px) clamp(14px,3vw,18px)',
               }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
                   {s.label}
                 </div>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800, color: '#e2faea' }}>
+                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(18px,4vw,22px)', fontWeight: 800, color: '#e2faea' }}>
                   {s.value}
                 </div>
               </div>
@@ -225,8 +226,8 @@ export default function TokenHubPage() {
               href={card.href}
               className={`at-card at-c${i + 1}`}
               style={{
-                display: 'flex', alignItems: 'center', gap: 18,
-                padding: '20px 22px',
+                display: 'flex', alignItems: 'center', gap: 'clamp(12px,3vw,18px)',
+                padding: 'clamp(14px,3vw,20px) clamp(14px,3vw,22px)',
                 background: 'rgba(8, 22, 14, 0.85)',
                 border: '1px solid rgba(22,163,74,0.1)',
                 borderRadius: 14,
@@ -285,17 +286,17 @@ export default function TokenHubPage() {
 
         {/* Blockchain footer */}
         <div className="at-footer" style={{
-          display: 'flex', alignItems: 'center', gap: 12,
+          display: 'flex', alignItems: 'flex-start', gap: 12,
           padding: '14px 18px',
           background: 'rgba(4, 14, 9, 0.6)',
           border: '1px solid rgba(22,163,74,0.07)',
           borderRadius: 12,
         }}>
           <div className="at-dot" style={{
-            width: 7, height: 7, borderRadius: '50%',
+            width: 7, height: 7, borderRadius: '50%', marginTop: 4,
             background: '#16a34a', flexShrink: 0,
           }} />
-          <p style={{ fontSize: 12, color: '#2a5c3a', margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 'clamp(11px,2.5vw,12px)', color: '#2a5c3a', margin: 0, lineHeight: 1.7 }}>
             <strong style={{ color: '#3d7a52', fontWeight: 600 }}>Polygon Mainnet</strong>
             {' '}— contrato ERC-1155 · cada token tem ID único derivado do UUID · mint e transferências on-chain após aprovação admin
           </p>
