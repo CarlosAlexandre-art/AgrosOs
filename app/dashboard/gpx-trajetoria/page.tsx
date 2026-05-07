@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -147,6 +148,24 @@ export default function GpxTrajetoriaPage() {
           {fileName ? fileName.replace('.gpx','') : 'Carregar GPX'}
         </button>
         <input ref={fileRef} type="file" accept=".gpx" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+      </div>
+
+      {/* Educational guide */}
+      <div className="flex-shrink-0 border-b px-4 py-2" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(8,12,20,0.97)' }}>
+        <HowToUse
+          storageKey="gpx-trajetoria"
+          title="Trajetória Temporal GPX"
+          subtitle="Visualização animada com codificação de tempo por cor · GPX Space-Time Cube"
+          theme="dark"
+          accentColor="#06b6d4"
+          steps={[
+            { icon: '📤', title: 'Carregue um .GPX', description: 'Carregue um arquivo GPX com timestamps. O trajeto é plotado com cada segmento colorido pela posição no tempo.' },
+            { icon: '🎨', title: 'Legenda de tempo', description: 'Azul = início do percurso, passando por ciano, verde e âmbar, até vermelho = final. A cor indica o momento, não a velocidade.' },
+            { icon: '▶️', title: 'Reproduza o percurso', description: 'Clique em "Reproduzir" para animar o trajeto. Um marcador colorido avança pelo mapa em sincronismo com o tempo.' },
+            { icon: '🎚️', title: 'Navegue livremente', description: 'Use o slider para ir diretamente a qualquer ponto do percurso. O painel mostra lat, lng, hora e velocidade naquele instante.' },
+          ]}
+          tip="Arquivos GPX sem timestamps são suportados, mas a reprodução temporal não terá horário real — apenas posição sequencial."
+        />
       </div>
 
       <div className="flex flex-1 min-h-0">

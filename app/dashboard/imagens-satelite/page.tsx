@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -173,6 +174,24 @@ export default function ImagensSatelitePage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Educational guide */}
+      <div className="flex-shrink-0 border-b px-4 py-2" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(10,14,26,0.97)' }}>
+        <HowToUse
+          storageKey="imagens-satelite"
+          title="Imagens de Satélite Esri"
+          subtitle="Acesso a 6 camadas de imageamento via ArcGIS ImageServer"
+          theme="dark"
+          accentColor="#38bdf8"
+          steps={[
+            { icon: '🗺️', title: 'Mapa automático', description: 'O mapa carrega com a imagem de satélite True Color da Esri (World Imagery) com resolução sub-métrica em áreas urbanas e agrícolas.' },
+            { icon: '🔘', title: 'Troque a camada', description: 'Clique no botão "Serviços" para ver as 6 camadas disponíveis: satélite, topográfico, relevo sombreado, National Geographic, oceano e canvas cinza.' },
+            { icon: '📡', title: 'Escolha a camada', description: 'Selecione a camada ideal para sua análise. Satélite é melhor para identificar culturas; topográfico é ideal para análise de relevo e drenagem.' },
+            { icon: '💾', title: 'Exporte a área', description: 'Clique em "Exportar" para baixar a área visível no mapa como imagem PNG 2048×2048 pixels via API REST da Esri.' },
+          ]}
+          tip="A camada 'Relevo Sombreado' (Esri World Shaded Relief) é excelente para identificar padrões de drenagem e declividade do terreno sem dados LiDAR."
+        />
       </div>
 
       {/* Map */}

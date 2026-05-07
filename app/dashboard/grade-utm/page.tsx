@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -264,6 +265,24 @@ export default function GradeUTMPage() {
             GeoJSON
           </button>
         </div>
+      </div>
+
+      {/* Educational guide */}
+      <div className="flex-shrink-0 border-b px-4 py-2" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(11,17,32,0.97)' }}>
+        <HowToUse
+          storageKey="grade-utm"
+          title="Grade UTM de Talhões"
+          subtitle="Divisão georeferenciada em células métricas · GridZoneGenerator"
+          theme="dark"
+          accentColor="#22d3ee"
+          steps={[
+            { icon: '📍', title: 'Centragem automática', description: 'A grade já está centrada nas coordenadas da sua propriedade cadastrada. Certifique-se de ter definido a localização na página Mapa.' },
+            { icon: '📐', title: 'Tamanho da célula', description: 'Escolha entre 50m, 100m, 200m, 500m ou 1km. Células de 100m (1 ha) são ideais para manejo de talhões em lavoura.' },
+            { icon: '🔲', title: 'Extensão e rótulos', description: 'Ajuste o slider de extensão (5×5 a 20×20 células) e ative/desative os rótulos A1, B2... para cada célula no mapa.' },
+            { icon: '💾', title: 'Exporte o GeoJSON', description: 'Baixe o arquivo GeoJSON para importar no QGIS, ArcGIS ou qualquer outro sistema de informação geográfica.' },
+          ]}
+          tip="Passe o mouse sobre qualquer célula para ver seu ID (ex: B5) e coordenadas exatas. O ID é gerado por coluna (letra) e linha (número)."
+        />
       </div>
 
       <div className="flex flex-1 min-h-0">

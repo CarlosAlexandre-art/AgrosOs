@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -284,6 +285,24 @@ export default function GpxVelocidadePage() {
           {fileName ? fileName.replace('.gpx','') : 'Carregar GPX'}
         </button>
         <input ref={fileInputRef} type="file" accept=".gpx" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+      </div>
+
+      {/* Educational guide */}
+      <div className="flex-shrink-0 border-b px-4 py-2" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(13,13,20,0.97)' }}>
+        <HowToUse
+          storageKey="gpx-velocidade"
+          title="Análise de Velocidade GPS"
+          subtitle="Visualize o trajeto de máquinas agrícolas colorido por velocidade · GPXVelocityCalculation"
+          theme="dark"
+          accentColor="#fbbf24"
+          steps={[
+            { icon: '📤', title: 'Carregue um .GPX', description: 'Arraste ou clique para carregar um arquivo GPX exportado de GPS agrícola (Garmin, Trimble), aplicativo (OsmAnd, Strava) ou equipamento de campo.' },
+            { icon: '🗺️', title: 'Veja o trajeto', description: 'O trajeto aparece no mapa com cada segmento colorido pela velocidade: azul (lento) → verde → âmbar → laranja → vermelho (rápido).' },
+            { icon: '🏎️', title: 'Analise as estatísticas', description: 'O painel esquerdo exibe o velocímetro, distância total, duração, velocidade média, máxima e área aproximada cobrida pelo percurso.' },
+            { icon: '🔎', title: 'Identifique padrões', description: 'Segmentos lentos (azul) podem indicar manobras ou falhas mecânicas. Segmentos rápidos (vermelho) indicam deslocamento sem operação.' },
+          ]}
+          tip="Sem dados de tempo no GPX, o sistema usa 5 km/h como estimativa padrão. Para velocidades reais, certifique-se de que o GPS grava timestamps."
+        />
       </div>
 
       <div className="flex flex-1 min-h-0">

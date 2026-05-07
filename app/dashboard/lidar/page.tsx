@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 interface LidarPoint { lat: number; lng: number; elevation: number }
 
@@ -161,6 +162,21 @@ export default function LidarPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-5 py-5 space-y-5">
+        <HowToUse
+          storageKey="lidar"
+          title="Nuvem de Pontos LiDAR"
+          subtitle="Visualização e análise de arquivos LAS/CSV de elevação"
+          theme="dark"
+          accentColor="#a78bfa"
+          steps={[
+            { icon: '📤', title: 'Carregue o arquivo', description: 'Arraste um arquivo .CSV ou .XYZ com colunas lat, lng, elevation (ou x, y, z). Suporta separadores vírgula, ponto-e-vírgula e tab.' },
+            { icon: '📊', title: 'Veja as estatísticas', description: 'Elevação mínima, máxima, média, desvio padrão e amplitude são calculados automaticamente para todos os pontos.' },
+            { icon: '🎨', title: 'Visualize a nuvem', description: 'No modo Elevação, cada ponto é colorido por altitude (azul = baixo, vermelho = alto). No modo Densidade, veja onde os pontos se concentram.' },
+            { icon: '📦', title: 'Arquivos LAS binários', description: 'Arquivos .LAS não podem ser lidos diretamente no navegador. Use LAStools ou PDAL para converter para CSV antes de carregar.' },
+          ]}
+          tip="O limite é de 50.000 pontos por arquivo para manter boa performance. Para arquivos maiores, recorte a área de interesse antes de exportar o CSV."
+        />
+
         {/* Upload area or LAS notice */}
         {points.length === 0 && !isLasFile && (
           <div

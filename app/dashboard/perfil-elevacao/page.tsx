@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -203,6 +204,24 @@ export default function PerfilElevacaoPage() {
         {step === 'pick-start' && 'Clique no mapa para definir o ponto inicial do transecto'}
         {step === 'pick-end' && 'Agora clique no ponto final do transecto'}
         {step === 'done' && (loading ? 'Consultando elevações via Open-Elevation API...' : 'Perfil calculado — passe o mouse sobre o gráfico para ver detalhes')}
+      </div>
+
+      {/* Educational guide */}
+      <div className="flex-shrink-0 border-b px-4 py-2" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(13,17,23,0.97)' }}>
+        <HowToUse
+          storageKey="perfil-elevacao"
+          title="Perfil de Elevação do Terreno"
+          subtitle="Transecto topográfico entre dois pontos via Open-Elevation API"
+          theme="dark"
+          accentColor="#f59e0b"
+          steps={[
+            { icon: '🖱️', title: 'Clique no ponto inicial', description: 'Clique em qualquer lugar do mapa para definir o início do transecto. Um marcador verde indicará a posição escolhida.' },
+            { icon: '🖱️', title: 'Clique no ponto final', description: 'Clique no ponto final desejado. Uma linha tracejada âmbar conecta os dois pontos e a consulta de elevação é disparada automaticamente.' },
+            { icon: '⏳', title: 'Aguarde o perfil', description: 'A API Open-Elevation calcula até 60 amostras ao longo da linha reta entre os pontos. Se indisponível, um terreno sintético é gerado como fallback.' },
+            { icon: '📈', title: 'Explore o gráfico', description: 'Passe o mouse sobre o gráfico para ver a elevação e distância em cada ponto. O marcador no mapa se move sincronizado com o cursor.' },
+          ]}
+          tip="Clique em 'Novo transecto' no cabeçalho para reiniciar a medição. Use a camada topográfica do mapa para escolher transectos em áreas de maior variação de relevo."
+        />
       </div>
 
       {/* Map */}

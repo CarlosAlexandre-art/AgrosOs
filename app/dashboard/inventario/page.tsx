@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 type NetfloraModel = {
   id: string
@@ -197,6 +198,21 @@ export default function InventarioPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+        <HowToUse
+          storageKey="netflora"
+          title="Inventário Florestal com IA"
+          subtitle="Detecção automática de espécies nativas via Netflora · Embrapa Acre"
+          theme="light"
+          accentColor="#16a34a"
+          steps={[
+            { icon: '🌎', title: 'Selecione o bioma', description: 'Escolha o bioma correspondente à sua propriedade entre os 6 disponíveis: Amazônia, Cerrado, Mata Atlântica, Caatinga, Pantanal ou Pampa.' },
+            { icon: '🤖', title: 'Escolha o modelo', description: 'Selecione o modelo YOLO treinado para a categoria de espécie desejada dentro do bioma. Cada modelo cobre diferentes tipos de vegetação.' },
+            { icon: '📸', title: 'Faça upload da imagem', description: 'Carregue uma imagem de drone ou satélite em JPEG ou PNG. Resolução mínima recomendada de 10 cm/pixel para melhores resultados.' },
+            { icon: '🔍', title: 'Detecte e analise', description: 'Clique em "Detectar espécies". Bounding boxes coloridas aparecerão sobre cada espécie identificada na imagem com o percentual de confiança.' },
+          ]}
+          tip="Configure a variável QGIS_SERVICE_URL para usar o microserviço ONNX real. Sem ela, o sistema opera em modo demonstração com detecções simuladas."
+        />
+
         {/* Biome selector */}
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
           <h2 className="text-sm font-semibold text-slate-700 mb-3">1. Selecione o bioma da propriedade</h2>

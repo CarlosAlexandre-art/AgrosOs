@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import HowToUse from '../../../components/HowToUse'
 
 type MonthData = {
   month: string
@@ -123,6 +124,21 @@ export default function VegetacaoPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-6 space-y-5">
+        <HowToUse
+          storageKey="vegetacao"
+          title="Índice de Vegetação (NDVI Proxy)"
+          subtitle="Monitoramento da saúde da vegetação via balanço hídrico · Open-Meteo"
+          theme="dark"
+          accentColor="#22c55e"
+          steps={[
+            { icon: '🌧️', title: 'Dados automáticos', description: 'Precipitação e evapotranspiração (ET₀) dos últimos 12 meses são buscados automaticamente das coordenadas da sua propriedade.' },
+            { icon: '📊', title: 'Cálculo do NDVI proxy', description: 'O balanço hídrico mensal (chuva ÷ ET₀) é normalizado para gerar um índice de vegetação sem precisar de imagens de satélite NIR.' },
+            { icon: '📈', title: 'Analise a tendência', description: 'O gráfico de barras mostra a evolução mensal. Barras verdes indicam vegetação saudável; amarelas/vermelhas indicam estresse hídrico.' },
+            { icon: '💧', title: 'Balanço hídrico', description: 'A seção inferior compara chuva vs ET₀ mês a mês. Quando ET₀ supera chuva, a vegetação sofre déficit hídrico.' },
+          ]}
+          tip="O NDVI proxy é calculado com dados climáticos reais como substituto do índice espectral. Para NDVI real, você precisaria de imagens multiespectrais NIR."
+        />
+
         {loading && (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
