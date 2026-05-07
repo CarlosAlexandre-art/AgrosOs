@@ -62,14 +62,16 @@ const EXEMPLO_PERFIL = {
   ]
 }
 
+type ResultadoItem = {
+  ID_PONTO?: string
+  ORDEM?: string
+  SUBORDEM?: string
+  GDE_GRUPO?: string
+  SUBGRUPO?: string
+}
+
 type Resultado = {
-  classification?: string
-  order?: string
-  suborder?: string
-  great_group?: string
-  subgroup?: string
-  confidence?: number
-  profiles?: { id: string; classification: string; confidence?: number }[]
+  items?: ResultadoItem[]
 }
 
 const CODIGOS = [
@@ -236,45 +238,50 @@ export default function SoloPage() {
               </div>
             )}
 
-            {resultado && (
+            {resultado && resultado.items && resultado.items.length > 0 && (
               <div className="rounded-2xl p-5 space-y-4" style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.2)' }}>
-                <div className="flex items-center gap-2">
-                  <span className="text-violet-400 font-bold text-sm">Resultado SiBCS</span>
-                  {resultado.confidence !== undefined && (
-                    <span className="text-[11px] px-2 py-0.5 rounded-full text-violet-300" style={{ background: 'rgba(167,139,250,0.1)' }}>
-                      {Math.round(resultado.confidence * 100)}% confiança
-                    </span>
-                  )}
-                </div>
+                <span className="text-violet-400 font-bold text-sm">Resultado SiBCS</span>
 
-                {resultado.classification && (
-                  <div className="space-y-2">
-                    {[
-                      { label: 'Classificação', value: resultado.classification },
-                      { label: 'Ordem', value: resultado.order },
-                      { label: 'Subordem', value: resultado.suborder },
-                      { label: 'Grande grupo', value: resultado.great_group },
-                      { label: 'Subgrupo', value: resultado.subgroup },
-                    ].filter(f => f.value).map(f => (
-                      <div key={f.label} className="flex items-start gap-3 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wider w-24 flex-shrink-0 pt-0.5">{f.label}</span>
-                        <span className="text-sm text-white font-medium">{f.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {resultado.items.map((item, i) => {
+                  const campos = [
+                    { label: 'Ordem', value: item.ORDEM },
+                    { label: 'Subordem', value: item.SUBORDEM },
+                    { label: 'Grande grupo', value: item.GDE_GRUPO },
+                    { label: 'Subgrupo', value: item.SUBGRUPO },
+                  ].filter(f => f.value && f.value !== 'unknown')
 
-                {resultado.profiles && resultado.profiles.map(p => (
-                  <div key={p.id} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                    <div className="text-[11px] text-slate-500 mb-1">{p.id}</div>
-                    <div className="text-sm text-white font-semibold">{p.classification}</div>
-                    {p.confidence !== undefined && (
-                      <div className="text-[11px] text-violet-400 mt-0.5">{Math.round(p.confidence * 100)}% confiança</div>
-                    )}
-                  </div>
-                ))}
+                  const classificacao = [item.ORDEM, item.SUBORDEM]
+                    .filter(v => v && v !== 'unknown')
+                    .map(v => v!.charAt(0) + v!.slice(1).toLowerCase())
+                    .join(' ')
 
-                <div className="pt-2">
+                  return (
+                    <div key={i} className="space-y-2">
+                      {item.ID_PONTO && resultado.items!.length > 1 && (
+                        <div className="text-[11px] text-slate-500 font-mono mb-1">{item.ID_PONTO}</div>
+                      )}
+                      {classificacao && (
+                        <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)' }}>
+                          <div className="text-[10px] text-violet-400 uppercase tracking-wider mb-1">Classificação</div>
+                          <div className="text-base font-bold text-white">{classificacao}</div>
+                        </div>
+                      )}
+                      {campos.map(f => (
+                        <div key={f.label} className="flex items-start gap-3 rounded-xl px-3 py-2.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                          <span className="text-[10px] text-slate-500 uppercase tracking-wider w-24 flex-shrink-0 pt-0.5">{f.label}</span>
+                          <span className="text-sm text-white font-medium capitalize">{f.value!.charAt(0) + f.value!.slice(1).toLowerCase()}</span>
+                        </div>
+                      ))}
+                      {(item.GDE_GRUPO === 'unknown' || item.SUBGRUPO === 'unknown') && (
+                        <div className="text-[11px] text-slate-500 px-1">
+                          Grande grupo e subgrupo requerem mais atributos do perfil (dados químicos, cerosidade, etc.)
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+
+                <div className="pt-1">
                   <div className="text-[10px] text-slate-500 mb-2">Resposta completa</div>
                   <pre className="text-[10px] font-mono text-slate-400 overflow-auto rounded-xl p-3 max-h-40" style={{ background: 'rgba(0,0,0,0.3)' }}>
                     {JSON.stringify(resultado, null, 2)}
