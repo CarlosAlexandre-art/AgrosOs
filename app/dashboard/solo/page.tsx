@@ -6,8 +6,7 @@ import HowToUse from '../../../components/HowToUse'
 const EXEMPLO_PERFIL = {
   items: [
     {
-      id: "perfil-001",
-      name: "Perfil A — Área de plantio",
+      ID_PONTO: "perfil-001",
       horizons: [
         {
           designation: "A",
@@ -54,6 +53,15 @@ type Resultado = {
   profiles?: { id: string; classification: string; confidence?: number }[]
 }
 
+const DEMO_RESULTADO: Resultado = {
+  classification: "LATOSSOLO VERMELHO Distrófico típico",
+  order: "Latossolo",
+  suborder: "Latossolo Vermelho",
+  great_group: "Latossolo Vermelho Distrófico",
+  subgroup: "Latossolo Vermelho Distrófico típico",
+  confidence: 0.87,
+}
+
 export default function SoloPage() {
   const [modo, setModo] = useState<'classification' | 'verification'>('classification')
   const [jsonInput, setJsonInput] = useState(JSON.stringify(EXEMPLO_PERFIL, null, 2))
@@ -61,6 +69,7 @@ export default function SoloPage() {
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
+  const [modoDemo, setModoDemo] = useState(false)
 
   function validarJson(val: string) {
     try {
@@ -74,6 +83,10 @@ export default function SoloPage() {
   }
 
   async function analisar() {
+    if (modoDemo) {
+      setApiError(''); setResultado(DEMO_RESULTADO)
+      return
+    }
     if (!validarJson(jsonInput)) return
     setLoading(true); setApiError(''); setResultado(null)
     try {
@@ -119,11 +132,30 @@ export default function SoloPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
             </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-sm font-bold text-white">Análise de Solo</h1>
             <p className="text-[10px] text-slate-500">SmartSolos Expert · Embrapa — classificação SiBCS</p>
           </div>
+          <button
+            onClick={() => { setModoDemo(v => !v); setResultado(null); setApiError('') }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+            style={modoDemo
+              ? { background: 'rgba(167,139,250,0.2)', border: '1px solid rgba(167,139,250,0.4)', color: '#a78bfa' }
+              : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#64748b' }
+            }
+          >
+            <span style={{ fontSize: 10 }}>●</span>
+            {modoDemo ? 'Demo ativo' : 'Modo demo'}
+          </button>
         </div>
+        {modoDemo && (
+          <div className="px-6 pb-2">
+            <div className="px-3 py-2 rounded-xl text-xs text-violet-300 flex items-center gap-2" style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.15)' }}>
+              <span>⚠️</span>
+              <span>Modo demonstração — resultado simulado. Desative para usar a API SmartSolos real.</span>
+            </div>
+          </div>
+        )}
 
         <div className="px-6 pb-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           <HowToUse
@@ -197,12 +229,15 @@ export default function SoloPage() {
 
             {resultado && (
               <div className="rounded-2xl p-5 space-y-4" style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.2)' }}>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-violet-400 font-bold text-sm">Resultado SiBCS</span>
                   {resultado.confidence !== undefined && (
                     <span className="text-[11px] px-2 py-0.5 rounded-full text-violet-300" style={{ background: 'rgba(167,139,250,0.1)' }}>
                       {Math.round(resultado.confidence * 100)}% confiança
                     </span>
+                  )}
+                  {modoDemo && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>DEMO</span>
                   )}
                 </div>
 
