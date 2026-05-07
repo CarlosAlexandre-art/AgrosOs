@@ -96,6 +96,15 @@ const NAV = [
           </svg>
         ),
       },
+      {
+        href: '/dashboard/clima',
+        label: 'Clima',
+        icon: (
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+          </svg>
+        ),
+      },
     ],
   },
   {
