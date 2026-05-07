@@ -76,7 +76,11 @@ model Property {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
   location     String?
-  sizeHectares Decimal      @default(0)
+  lat                Float?
+  lng                Float?
+  waterVulnerability String?
+  waterAnalysisData  Json?
+  sizeHectares       Decimal      @default(0)
   coverUrl     String?
   fields       Field[]
   activities   Activity[]
@@ -118,6 +122,9 @@ model Field {
   crop         Crop?      @relation(fields: [cropId], references: [id])
   name         String
   sizeHectares Decimal    @default(0)
+  lat          Float?
+  lng          Float?
+  geoJson      String?
   activities   Activity[]
 }
 
