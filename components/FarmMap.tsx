@@ -22,6 +22,62 @@ interface MapData {
 
 type Mode = 'view' | 'move' | 'field'
 
+type LayerId = 'satellite' | 'hybrid' | 'topo' | 'street' | 'osm'
+
+interface TileConfig {
+  label: string
+  sublabel: string
+  url: string
+  labelsUrl?: string
+  attribution: string
+  swatch: string
+  swatchAlt: string
+}
+
+const TILE_LAYERS: Record<LayerId, TileConfig> = {
+  satellite: {
+    label: 'Satélite',
+    sublabel: 'Esri World Imagery',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+    swatch: 'linear-gradient(135deg,#1a3a1a 0%,#2d5016 40%,#3a6b1e 70%,#1c2b0e 100%)',
+    swatchAlt: '#2d5016',
+  },
+  hybrid: {
+    label: 'Híbrido',
+    sublabel: 'Satélite + Rótulos',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    labelsUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri',
+    swatch: 'linear-gradient(135deg,#1a3a1a 0%,#2d5016 40%,#f59e0b44 70%,#1c2b0e 100%)',
+    swatchAlt: '#3d6b20',
+  },
+  topo: {
+    label: 'Topográfico',
+    sublabel: 'Esri World Topo',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri, HERE, DeLorme',
+    swatch: 'linear-gradient(135deg,#7cb9a8 0%,#5a9e8e 30%,#8aab6f 60%,#c8b89a 100%)',
+    swatchAlt: '#7cb9a8',
+  },
+  street: {
+    label: 'Ruas',
+    sublabel: 'Esri World Street',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri, HERE, TomTom',
+    swatch: 'linear-gradient(135deg,#e8dcc8 0%,#d4c9b0 30%,#c8b99a 60%,#b8a88a 100%)',
+    swatchAlt: '#d4c9b0',
+  },
+  osm: {
+    label: 'OpenStreetMap',
+    sublabel: 'Comunidade OSM',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    swatch: 'linear-gradient(135deg,#b5cf6b 0%,#8fb94a 30%,#d4e8a0 60%,#c8d870 100%)',
+    swatchAlt: '#8fb94a',
+  },
+}
+
 const FIELD_COLORS = ['#16a34a', '#2563eb', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#db2777']
 const BR_CENTER: [number, number] = [-14.235, -51.925]
 
@@ -33,7 +89,8 @@ export default function FarmMap({ data }: { data: MapData }) {
   const mapInstance = useRef<L>(null)
   const propMarker = useRef<L>(null)
   const fieldMarkers = useRef<Record<string, L>>({})
-  // Refs for current mode/field — avoids stale closures inside Leaflet event handlers
+  const baseLayerRef = useRef<L>(null)
+  const labelsLayerRef = useRef<L>(null)
   const modeRef = useRef<Mode>('view')
   const activeFieldRef = useRef<string | null>(null)
   const setPendingRef = useRef<((lat: number, lng: number) => void) | null>(null)
@@ -46,6 +103,8 @@ export default function FarmMap({ data }: { data: MapData }) {
   const [searching, setSearching] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [activeLayer, setActiveLayer] = useState<LayerId>('satellite')
+  const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [pendingLat, setPendingLat] = useState<number | null>(data.lat)
   const [pendingLng, setPendingLng] = useState<number | null>(data.lng)
   const [fieldCoords, setFieldCoords] = useState<Record<string, { lat: number; lng: number }>>(() => {
@@ -61,26 +120,44 @@ export default function FarmMap({ data }: { data: MapData }) {
     setFieldRef.current = (id, lat, lng) => setFieldCoords(prev => ({ ...prev, [id]: { lat, lng } }))
   }, [])
 
-  // Load Leaflet from CDN, then initialize map
+  // Switch tile layer
+  const switchLayer = useCallback((layerId: LayerId) => {
+    const map = mapInstance.current
+    if (!map || !(window as L).L) return
+    const Lx: L = (window as L).L
+
+    // Remove existing layers
+    if (baseLayerRef.current) { baseLayerRef.current.remove(); baseLayerRef.current = null }
+    if (labelsLayerRef.current) { labelsLayerRef.current.remove(); labelsLayerRef.current = null }
+
+    const cfg = TILE_LAYERS[layerId]
+    baseLayerRef.current = Lx.tileLayer(cfg.url, { attribution: cfg.attribution, maxZoom: 19 }).addTo(map)
+
+    if (cfg.labelsUrl) {
+      labelsLayerRef.current = Lx.tileLayer(cfg.labelsUrl, { attribution: '', maxZoom: 19, pane: 'tilePane' }).addTo(map)
+    }
+
+    setActiveLayer(layerId)
+    setLayerPanelOpen(false)
+  }, [])
+
   useEffect(() => {
     if (typeof window === 'undefined' || mapInstance.current) return
 
     const cssId = 'leaflet-css'
     if (!document.getElementById(cssId)) {
       const link = document.createElement('link')
-      link.id = cssId
-      link.rel = 'stylesheet'
+      link.id = cssId; link.rel = 'stylesheet'
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
       document.head.appendChild(link)
     }
 
     const initMap = () => {
       if (!mapRef.current || mapInstance.current) return
-      const L: L = (window as L).L
+      const Lx: L = (window as L).L
 
-      // Fix default icon
-      delete L.Icon.Default.prototype._getIconUrl
-      L.Icon.Default.mergeOptions({
+      delete Lx.Icon.Default.prototype._getIconUrl
+      Lx.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -88,55 +165,46 @@ export default function FarmMap({ data }: { data: MapData }) {
 
       const d = dataRef.current
       const center: [number, number] = d.lat && d.lng ? [d.lat, d.lng] : BR_CENTER
-      const map = L.map(mapRef.current, { center, zoom: d.lat ? 14 : 5, zoomControl: false })
+      const map = Lx.map(mapRef.current, { center, zoom: d.lat ? 14 : 5, zoomControl: false })
       mapInstance.current = map
 
-      // Tiles
-      const satellite = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        { attribution: '&copy; Esri', maxZoom: 19 }
-      )
-      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap', maxZoom: 19,
-      })
-      satellite.addTo(map)
-      L.control.layers({ 'Satélite': satellite, 'Mapa': osm }, {}, { position: 'bottomright' }).addTo(map)
-      L.control.zoom({ position: 'bottomright' }).addTo(map)
+      // Initial tile layer (satellite)
+      const cfg = TILE_LAYERS['satellite']
+      baseLayerRef.current = Lx.tileLayer(cfg.url, { attribution: cfg.attribution, maxZoom: 19 }).addTo(map)
 
-      const makeFarmIcon = () => L.divIcon({
+      Lx.control.zoom({ position: 'bottomright' }).addTo(map)
+
+      const makeFarmIcon = () => Lx.divIcon({
         className: '',
         html: `<div style="width:36px;height:36px;background:#16a34a;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 10px rgba(0,0,0,.4)"><div style="transform:rotate(45deg);height:100%;display:flex;align-items:center;justify-content:center;font-size:15px">🌾</div></div>`,
         iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38],
       })
 
-      // Property marker
       if (d.lat && d.lng) {
-        propMarker.current = L.marker([d.lat, d.lng], { icon: makeFarmIcon() })
+        propMarker.current = Lx.marker([d.lat, d.lng], { icon: makeFarmIcon() })
           .addTo(map)
           .bindPopup(`<b>${d.name}</b><br><span style="color:#666">${Number(d.sizeHectares).toFixed(1)} ha</span>`)
       }
 
-      // Field layers
       d.fields.forEach((field: Field, idx: number) => {
         const color = FIELD_COLORS[idx % FIELD_COLORS.length]
         if (field.geoJson) {
           try {
-            fieldMarkers.current[field.id] = L.geoJSON(JSON.parse(field.geoJson), {
+            fieldMarkers.current[field.id] = Lx.geoJSON(JSON.parse(field.geoJson), {
               style: { color, fillColor: color, fillOpacity: 0.25, weight: 2 },
             }).addTo(map).bindPopup(`<b>${field.name}</b><br>${Number(field.sizeHectares).toFixed(1)} ha`)
           } catch {}
         } else if (field.lat && field.lng) {
-          const icon = L.divIcon({
+          const icon = Lx.divIcon({
             className: '',
             html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
             iconSize: [14, 14], iconAnchor: [7, 7],
           })
-          fieldMarkers.current[field.id] = L.marker([field.lat, field.lng], { icon })
+          fieldMarkers.current[field.id] = Lx.marker([field.lat, field.lng], { icon })
             .addTo(map).bindPopup(`<b>${field.name}</b><br>${Number(field.sizeHectares).toFixed(1)} ha`)
         }
       })
 
-      // Click handler
       map.on('click', (e: L) => {
         const { lat, lng } = e.latlng
         const m = modeRef.current
@@ -145,28 +213,26 @@ export default function FarmMap({ data }: { data: MapData }) {
         if (m === 'move') {
           setPendingRef.current?.(lat, lng)
           if (propMarker.current) propMarker.current.setLatLng([lat, lng])
-          else propMarker.current = L.marker([lat, lng], { icon: makeFarmIcon() }).addTo(map)
+          else propMarker.current = Lx.marker([lat, lng], { icon: makeFarmIcon() }).addTo(map)
         } else if (m === 'field' && fid) {
           setFieldRef.current?.(fid, lat, lng)
           const d2 = dataRef.current
           const idx = d2.fields.findIndex((f: Field) => f.id === fid)
           const color = FIELD_COLORS[idx % FIELD_COLORS.length]
           fieldMarkers.current[fid]?.remove()
-          const icon = L.divIcon({
+          const icon = Lx.divIcon({
             className: '',
             html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
             iconSize: [14, 14], iconAnchor: [7, 7],
           })
-          fieldMarkers.current[fid] = L.marker([lat, lng], { icon })
+          fieldMarkers.current[fid] = Lx.marker([lat, lng], { icon })
             .addTo(map).bindPopup(d2.fields[idx]?.name ?? '')
         }
       })
     }
 
-    // If Leaflet already loaded (e.g. hot reload), init immediately
-    if ((window as L).L) {
-      initMap()
-    } else {
+    if ((window as L).L) { initMap() }
+    else {
       const script = document.createElement('script')
       script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
       script.onload = initMap
@@ -176,6 +242,8 @@ export default function FarmMap({ data }: { data: MapData }) {
     return () => {
       mapInstance.current?.remove()
       mapInstance.current = null
+      baseLayerRef.current = null
+      labelsLayerRef.current = null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -189,12 +257,8 @@ export default function FarmMap({ data }: { data: MapData }) {
         { headers: { 'Accept-Language': 'pt' } }
       )
       const results = await r.json()
-      if (results[0]) {
-        mapInstance.current.flyTo([parseFloat(results[0].lat), parseFloat(results[0].lon)], 14)
-      }
-    } finally {
-      setSearching(false)
-    }
+      if (results[0]) mapInstance.current.flyTo([parseFloat(results[0].lat), parseFloat(results[0].lon)], 14)
+    } finally { setSearching(false) }
   }, [search])
 
   const handleGeolocate = useCallback(() => {
@@ -204,20 +268,25 @@ export default function FarmMap({ data }: { data: MapData }) {
     )
   }, [])
 
+  const handleOpenGoogleMaps = useCallback(() => {
+    const map = mapInstance.current
+    if (!map) return
+    const c = map.getCenter()
+    const z = map.getZoom()
+    window.open(`https://maps.google.com/?q=${c.lat},${c.lng}&z=${z}&t=k`, '_blank')
+  }, [])
+
   const handleSave = useCallback(async () => {
     setSaving(true)
     try {
       const calls: Promise<Response>[] = []
-
-      if (pendingLat != null && pendingLng != null &&
-          (pendingLat !== data.lat || pendingLng !== data.lng)) {
+      if (pendingLat != null && pendingLng != null && (pendingLat !== data.lat || pendingLng !== data.lng)) {
         calls.push(fetch('/api/mapa', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ lat: pendingLat, lng: pendingLng }),
         }))
       }
-
       Object.entries(fieldCoords).forEach(([fieldId, c]) => {
         const orig = data.fields.find(f => f.id === fieldId)
         if (orig?.lat === c.lat && orig?.lng === c.lng) return
@@ -227,7 +296,6 @@ export default function FarmMap({ data }: { data: MapData }) {
           body: JSON.stringify({ fieldId, lat: c.lat, lng: c.lng }),
         }))
       })
-
       await Promise.all(calls)
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
@@ -245,6 +313,8 @@ export default function FarmMap({ data }: { data: MapData }) {
       return !o || o.lat !== c.lat || o.lng !== c.lng
     })
 
+  const currentLayerCfg = TILE_LAYERS[activeLayer]
+
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
@@ -255,9 +325,7 @@ export default function FarmMap({ data }: { data: MapData }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
+              type="text" value={search} onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               placeholder="Buscar cidade, endereço..."
               className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#16a34a] focus:border-transparent"
@@ -272,10 +340,18 @@ export default function FarmMap({ data }: { data: MapData }) {
         <button onClick={handleGeolocate} title="Usar minha localização"
           className="flex items-center gap-1.5 px-3 py-2 text-sm border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <circle cx="12" cy="12" r="3" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+            <circle cx="12" cy="12" r="3" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
           </svg>
           <span className="hidden sm:inline">GPS</span>
+        </button>
+
+        {/* Open in Google Maps */}
+        <button onClick={handleOpenGoogleMaps} title="Abrir no Google Maps"
+          className="flex items-center gap-1.5 px-3 py-2 text-sm border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors">
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          <span className="hidden sm:inline">Google Maps</span>
         </button>
 
         <div className="h-5 w-px bg-slate-200 hidden sm:block" />
@@ -305,7 +381,6 @@ export default function FarmMap({ data }: { data: MapData }) {
         </button>
       </div>
 
-      {/* Hint banner */}
       {mode !== 'view' && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-800 font-medium flex items-center gap-2 flex-shrink-0">
           <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -319,14 +394,85 @@ export default function FarmMap({ data }: { data: MapData }) {
         </div>
       )}
 
-      {/* Map + Fields panel */}
       <div className="flex flex-1 min-h-0">
         <div className="flex-1 relative min-w-0">
-          <div
-            ref={mapRef}
-            className="absolute inset-0"
-            style={{ cursor: mode !== 'view' ? 'crosshair' : undefined }}
-          />
+          <div ref={mapRef} className="absolute inset-0" style={{ cursor: mode !== 'view' ? 'crosshair' : undefined }} />
+
+          {/* ── Layer switcher — floating glass panel ── */}
+          <div className="absolute bottom-8 left-3 z-[1000]" style={{ pointerEvents: 'auto' }}>
+            {layerPanelOpen && (
+              <>
+                {/* backdrop */}
+                <div className="fixed inset-0 z-[-1]" onClick={() => setLayerPanelOpen(false)} />
+                <div
+                  className="mb-2 rounded-2xl overflow-hidden shadow-2xl border border-white/20"
+                  style={{
+                    background: 'rgba(15,23,42,0.88)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    minWidth: '200px',
+                  }}
+                >
+                  <div className="px-3 py-2.5 border-b border-white/10">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Camada base</span>
+                  </div>
+                  <div className="p-2 space-y-1">
+                    {(Object.entries(TILE_LAYERS) as [LayerId, TileConfig][]).map(([id, cfg]) => (
+                      <button
+                        key={id}
+                        onClick={() => switchLayer(id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${
+                          activeLayer === id
+                            ? 'bg-white/15 ring-1 ring-white/30'
+                            : 'hover:bg-white/8'
+                        }`}
+                      >
+                        <div
+                          className="w-8 h-8 rounded-lg flex-shrink-0 border border-white/20"
+                          style={{ background: cfg.swatch }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-sm font-semibold leading-tight ${activeLayer === id ? 'text-white' : 'text-slate-300'}`}>
+                            {cfg.label}
+                          </div>
+                          <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">{cfg.sublabel}</div>
+                        </div>
+                        {activeLayer === id && (
+                          <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Trigger button */}
+            <button
+              onClick={() => setLayerPanelOpen(o => !o)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
+              style={{
+                background: layerPanelOpen ? 'rgba(22,163,74,0.95)' : 'rgba(15,23,42,0.85)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+              }}
+            >
+              <div
+                className="w-5 h-5 rounded-md flex-shrink-0"
+                style={{ background: currentLayerCfg.swatch }}
+              />
+              <span className="text-xs font-semibold text-white">{currentLayerCfg.label}</span>
+              <svg
+                className={`w-3.5 h-3.5 text-white/70 transition-transform ${layerPanelOpen ? 'rotate-180' : ''}`}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="m19 9-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Fields panel — desktop */}
