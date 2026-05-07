@@ -38,6 +38,14 @@ interface HBVData {
   summary: HBVSummary
   updatedAt: string
 }
+interface HIFDData {
+  demandIndex: number
+  status: 'OK' | 'ALERTA' | 'CRÍTICO'
+  label: string
+  recommendation: string
+  source: string
+  meta: { soilType: string; runoffCoeff: number; totalRain30d: number; deficitDays30d: number }
+}
 
 // ─── Question definitions ─────────────────────────────────────────────────────
 const QUESTIONS = [
@@ -123,6 +131,9 @@ export default function AguaPage() {
   const [hbvError, setHbvError] = useState<string | null>(null)
   const [loadingHbv, setLoadingHbv] = useState(false)
 
+  // ── HIFD state ───────────────────────────────────────────────────────────
+  const [hifd, setHifd] = useState<HIFDData | null>(null)
+
   useEffect(() => {
     fetch('/api/vulnerabilidade-hidrica')
       .then(r => r.json())
@@ -133,9 +144,15 @@ export default function AguaPage() {
   useEffect(() => {
     if (activeTab !== 'balanco' || hbv || hbvError) return
     setLoadingHbv(true)
-    fetch('/api/hbv')
-      .then(r => r.json())
-      .then(d => { if (d.error) setHbvError(d.error); else setHbv(d) })
+    Promise.all([
+      fetch('/api/hbv').then(r => r.json()),
+      fetch('/api/qgis-hifd').then(r => r.json()),
+    ])
+      .then(([hbvData, hifdData]) => {
+        if (hbvData.error) setHbvError(hbvData.error)
+        else setHbv(hbvData)
+        if (!hifdData.error) setHifd(hifdData)
+      })
       .catch(() => setHbvError('Falha de conexão'))
       .finally(() => setLoadingHbv(false))
   }, [activeTab, hbv, hbvError])
@@ -352,13 +369,13 @@ export default function AguaPage() {
         </div>
       )}
 
-      {!loadingHbv && hbv && <HBVDashboard data={hbv} />}
+      {!loadingHbv && hbv && <HBVDashboard data={hbv} hifd={hifd} />}
     </div>
   )
 }
 
 // ─── HBV Dashboard ────────────────────────────────────────────────────────────
-function HBVDashboard({ data }: { data: HBVData }) {
+function HBVDashboard({ data, hifd }: { data: HBVData; hifd: HIFDData | null }) {
   const s = data.summary
   const updatedAt = new Date(data.updatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 
@@ -461,6 +478,41 @@ function HBVDashboard({ data }: { data: HBVData }) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+
+      {/* HIFD — Farm Water Demand Index */}
+      {hifd && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-700">Índice de Demanda Hídrica (HIFD)</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Método HSAE v6.01 · via microserviço QGIS headless</p>
+            </div>
+            <div className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+              hifd.status === 'OK' ? 'bg-green-100 text-green-700'
+              : hifd.status === 'ALERTA' ? 'bg-amber-100 text-amber-700'
+              : 'bg-red-100 text-red-700'
+            }`}>
+              {hifd.label}
+            </div>
+          </div>
+          <div className="flex items-center gap-4 mb-3">
+            <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width: `${hifd.demandIndex}%`,
+                  background: hifd.status === 'OK' ? '#16a34a' : hifd.status === 'ALERTA' ? '#ca8a04' : '#dc2626',
+                }}
+              />
+            </div>
+            <span className="text-lg font-black text-slate-800 w-14 text-right">{hifd.demandIndex}</span>
+          </div>
+          <p className="text-xs text-slate-600 leading-relaxed">{hifd.recommendation}</p>
+          <p className="text-[10px] text-slate-400 mt-2">
+            Coef. escoamento {hifd.meta.runoffCoeff.toFixed(2)} · {hifd.meta.totalRain30d} mm/30d · {hifd.meta.deficitDays30d} dias déficit
+          </p>
+        </div>
+      )}
 
       {/* Model parameters */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
