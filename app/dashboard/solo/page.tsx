@@ -3,40 +3,59 @@
 import { useState } from 'react'
 import HowToUse from '../../../components/HowToUse'
 
+// Schema: https://www.agroapi.cnptia.embrapa.br/store/api-docs/agroapi/SmartSolosExpert/v1
+// Granulometria em g/Kg (ex: 38% = 380 g/Kg)
+// Cor Munsell separada: MATIZ / VALOR / CROMA
+// ESTRUTURA_TIPO: 1=granular 2=blocos-ang 3=blocos-subang 4=prismática 5=colunar 6=laminar 7=maciça 8=grãos-simples
+// ESTRUTURA_GRAU: 1=fraca 2=moderada 3=forte
+// ESTRUTURA_TAMANHO: 1=muito-pequena 2=pequena 3=média 4=grande 5=muito-grande
+// CONSISTENCIA_SECO: 1=solta 2=macia 3=lig-dura 4=dura 5=muito-dura 6=ext-dura
+// DRENAGEM: 1=exc-drenado … 4=bem-drenado … 7=mal-drenado 8=muito-mal-drenado
 const EXEMPLO_PERFIL = {
   items: [
     {
       ID_PONTO: "perfil-001",
+      DRENAGEM: 4,
       HORIZONTES: [
         {
-          DESIGNACAO: "A",
-          PROFUNDIDADE_SUPERIOR: 0,
-          PROFUNDIDADE_INFERIOR: 25,
-          COR_SECA: "10YR 4/3",
-          COR_UMIDA: "10YR 3/2",
-          TEXTURA: "franco-argilosa",
-          ESTRUTURA: "granular",
-          CONSISTENCIA_SECA: "macio",
-          CONSISTENCIA_UMIDA: "friável",
+          SIMB_HORIZ: "A",
+          LIMITE_SUP: 0,
+          LIMITE_INF: 25,
+          COR_SECA_MATIZ: "10YR",
+          COR_SECA_VALOR: 4,
+          COR_SECA_CROMA: 3,
+          COR_UMIDA_MATIZ: "10YR",
+          COR_UMIDA_VALOR: 3,
+          COR_UMIDA_CROMA: 2,
+          ESTRUTURA_TIPO: 1,
+          ESTRUTURA_GRAU: 2,
+          ESTRUTURA_TAMANHO: 2,
+          CONSISTENCIA_SECO: 2,
           PH_AGUA: 5.8,
-          ARGILA: 38,
-          AREIA: 42,
-          SILTE: 20,
+          ARGILA: 380,
+          AREIA_FINA: 300,
+          AREIA_GROS: 120,
+          SILTE: 200,
         },
         {
-          DESIGNACAO: "Bw",
-          PROFUNDIDADE_SUPERIOR: 25,
-          PROFUNDIDADE_INFERIOR: 120,
-          COR_SECA: "2.5YR 4/6",
-          COR_UMIDA: "2.5YR 3/6",
-          TEXTURA: "argilosa",
-          ESTRUTURA: "blocos subangulares",
-          CONSISTENCIA_SECA: "ligeiramente duro",
-          CONSISTENCIA_UMIDA: "friável",
+          SIMB_HORIZ: "Bw",
+          LIMITE_SUP: 25,
+          LIMITE_INF: 120,
+          COR_SECA_MATIZ: "2.5YR",
+          COR_SECA_VALOR: 4,
+          COR_SECA_CROMA: 6,
+          COR_UMIDA_MATIZ: "2.5YR",
+          COR_UMIDA_VALOR: 3,
+          COR_UMIDA_CROMA: 6,
+          ESTRUTURA_TIPO: 3,
+          ESTRUTURA_GRAU: 2,
+          ESTRUTURA_TAMANHO: 3,
+          CONSISTENCIA_SECO: 3,
           PH_AGUA: 5.4,
-          ARGILA: 68,
-          AREIA: 20,
-          SILTE: 12,
+          ARGILA: 680,
+          AREIA_FINA: 150,
+          AREIA_GROS: 50,
+          SILTE: 120,
         }
       ]
     }
@@ -53,6 +72,45 @@ type Resultado = {
   profiles?: { id: string; classification: string; confidence?: number }[]
 }
 
+const CODIGOS = [
+  {
+    titulo: 'ESTRUTURA_TIPO',
+    itens: ['1 granular', '2 blocos ang.', '3 blocos subang.', '4 prismática', '5 colunar', '6 laminar', '7 maciça', '8 grãos simples'],
+  },
+  {
+    titulo: 'ESTRUTURA_GRAU',
+    itens: ['1 fraca', '2 moderada', '3 forte'],
+  },
+  {
+    titulo: 'ESTRUTURA_TAMANHO',
+    itens: ['1 muito pequena', '2 pequena', '3 média', '4 grande', '5 muito grande'],
+  },
+  {
+    titulo: 'CONSISTENCIA_SECO',
+    itens: ['1 solta', '2 macia', '3 lig. dura', '4 dura', '5 muito dura', '6 ext. dura'],
+  },
+  {
+    titulo: 'DRENAGEM',
+    itens: ['1 exc. drenado', '2 fort. drenado', '3 acent. drenado', '4 bem drenado', '5 mod. drenado', '6 imperf. drenado', '7 mal drenado', '8 muito mal drenado'],
+  },
+]
+
+const SIBCS_ORDENS = [
+  { sigla: 'LA', nome: 'Latossolo', cor: '#ef4444' },
+  { sigla: 'AR', nome: 'Argissolo', cor: '#f97316' },
+  { sigla: 'ES', nome: 'Espodossolo', cor: '#eab308' },
+  { sigla: 'CA', nome: 'Cambissolo', cor: '#22c55e' },
+  { sigla: 'NE', nome: 'Neossolo', cor: '#3b82f6' },
+  { sigla: 'OX', nome: 'Organossolo', cor: '#8b5cf6' },
+  { sigla: 'GX', nome: 'Gleissolo', cor: '#06b6d4' },
+  { sigla: 'VX', nome: 'Vertissolo', cor: '#ec4899' },
+  { sigla: 'CX', nome: 'Chernossolo', cor: '#64748b' },
+  { sigla: 'MT', nome: 'Nitossolo', cor: '#a78bfa' },
+  { sigla: 'PL', nome: 'Planossolo', cor: '#34d399' },
+  { sigla: 'SX', nome: 'Planossolos', cor: '#fb923c' },
+  { sigla: 'GY', nome: 'Gipsossolo', cor: '#f472b6' },
+]
+
 export default function SoloPage() {
   const [modo, setModo] = useState<'classification' | 'verification'>('classification')
   const [jsonInput, setJsonInput] = useState(JSON.stringify(EXEMPLO_PERFIL, null, 2))
@@ -60,6 +118,7 @@ export default function SoloPage() {
   const [resultado, setResultado] = useState<Resultado | null>(null)
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
+  const [abaRef, setAbaRef] = useState<'ordens' | 'codigos'>('ordens')
 
   function validarJson(val: string) {
     try {
@@ -92,22 +151,6 @@ export default function SoloPage() {
     } finally { setLoading(false) }
   }
 
-  const SIBCS_ORDENS = [
-    { sigla: 'LA', nome: 'Latossolo', cor: '#ef4444' },
-    { sigla: 'AR', nome: 'Argissolo', cor: '#f97316' },
-    { sigla: 'ES', nome: 'Espodossolo', cor: '#eab308' },
-    { sigla: 'CA', nome: 'Cambissolo', cor: '#22c55e' },
-    { sigla: 'NE', nome: 'Neossolo', cor: '#3b82f6' },
-    { sigla: 'OX', nome: 'Organossolo', cor: '#8b5cf6' },
-    { sigla: 'GX', nome: 'Gleissolo', cor: '#06b6d4' },
-    { sigla: 'VX', nome: 'Vertissolo', cor: '#ec4899' },
-    { sigla: 'CX', nome: 'Chernossolo', cor: '#64748b' },
-    { sigla: 'MT', nome: 'Nitossolo', cor: '#a78bfa' },
-    { sigla: 'PL', nome: 'Planossolo', cor: '#34d399' },
-    { sigla: 'SX', nome: 'Planossolos', cor: '#fb923c' },
-    { sigla: 'GY', nome: 'Gipsossolo', cor: '#f472b6' },
-  ]
-
   return (
     <div className="min-h-screen" style={{ background: '#0a0e1a' }}>
       {/* Header */}
@@ -132,12 +175,12 @@ export default function SoloPage() {
             theme="dark"
             accentColor="#a78bfa"
             steps={[
-              { icon: '🔬', title: 'Prepare os dados', description: 'Organize os dados do perfil de solo em formato JSON: horizontes com profundidade, textura, cor Munsell, pH e granulometria.' },
-              { icon: '📝', title: 'Edite o JSON', description: 'Use o editor para ajustar os dados do seu perfil. Um exemplo pré-preenchido já mostra a estrutura correta.' },
-              { icon: '🏷️', title: 'Classificar', description: 'Modo "Classificar" retorna a ordem, subordem, grande grupo e subgrupo do solo conforme o SiBCS.' },
-              { icon: '✅', title: 'Verificar', description: 'Modo "Verificar" compara sua classificação com a do sistema — útil para validar laudos e laudos técnicos.' },
+              { icon: '🔬', title: 'Estrutura do JSON', description: 'Cada perfil tem ID_PONTO, DRENAGEM (1–8) e array HORIZONTES. Cada horizonte tem SIMB_HORIZ, LIMITE_SUP, LIMITE_INF, cor Munsell separada em MATIZ/VALOR/CROMA.' },
+              { icon: '📏', title: 'Granulometria em g/Kg', description: 'ARGILA, SILTE, AREIA_FINA, AREIA_GROS são informados em g/Kg — não em percentagem. Ex: 38% = 380 g/Kg.' },
+              { icon: '🔢', title: 'Estrutura e consistência', description: 'ESTRUTURA_TIPO, ESTRUTURA_GRAU, ESTRUTURA_TAMANHO e CONSISTENCIA_SECO usam códigos inteiros. Consulte a tabela de referência ao lado.' },
+              { icon: '🏷️', title: 'Classificar ou Verificar', description: 'Classificar retorna ordem/subordem/grande-grupo/subgrupo pelo SiBCS. Verificar compara com uma classificação já existente no perfil.' },
             ]}
-            tip="A cor Munsell (ex: 10YR 4/3) é fundamental para classificação precisa. Colete com carta de cor Munsell em solo úmido e seco."
+            tip="Cor Munsell deve ser separada: '2.5YR 4/6' vira COR_SECA_MATIZ:'2.5YR', COR_SECA_VALOR:4, COR_SECA_CROMA:6"
           />
         </div>
       </div>
@@ -146,7 +189,6 @@ export default function SoloPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Editor */}
           <div className="space-y-4">
-            {/* Modo */}
             <div className="flex gap-2">
               {(['classification', 'verification'] as const).map(m => (
                 <button key={m} onClick={() => setModo(m)}
@@ -163,7 +205,7 @@ export default function SoloPage() {
             <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${jsonError ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}` }}>
               <div className="flex items-center justify-between px-4 py-2.5" style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 <span className="text-[11px] font-mono text-slate-400">perfil.json</span>
-                <button onClick={() => setJsonInput(JSON.stringify(EXEMPLO_PERFIL, null, 2))}
+                <button onClick={() => { setJsonInput(JSON.stringify(EXEMPLO_PERFIL, null, 2)); setJsonError('') }}
                   className="text-[10px] text-violet-400 hover:text-violet-300 transition-colors">
                   Restaurar exemplo
                 </button>
@@ -172,7 +214,7 @@ export default function SoloPage() {
                 value={jsonInput}
                 onChange={e => { setJsonInput(e.target.value); validarJson(e.target.value) }}
                 spellCheck={false}
-                rows={20}
+                rows={22}
                 className="w-full px-4 py-3 text-xs font-mono text-green-300 outline-none resize-none"
                 style={{ background: '#0d1117', lineHeight: 1.6 }}
               />
@@ -241,18 +283,53 @@ export default function SoloPage() {
               </div>
             )}
 
+            {/* Referência */}
             {!resultado && (
-              <div className="rounded-2xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div className="text-xs text-slate-400 font-semibold">Ordens do SiBCS — referência rápida</div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {SIBCS_ORDENS.map(o => (
-                    <div key={o.sigla} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                      <span className="text-[11px] font-bold font-mono" style={{ color: o.cor, width: 24 }}>{o.sigla}</span>
-                      <span className="text-[11px] text-slate-400">{o.nome}</span>
-                    </div>
+              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.07)' }}>
+                {/* Tabs referência */}
+                <div className="flex" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                  {(['ordens', 'codigos'] as const).map(a => (
+                    <button key={a} onClick={() => setAbaRef(a)}
+                      className="flex-1 py-2.5 text-[11px] font-semibold transition-colors"
+                      style={abaRef === a ? { color: '#a78bfa', borderBottom: '2px solid #a78bfa' } : { color: '#64748b' }}>
+                      {a === 'ordens' ? 'Ordens SiBCS' : 'Códigos de Campo'}
+                    </button>
                   ))}
                 </div>
-                <div className="text-[10px] text-slate-600 pt-1">Fonte: Embrapa Solos — SiBCS 3ª edição</div>
+
+                <div className="p-4" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  {abaRef === 'ordens' && (
+                    <>
+                      <div className="grid grid-cols-2 gap-1.5 mb-3">
+                        {SIBCS_ORDENS.map(o => (
+                          <div key={o.sigla} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                            <span className="text-[11px] font-bold font-mono" style={{ color: o.cor, width: 24 }}>{o.sigla}</span>
+                            <span className="text-[11px] text-slate-400">{o.nome}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-[10px] text-slate-600">Fonte: Embrapa Solos — SiBCS 3ª edição</div>
+                    </>
+                  )}
+
+                  {abaRef === 'codigos' && (
+                    <div className="space-y-3">
+                      {CODIGOS.map(c => (
+                        <div key={c.titulo}>
+                          <div className="text-[10px] font-mono text-violet-400 mb-1.5">{c.titulo}</div>
+                          <div className="flex flex-wrap gap-1">
+                            {c.itens.map(item => (
+                              <span key={item} className="text-[10px] px-2 py-0.5 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <div className="text-[10px] text-slate-600 pt-1">Granulometria: ARGILA, SILTE, AREIA_FINA, AREIA_GROS em g/Kg (38% = 380)</div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
