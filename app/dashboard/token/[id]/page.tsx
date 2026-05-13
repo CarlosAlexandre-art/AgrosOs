@@ -91,7 +91,19 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [totalCommission, setTotalCommission] = useState(0)
   const [laudo, setLaudo] = useState<Laudo | null>(null)
+  const [analiseIA, setAnaliseIA] = useState<any>(null)
+  const [loadingAnalise, setLoadingAnalise] = useState(false)
   const [resgatando, setResgatando] = useState(false)
+
+  async function analisarTokenIA() {
+    setLoadingAnalise(true)
+    try {
+      const res = await fetch(`/api/ai/token-analise?tokenId=${id}`)
+      if (res.ok) setAnaliseIA(await res.json())
+    } finally {
+      setLoadingAnalise(false)
+    }
+  }
   const [connectStatus, setConnectStatus] = useState<{ connected: boolean } | null>(null)
   const [connectingStripe, setConnectingStripe] = useState(false)
 
@@ -323,6 +335,128 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
           <p className="text-xs text-slate-400 mt-3">Laudo gerado automaticamente com base nos dados operacionais do SmartAgroOS.</p>
         </div>
       )}
+
+      {/* Due Diligence IA — NVIDIA NIM */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Due Diligence com IA</div>
+            <div className="text-xs text-slate-400 mt-0.5">NVIDIA NIM · LLaMA 3.3 70B + Benchmarks CONAB/IBGE</div>
+          </div>
+          <button
+            onClick={analisarTokenIA}
+            disabled={loadingAnalise}
+            className="flex items-center gap-2 text-xs bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-xl transition-colors"
+          >
+            {loadingAnalise ? (
+              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+            )}
+            {loadingAnalise ? 'Analisando...' : 'Analisar com IA'}
+          </button>
+        </div>
+
+        {!analiseIA && !loadingAnalise && (
+          <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-4 text-sm text-slate-500">
+            <svg className="w-5 h-5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+            Gera um laudo de risco com benchmarks de produtividade e análise do perfil do produtor.
+          </div>
+        )}
+
+        {loadingAnalise && (
+          <div className="flex items-center gap-3 bg-indigo-50 rounded-xl p-4 text-sm text-indigo-700">
+            <svg className="w-4 h-4 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            Processando benchmarks CONAB/IBGE e gerando laudo...
+          </div>
+        )}
+
+        {analiseIA && (
+          <div className="space-y-4">
+            {/* Score de Risco */}
+            <div className="flex items-center gap-3">
+              <div className={`text-2xl font-bold tabular-nums ${
+                analiseIA.risco.nivel === 'ALTO' ? 'text-red-600' :
+                analiseIA.risco.nivel === 'MÉDIO' ? 'text-amber-600' : 'text-green-600'
+              }`}>
+                {analiseIA.risco.score}<span className="text-sm font-normal text-slate-400">/100</span>
+              </div>
+              <div>
+                <div className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  analiseIA.risco.nivel === 'ALTO' ? 'bg-red-100 text-red-700' :
+                  analiseIA.risco.nivel === 'MÉDIO' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
+                }`}>
+                  Risco {analiseIA.risco.nivel}
+                </div>
+                {analiseIA.risco.flagProducaoAnomala && (
+                  <div className="text-xs text-red-600 mt-1 font-medium">⚠️ Produção acima do benchmark</div>
+                )}
+              </div>
+            </div>
+
+            {/* Viabilidade Física */}
+            <div className="bg-slate-50 rounded-xl p-3">
+              <div className="text-xs text-slate-400 mb-0.5">Viabilidade Física</div>
+              <div className="text-sm text-slate-800 font-medium">{analiseIA.viabilidadeFisica}</div>
+            </div>
+
+            {/* Perfil do Produtor */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {analiseIA.produtor.agroRateScore && (
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <div className="text-xs text-slate-400 mb-0.5">AgroRate</div>
+                  <div className="text-sm font-semibold text-slate-900">
+                    {analiseIA.produtor.agroRateScore}
+                    <span className="text-xs text-slate-400 ml-1">{analiseIA.produtor.agroRateCategoria}</span>
+                  </div>
+                </div>
+              )}
+              <div className="bg-slate-50 rounded-xl p-3">
+                <div className="text-xs text-slate-400 mb-0.5">Área total</div>
+                <div className="text-sm font-semibold text-slate-900">{analiseIA.produtor.areaHa} ha</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3">
+                <div className="text-xs text-slate-400 mb-0.5">Receita 12m</div>
+                <div className="text-sm font-semibold text-slate-900">{fmt(analiseIA.produtor.receita12m)}</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3">
+                <div className="text-xs text-slate-400 mb-0.5">Tokens vendidos</div>
+                <div className="text-sm font-semibold text-slate-900">{analiseIA.mercado.pctSold}%</div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3">
+                <div className="text-xs text-slate-400 mb-0.5">CAR</div>
+                <div className={`text-sm font-semibold ${analiseIA.produtor.temCAR ? 'text-green-700' : 'text-red-500'}`}>
+                  {analiseIA.produtor.temCAR ? '✓ Registrado' : '✗ Pendente'}
+                </div>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3">
+                <div className="text-xs text-slate-400 mb-0.5">Contrato</div>
+                <div className={`text-sm font-semibold ${analiseIA.produtor.temContrato ? 'text-green-700' : 'text-amber-600'}`}>
+                  {analiseIA.produtor.temContrato ? '✓ Assinado' : '⏳ Pendente'}
+                </div>
+              </div>
+            </div>
+
+            {/* Laudo NIM */}
+            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+              <div className="text-xs font-semibold text-indigo-600 mb-2 uppercase tracking-wide">Laudo Analítico</div>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{analiseIA.laudo}</p>
+            </div>
+
+            <p className="text-xs text-slate-400">Gerado em {new Date(analiseIA.geradoEm).toLocaleString('pt-BR')} · {analiseIA.modelo}</p>
+          </div>
+        )}
+      </div>
 
       {/* Blockchain */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
