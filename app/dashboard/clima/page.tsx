@@ -30,6 +30,18 @@ export default function ClimaPage() {
   const [data, setData] = useState<WeatherData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sim, setSim] = useState<any>(null)
+  const [loadingSim, setLoadingSim] = useState(false)
+
+  async function simularFisica() {
+    setLoadingSim(true)
+    try {
+      const res = await fetch('/api/ai/clima-simulacao')
+      if (res.ok) setSim(await res.json())
+    } finally {
+      setLoadingSim(false)
+    }
+  }
 
   useEffect(() => {
     fetch('/api/clima')
@@ -189,6 +201,67 @@ export default function ClimaPage() {
         </div>
       </div>
 
+      {/* Simulação Física — PhysicsNeMo-inspired */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div>
+            <div className="font-bold text-slate-800">🌡️ Simulação Física (ET₀ + Balanço Hídrico)</div>
+            <div className="text-xs text-slate-400">Hargreaves FAO-56 + NVIDIA NIM</div>
+          </div>
+          <button
+            onClick={simularFisica}
+            disabled={loadingSim}
+            className="text-xs font-bold bg-sky-600 text-white px-3 py-1.5 rounded-xl hover:bg-sky-700 transition disabled:opacity-50"
+          >
+            {loadingSim ? '⏳ Simulando...' : '⚡ Simular'}
+          </button>
+        </div>
+        {sim && (
+          <div className="p-5 space-y-4">
+            {/* Resumo */}
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-sky-50 rounded-xl py-3">
+                <div className="text-lg font-bold text-sky-700">{sim.resumo.totalEtc} mm</div>
+                <div className="text-[10px] text-sky-500">ETc 7 dias (Kc {sim.kc})</div>
+              </div>
+              <div className="bg-blue-50 rounded-xl py-3">
+                <div className="text-lg font-bold text-blue-700">{sim.resumo.totalPrecip} mm</div>
+                <div className="text-[10px] text-blue-500">Precipitação 7 dias</div>
+              </div>
+              <div className={`rounded-xl py-3 ${sim.resumo.deficitTotal > 0 ? 'bg-red-50' : 'bg-green-50'}`}>
+                <div className={`text-lg font-bold ${sim.resumo.deficitTotal > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {sim.resumo.deficitTotal > 0 ? `-${sim.resumo.deficitTotal}` : '✓'} {sim.resumo.deficitTotal > 0 ? 'mm' : 'OK'}
+                </div>
+                <div className={`text-[10px] ${sim.resumo.deficitTotal > 0 ? 'text-red-400' : 'text-green-500'}`}>
+                  {sim.resumo.deficitTotal > 0 ? `déficit · ${sim.resumo.diasEstresse}d estresse` : 'sem déficit'}
+                </div>
+              </div>
+            </div>
+            {/* Dias */}
+            <div className="grid grid-cols-7 gap-1">
+              {sim.dias.map((d: any, i: number) => (
+                <div key={i} className={`rounded-lg p-2 text-center text-[10px] ${
+                  d.estresse === 'alto' ? 'bg-red-50 border border-red-200'
+                  : d.estresse === 'moderado' ? 'bg-amber-50 border border-amber-200'
+                  : 'bg-slate-50 border border-slate-100'
+                }`}>
+                  <div className="font-semibold text-slate-600">{new Date(d.date + 'T12:00:00').getDate()}/{new Date(d.date + 'T12:00:00').getMonth() + 1}</div>
+                  <div className="text-sky-600 font-bold mt-1">{d.et0}mm</div>
+                  <div className="text-slate-400">ET₀</div>
+                  <div className={`mt-1 font-semibold ${d.balance >= 0 ? 'text-green-600' : 'text-red-500'}`}>{d.balance > 0 ? '+' : ''}{d.balance}</div>
+                </div>
+              ))}
+            </div>
+            {/* Análise NIM */}
+            <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
+              <div className="text-xs font-bold text-indigo-600 mb-1">🤖 Recomendação agronômica</div>
+              <p className="text-sm text-slate-700 whitespace-pre-line">{sim.analiseIA}</p>
+              <p className="text-[10px] text-slate-400 mt-2">{sim.modelo}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Rainfall history chart */}
       {data.history.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
@@ -206,8 +279,8 @@ export default function ClimaPage() {
               />
               <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} />
               <Tooltip
-                formatter={(v: number) => [`${v} mm`, 'Chuva']}
-                labelFormatter={v => new Date(v + 'T12:00:00').toLocaleDateString('pt-BR')}
+                formatter={(v: any) => [`${v} mm`, 'Chuva']}
+                labelFormatter={(v: any) => new Date(v + 'T12:00:00').toLocaleDateString('pt-BR')}
                 contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0' }}
               />
               <Bar dataKey="precip" radius={[3, 3, 0, 0]}>
