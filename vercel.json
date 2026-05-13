@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/check-late",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/notificar",
+      "schedule": "0 9,18 * * *"
     }
   ]
 }

@@ -7,7 +7,7 @@ export function getResend() {
 export async function sendWelcomeEmail(name: string, email: string) {
   const resend = getResend()
   await resend.emails.send({
-    from: 'SmartAgroOS <onboarding@resend.dev>',
+    from: 'SmartAgroOS <noreply@parceirosdeproposito.com>',
     to: email,
     subject: 'Bem-vindo ao SmartAgroOS 🌾',
     html: `
@@ -61,6 +61,41 @@ export async function sendWelcomeEmail(name: string, email: string) {
               <p style="margin:0;color:#94a3b8;font-size:12px;">© 2025 SmartAgroOS · Sistema Operacional da Fazenda</p>
             </div>
 
+          </div>
+        </body>
+      </html>
+    `,
+  })
+}
+
+export async function sendPromotionalEmail(email: string, name: string, subject: string, title: string, body: string, cta: string, url: string) {
+  const resend = getResend()
+  await resend.emails.send({
+    from: 'SmartAgroOS <noreply@parceirosdeproposito.com>',
+    to: email,
+    subject: subject,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
+        <body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+          <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
+            <div style="background:#16a34a;padding:24px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:700;">SmartAgroOS</h1>
+            </div>
+            <div style="padding:32px;">
+              <h2 style="margin:0 0 12px;color:#0f172a;font-size:20px;">Olá, ${name.split(' ')[0]}!</h2>
+              <h3 style="color:#16a34a;font-size:18px;margin-bottom:16px;">${title}</h3>
+              <p style="margin:0 0 24px;color:#64748b;font-size:15px;line-height:1.6;">${body}</p>
+              <div style="text-align:center;margin-bottom:24px;">
+                <a href="${url}" style="display:inline-block;background:#16a34a;color:#ffffff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none;">
+                  ${cta}
+                </a>
+              </div>
+            </div>
+            <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 32px;text-align:center;">
+              <p style="margin:0;color:#94a3b8;font-size:12px;">© 2026 SmartAgroOS · OryonAG Ecosystem</p>
+            </div>
           </div>
         </body>
       </html>

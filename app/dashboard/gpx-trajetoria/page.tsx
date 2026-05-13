@@ -58,6 +58,7 @@ export default function GpxTrajetoriaPage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [fileName, setFileName] = useState('')
   const [dragOver, setDragOver] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current || mapInstance.current) return
@@ -168,9 +169,27 @@ export default function GpxTrajetoriaPage() {
         />
       </div>
 
-      <div className="flex flex-1 min-h-0">
-        {/* Side panel */}
-        <div className="w-48 flex-shrink-0 border-r flex flex-col overflow-y-auto" style={{ background: 'rgba(8,12,20,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}>
+      <div className="flex flex-1 min-h-0 relative">
+        {/* Side panel — sidebar on desktop, bottom sheet on mobile */}
+        <div
+          className={[
+            'flex-col border-r overflow-y-auto flex-shrink-0',
+            panelOpen
+              ? 'flex absolute inset-x-0 bottom-0 max-h-[65%] z-[1001] rounded-t-2xl shadow-2xl'
+              : 'hidden',
+            'md:flex md:relative md:inset-auto md:bottom-auto md:z-auto md:max-h-none md:rounded-none md:w-48 md:shadow-none',
+          ].join(' ')}
+          style={{ background: 'rgba(8,12,20,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}
+        >
+          {/* Mobile close button */}
+          <div className="md:hidden flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <span className="text-xs font-bold text-white">Controles</span>
+            <button onClick={() => setPanelOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
           {points.length === 0 ? (
             <div className={`m-3 flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer ${dragOver ? 'border-cyan-400 bg-cyan-400/10' : 'border-white/10'}`}
               onClick={() => fileRef.current?.click()}
@@ -228,6 +247,22 @@ export default function GpxTrajetoriaPage() {
         {/* Map */}
         <div className="flex-1 relative">
           <div ref={mapRef} className="absolute inset-0" />
+          {/* Mobile panel toggle */}
+          <button
+            onClick={() => setPanelOpen(o => !o)}
+            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: panelOpen ? 'rgba(6,182,212,0.95)' : 'rgba(8,12,20,0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061A1.125 1.125 0 013 16.811V8.69zM12.75 8.689c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 010 1.954l-7.108 4.061a1.125 1.125 0 01-1.683-.977V8.69z" />
+            </svg>
+            Trajeto
+          </button>
           {points.length === 0 && (
             <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none" style={{ background: 'rgba(8,12,20,0.7)' }}>
               <div className="text-center"><div className="text-4xl mb-3 opacity-30">📡</div><p className="text-sm font-bold text-white/50">Carregue um arquivo GPX</p></div>

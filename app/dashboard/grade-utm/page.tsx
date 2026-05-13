@@ -78,6 +78,7 @@ export default function GradeUTMPage() {
   const [showLabels, setShowLabels] = useState(true)
   const [hoveredCell, setHoveredCell] = useState<GridCell | null>(null)
   const [cellCount, setCellCount] = useState(0)
+  const [panelOpen, setPanelOpen] = useState(false)
 
   const activePreset = GRID_PRESETS.find(p => p.m === gridM) ?? GRID_PRESETS[1]
 
@@ -285,12 +286,27 @@ export default function GradeUTMPage() {
         />
       </div>
 
-      <div className="flex flex-1 min-h-0">
-        {/* Config panel */}
+      <div className="flex flex-1 min-h-0 relative">
+        {/* Config panel — sidebar on desktop, bottom sheet on mobile */}
         <div
-          className="w-56 flex-shrink-0 flex flex-col border-r overflow-y-auto"
+          className={[
+            'flex-col border-r overflow-y-auto flex-shrink-0',
+            panelOpen
+              ? 'flex absolute inset-x-0 bottom-0 max-h-[65%] z-[1001] rounded-t-2xl shadow-2xl'
+              : 'hidden',
+            'md:flex md:relative md:inset-auto md:bottom-auto md:z-auto md:max-h-none md:rounded-none md:w-56 md:shadow-none',
+          ].join(' ')}
           style={{ background: 'rgba(11,17,32,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}
         >
+          {/* Mobile close button */}
+          <div className="md:hidden flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <span className="text-xs font-bold text-white">Configurações</span>
+            <button onClick={() => setPanelOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
           {/* Property info */}
           <div className="px-4 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Propriedade</div>
@@ -408,6 +424,22 @@ export default function GradeUTMPage() {
 
         {/* Map */}
         <div className="flex-1 relative min-w-0">
+          {/* Mobile panel toggle */}
+          <button
+            onClick={() => setPanelOpen(o => !o)}
+            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: panelOpen ? `${activePreset.color}dd` : 'rgba(15,23,42,0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            Grade
+          </button>
           {!property?.lat && !loading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center" style={{ background: 'rgba(11,17,32,0.85)' }}>
               <div className="text-center px-6">

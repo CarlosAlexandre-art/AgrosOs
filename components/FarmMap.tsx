@@ -105,6 +105,7 @@ export default function FarmMap({ data }: { data: MapData }) {
   const [saved, setSaved] = useState(false)
   const [activeLayer, setActiveLayer] = useState<LayerId>('satellite')
   const [layerPanelOpen, setLayerPanelOpen] = useState(false)
+  const [mobileFieldsOpen, setMobileFieldsOpen] = useState(false)
   const [pendingLat, setPendingLat] = useState<number | null>(data.lat)
   const [pendingLng, setPendingLng] = useState<number | null>(data.lng)
   const [fieldCoords, setFieldCoords] = useState<Record<string, { lat: number; lng: number }>>(() => {
@@ -315,11 +316,65 @@ export default function FarmMap({ data }: { data: MapData }) {
 
   const currentLayerCfg = TILE_LAYERS[activeLayer]
 
+  const FieldsList = ({ onMarkField }: { onMarkField?: () => void }) => (
+    <>
+      {data.fields.length === 0 ? (
+        <div className="p-6 text-center">
+          <div className="text-3xl mb-2">🌱</div>
+          <p className="text-sm text-slate-400">Nenhum talhão cadastrado</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-slate-50">
+          {data.fields.map((field, idx) => {
+            const color = FIELD_COLORS[idx % FIELD_COLORS.length]
+            const isLocated = fieldCoords[field.id] || (field.lat && field.lng)
+            const isActive = activeField === field.id && mode === 'field'
+            return (
+              <div key={field.id} className={`px-4 py-3 transition-colors ${isActive ? 'bg-amber-50' : 'hover:bg-slate-50/80'}`}>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white" style={{ background: color }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-slate-800 truncate">{field.name}</div>
+                    <div className="text-xs text-slate-400">{Number(field.sizeHectares).toFixed(1)} ha</div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (isActive) { setMode('view'); setActiveField(null) }
+                      else { setMode('field'); setActiveField(field.id); onMarkField?.() }
+                    }}
+                    title={isLocated ? 'Reposicionar' : 'Marcar no mapa'}
+                    className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
+                      isActive ? 'bg-amber-200 text-amber-700' : 'text-slate-300 hover:text-[#16a34a] hover:bg-green-50'
+                    }`}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                </div>
+                {isLocated && (
+                  <div className="mt-1 text-[10px] text-[#16a34a] font-semibold flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Localizado
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+
   return (
     <div className="flex flex-col h-full">
-      {/* Toolbar */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3 flex flex-wrap items-center gap-3 flex-shrink-0">
-        <div className="flex items-center gap-2 flex-1 min-w-0 max-w-xs">
+      {/* Toolbar — two rows on mobile, single row on desktop */}
+      <div className="bg-white border-b border-slate-200 px-3 py-2.5 flex-shrink-0">
+        {/* Row 1: Search */}
+        <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -332,53 +387,68 @@ export default function FarmMap({ data }: { data: MapData }) {
             />
           </div>
           <button onClick={handleSearch} disabled={searching}
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium text-slate-600 transition-colors disabled:opacity-50">
+            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium text-slate-600 transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0">
             {searching ? '...' : 'Buscar'}
           </button>
         </div>
 
-        <button onClick={handleGeolocate} title="Usar minha localização"
-          className="flex items-center gap-1.5 px-3 py-2 text-sm border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <circle cx="12" cy="12" r="3" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
-          </svg>
-          <span className="hidden sm:inline">GPS</span>
-        </button>
+        {/* Row 2: Action buttons */}
+        <div className="flex items-center gap-2 mt-2">
+          <button onClick={handleGeolocate} title="Usar minha localização"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors flex-shrink-0">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <circle cx="12" cy="12" r="3" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+            </svg>
+            <span className="hidden sm:inline">GPS</span>
+          </button>
 
-        {/* Open in Google Maps */}
-        <button onClick={handleOpenGoogleMaps} title="Abrir no Google Maps"
-          className="flex items-center gap-1.5 px-3 py-2 text-sm border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors">
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
-          <span className="hidden sm:inline">Google Maps</span>
-        </button>
+          <button onClick={handleOpenGoogleMaps} title="Abrir no Google Maps"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 transition-colors flex-shrink-0">
+            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <span className="hidden sm:inline">Google Maps</span>
+          </button>
 
-        <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+          <div className="h-5 w-px bg-slate-200 hidden sm:block flex-shrink-0" />
 
-        <button
-          onClick={() => { setMode(m => m === 'move' ? 'view' : 'move'); setActiveField(null) }}
-          className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl font-medium transition-all ${
-            mode === 'move' ? 'bg-[#16a34a] text-white shadow-sm' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-          }`}
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          {mode === 'move' ? 'Clique no mapa...' : 'Marcar fazenda'}
-        </button>
+          <button
+            onClick={() => { setMode(m => m === 'move' ? 'view' : 'move'); setActiveField(null) }}
+            className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-xl font-medium transition-all flex-shrink-0 ${
+              mode === 'move' ? 'bg-[#16a34a] text-white shadow-sm' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span className="sm:hidden">{mode === 'move' ? 'Ativo' : 'Marcar'}</span>
+            <span className="hidden sm:inline">{mode === 'move' ? 'Clique no mapa...' : 'Marcar fazenda'}</span>
+          </button>
 
-        <button
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
-          className="btn-primary ml-auto flex items-center gap-1.5 px-4 py-2 text-sm bg-[#16a34a] text-white font-semibold rounded-xl hover:bg-[#15803d] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-        >
-          {saved ? (
-            <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>Salvo!</>
-          ) : saving ? 'Salvando...' : (
-            <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>Salvar</>
-          )}
-        </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !hasChanges}
+            className="ml-auto flex items-center gap-1.5 px-4 py-2 text-sm bg-[#16a34a] text-white font-semibold rounded-xl hover:bg-[#15803d] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex-shrink-0"
+          >
+            {saved ? (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="hidden sm:inline">Salvo!</span>
+              </>
+            ) : saving ? (
+              <span className="hidden sm:inline">Salvando...</span>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                <span className="hidden sm:inline">Salvar</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {mode !== 'view' && (
@@ -386,23 +456,23 @@ export default function FarmMap({ data }: { data: MapData }) {
           <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          {mode === 'move' && 'Clique em qualquer ponto do mapa para posicionar o marcador da fazenda'}
-          {mode === 'field' && activeField && `Clique no mapa para posicionar "${data.fields.find(f => f.id === activeField)?.name}"`}
+          {mode === 'move' && 'Toque em qualquer ponto do mapa para posicionar o marcador da fazenda'}
+          {mode === 'field' && activeField && `Toque no mapa para posicionar "${data.fields.find(f => f.id === activeField)?.name}"`}
           <button onClick={() => { setMode('view'); setActiveField(null) }} className="ml-auto text-amber-700 underline hover:no-underline">
             Cancelar
           </button>
         </div>
       )}
 
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 relative">
+        {/* Map area */}
         <div className="flex-1 relative min-w-0">
           <div ref={mapRef} className="absolute inset-0" style={{ cursor: mode !== 'view' ? 'crosshair' : undefined }} />
 
-          {/* ── Layer switcher — floating glass panel ── */}
+          {/* Layer switcher — floating glass panel */}
           <div className="absolute bottom-8 left-3 z-[1000]" style={{ pointerEvents: 'auto' }}>
             {layerPanelOpen && (
               <>
-                {/* backdrop */}
                 <div className="fixed inset-0 z-[-1]" onClick={() => setLayerPanelOpen(false)} />
                 <div
                   className="mb-2 rounded-2xl overflow-hidden shadow-2xl border border-white/20"
@@ -449,7 +519,6 @@ export default function FarmMap({ data }: { data: MapData }) {
               </>
             )}
 
-            {/* Trigger button */}
             <button
               onClick={() => setLayerPanelOpen(o => !o)}
               className="flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg transition-all hover:scale-105 active:scale-95"
@@ -460,10 +529,7 @@ export default function FarmMap({ data }: { data: MapData }) {
                 border: '1px solid rgba(255,255,255,0.15)',
               }}
             >
-              <div
-                className="w-5 h-5 rounded-md flex-shrink-0"
-                style={{ background: currentLayerCfg.swatch }}
-              />
+              <div className="w-5 h-5 rounded-md flex-shrink-0" style={{ background: currentLayerCfg.swatch }} />
               <span className="text-xs font-semibold text-white">{currentLayerCfg.label}</span>
               <svg
                 className={`w-3.5 h-3.5 text-white/70 transition-transform ${layerPanelOpen ? 'rotate-180' : ''}`}
@@ -473,9 +539,26 @@ export default function FarmMap({ data }: { data: MapData }) {
               </svg>
             </button>
           </div>
+
+          {/* Mobile: talhões toggle button — above zoom controls */}
+          <button
+            onClick={() => setMobileFieldsOpen(o => !o)}
+            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: mobileFieldsOpen ? 'rgba(22,163,74,0.95)' : 'rgba(15,23,42,0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            Talhões{data.fields.length > 0 ? ` (${data.fields.length})` : ''}
+          </button>
         </div>
 
-        {/* Fields panel — desktop */}
+        {/* Fields panel — desktop sidebar */}
         <div className="w-60 bg-white border-l border-slate-200 hidden md:flex flex-col flex-shrink-0">
           <div className="px-4 py-3 border-b border-slate-100">
             <h3 className="text-sm font-bold text-slate-800">Talhões</h3>
@@ -483,64 +566,44 @@ export default function FarmMap({ data }: { data: MapData }) {
               {data.fields.length} cadastrado{data.fields.length !== 1 ? 's' : ''}
             </p>
           </div>
-
           <div className="flex-1 overflow-y-auto">
-            {data.fields.length === 0 ? (
-              <div className="p-6 text-center">
-                <div className="text-3xl mb-2">🌱</div>
-                <p className="text-sm text-slate-400">Nenhum talhão cadastrado</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-50">
-                {data.fields.map((field, idx) => {
-                  const color = FIELD_COLORS[idx % FIELD_COLORS.length]
-                  const isLocated = fieldCoords[field.id] || (field.lat && field.lng)
-                  const isActive = activeField === field.id && mode === 'field'
-                  return (
-                    <div key={field.id} className={`px-4 py-3 transition-colors ${isActive ? 'bg-amber-50' : 'hover:bg-slate-50/80'}`}>
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white" style={{ background: color }} />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-slate-800 truncate">{field.name}</div>
-                          <div className="text-xs text-slate-400">{Number(field.sizeHectares).toFixed(1)} ha</div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            if (isActive) { setMode('view'); setActiveField(null) }
-                            else { setMode('field'); setActiveField(field.id) }
-                          }}
-                          title={isLocated ? 'Reposicionar' : 'Marcar no mapa'}
-                          className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
-                            isActive ? 'bg-amber-200 text-amber-700' : 'text-slate-300 hover:text-[#16a34a] hover:bg-green-50'
-                          }`}
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </button>
-                      </div>
-                      {isLocated && (
-                        <div className="mt-1 text-[10px] text-[#16a34a] font-semibold flex items-center gap-1">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                          Localizado
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            <FieldsList />
           </div>
-
           <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/60">
             <p className="text-[10px] text-slate-400 leading-relaxed">
               Clique no 📍 ao lado do talhão, depois clique no mapa para posicioná-lo.
             </p>
           </div>
         </div>
+
+        {/* Mobile: talhões bottom sheet */}
+        {mobileFieldsOpen && (
+          <div className="md:hidden absolute inset-x-0 bottom-0 z-[1001] bg-white rounded-t-2xl shadow-2xl flex flex-col" style={{ maxHeight: '55%' }}>
+            {/* Handle + header */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-100">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">Talhões</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{data.fields.length} cadastrado{data.fields.length !== 1 ? 's' : ''}</p>
+              </div>
+              <button
+                onClick={() => setMobileFieldsOpen(false)}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <FieldsList onMarkField={() => setMobileFieldsOpen(false)} />
+            </div>
+            <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/60">
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Toque em 📍 ao lado do talhão, depois toque no mapa para posicioná-lo.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

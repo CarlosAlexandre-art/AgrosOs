@@ -164,6 +164,7 @@ export default function GpxVelocidadePage() {
   const [gpxData, setGpxData] = useState<{ points: GpxPoint[]; stats: GpxStats } | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
+  const [panelOpen, setPanelOpen] = useState(false)
 
   // Init map
   useEffect(() => {
@@ -305,9 +306,27 @@ export default function GpxVelocidadePage() {
         />
       </div>
 
-      <div className="flex flex-1 min-h-0">
-        {/* Stats panel */}
-        <div className="w-56 flex-shrink-0 overflow-y-auto border-r flex flex-col" style={{ background: 'rgba(13,13,20,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}>
+      <div className="flex flex-1 min-h-0 relative">
+        {/* Stats panel — sidebar on desktop, bottom sheet on mobile */}
+        <div
+          className={[
+            'flex-col overflow-y-auto border-r flex-shrink-0',
+            panelOpen
+              ? 'flex absolute inset-x-0 bottom-0 max-h-[65%] z-[1001] rounded-t-2xl shadow-2xl'
+              : 'hidden',
+            'md:flex md:relative md:inset-auto md:bottom-auto md:z-auto md:max-h-none md:rounded-none md:w-56 md:shadow-none',
+          ].join(' ')}
+          style={{ background: 'rgba(13,13,20,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}
+        >
+          {/* Mobile close button */}
+          <div className="md:hidden flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <span className="text-xs font-bold text-white">Estatísticas</span>
+            <button onClick={() => setPanelOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
           {!gpxData ? (
             <div
               className={`m-3 flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-all ${dragOver ? 'border-amber-400 bg-amber-400/10' : 'border-white/10 hover:border-white/20'}`}
@@ -376,6 +395,22 @@ export default function GpxVelocidadePage() {
         {/* Map */}
         <div className="flex-1 relative">
           <div ref={mapRef} className="absolute inset-0" />
+          {/* Mobile panel toggle */}
+          <button
+            onClick={() => setPanelOpen(o => !o)}
+            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: panelOpen ? 'rgba(251,191,36,0.95)' : 'rgba(13,13,20,0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Velocidade
+          </button>
           {!gpxData && (
             <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none" style={{ background: 'rgba(13,13,20,0.6)' }}>
               <div className="text-center px-6">
