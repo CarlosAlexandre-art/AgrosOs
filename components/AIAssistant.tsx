@@ -182,7 +182,7 @@ export default function AIAssistant() {
                 </svg>
               </button>
             </div>
-            <div className="text-[10px] text-slate-600 text-center mt-1.5">Powered by Groq · LLaMA 3.3 70B</div>
+            <div className="text-[10px] text-slate-600 text-center mt-1.5">Powered by NVIDIA NIM · LLaMA 3.3 70B</div>
           </div>
         </div>
       )}
