@@ -137,6 +137,18 @@ export default function MercadoPage() {
 
       <div style={{ position: 'relative', zIndex: 1, padding: '40px 24px 64px', maxWidth: 780, margin: '0 auto' }}>
 
+        {/* Disclaimer piloto */}
+        <div style={{
+          background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
+          borderRadius: 12, padding: '12px 16px', marginBottom: 24,
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+        }}>
+          <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+          <div style={{ fontSize: 12, color: '#fbbf24', lineHeight: 1.6 }}>
+            <strong>Plataforma em fase piloto.</strong> Os tokens aqui listados passaram por verificação de identidade (KYC CPF) e revisão da equipe OryonAG, mas o colateral físico não foi auditado in loco. Invista apenas valores que pode assumir como risco. O dinheiro vai direto ao produtor via Stripe Connect após a compra.
+          </div>
+        </div>
+
         {/* Header */}
         <div className="am-header" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
           <Link href="/dashboard/token" style={{

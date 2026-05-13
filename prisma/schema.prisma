@@ -374,6 +374,7 @@ model AgroToken {
   machineYear  Int?
   usageHours   Decimal?
 
+  carNumber         String?
   contractUrl       String?
   blockchainTx      String?
   originacaoFee     Decimal?

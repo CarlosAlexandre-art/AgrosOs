@@ -12,6 +12,7 @@ type AdminToken = {
   tokenPrice: number
   totalTokens: number
   soldTokens: number
+  carNumber: string | null
   createdAt: string
   _count: { transactions: number }
   property: {
@@ -136,6 +137,22 @@ export default function AdminTokensPage() {
                       {token.property.name} — {token.property.user.name} ({token.property.user.email})
                       {token.property.user.cpf && ` • CPF: ${token.property.user.cpf}`}
                     </p>
+                    {token.carNumber && (
+                      <p className="text-xs text-slate-400 mt-0.5 font-mono">
+                        CAR: {token.carNumber} —{' '}
+                        <a
+                          href="https://www.car.gov.br/publico/imoveis/index"
+                          target="_blank"
+                          rel="noopener"
+                          className="text-blue-500 hover:underline"
+                        >
+                          verificar portal CAR
+                        </a>
+                      </p>
+                    )}
+                    {!token.carNumber && (
+                      <p className="text-xs text-red-400 mt-0.5">⚠️ CAR não informado</p>
+                    )}
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-lg font-bold text-slate-900">{fmt(Number(token.totalValue))}</div>

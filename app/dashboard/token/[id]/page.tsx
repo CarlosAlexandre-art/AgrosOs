@@ -144,6 +144,36 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-5">
+
+      {/* Status banners */}
+      {token.status === 'PENDING_REVIEW' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+          <span className="text-xl flex-shrink-0">🔍</span>
+          <div>
+            <div className="text-sm font-semibold text-amber-800">Em análise pela equipe OryonAG</div>
+            <div className="text-xs text-amber-700 mt-0.5">Seu token está na fila de aprovação. Em geral revisamos em até 48h. Você será notificado quando for aprovado ou se houver pendência.</div>
+          </div>
+        </div>
+      )}
+      {token.status === 'CANCELLED' && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
+          <span className="text-xl flex-shrink-0">❌</span>
+          <div>
+            <div className="text-sm font-semibold text-red-800">Token rejeitado</div>
+            <div className="text-xs text-red-700 mt-0.5">Este token foi rejeitado na revisão. Entre em contato com o suporte para entender o motivo e criar uma nova oferta.</div>
+          </div>
+        </div>
+      )}
+      {token.status === 'ACTIVE' && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex gap-3">
+          <span className="text-xl flex-shrink-0">✅</span>
+          <div>
+            <div className="text-sm font-semibold text-green-800">Token aprovado e ativo no mercado</div>
+            <div className="text-xs text-green-700 mt-0.5">Sua oferta está visível para investidores. KYC verificado · CAR registrado · Revisão OryonAG concluída.</div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/dashboard/token" className="p-2 rounded-xl hover:bg-gray-100 transition-colors">

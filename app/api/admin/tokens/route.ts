@@ -21,5 +21,6 @@ export async function GET() {
       _count: { select: { transactions: true } },
     },
   })
+
   return NextResponse.json(tokens)
 }

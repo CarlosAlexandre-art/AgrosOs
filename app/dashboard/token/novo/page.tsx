@@ -201,6 +201,7 @@ export default function NovoTokenPage() {
     machineModel: '',
     machineYear: '',
     usageHours: '',
+    carNumber: '',
     cpf: '',
     aceitaTermos: false,
     aceitaCVM: false,
@@ -283,12 +284,17 @@ export default function NovoTokenPage() {
 
   const canGoStep2 = !!form.type && !!form.propertyId
   const canGoStep3 = !!form.title && !!form.totalValue && !!form.tokenPrice
-  const canGoStep4 = canGoStep3 && (
+  const carRegex = /^[A-Z]{2}-\d{7}-[0-9A-F]{32}$/i
+  const carOk = carRegex.test(form.carNumber.trim())
+  const tvNum = parseFloat(form.totalValue) || 0
+  const tvOverLimit = tvNum > 100_000
+
+  const canGoStep4 = canGoStep3 && carOk && (
     form.type === 'SAFRA'      ? !!form.commodity && !!form.deliveryDate :
     form.type === 'MATERIAL'   ? !!form.materialType && !!form.quantity :
     !!form.machineType
   )
-  const canSubmit = canGoStep4 && cpfOk && !!cpfResult && form.aceitaTermos && form.aceitaCVM && form.aceitaPiloto
+  const canSubmit = canGoStep4 && cpfOk && !!cpfResult && form.aceitaTermos && form.aceitaCVM && form.aceitaPiloto && !tvOverLimit
 
   const STEP_LABEL = ['Tipo e propriedade', 'Valores e retorno', 'Detalhes do ativo', 'Simulação e conformidade']
 
@@ -450,13 +456,21 @@ export default function NovoTokenPage() {
               </div>
             </div>
 
-            {totalTokens > 0 && (
+            {totalTokens > 0 && !tvOverLimit && (
               <div style={{
                 background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.15)',
                 borderRadius: 10, padding: '12px 16px', fontSize: 14, color: '#4ade80',
               }}>
                 Serão emitidos <strong>{totalTokens.toLocaleString('pt-BR')} tokens</strong> de{' '}
                 R$ {parseFloat(form.tokenPrice).toLocaleString('pt-BR')} cada
+              </div>
+            )}
+            {tvOverLimit && (
+              <div style={{
+                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
+                borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171',
+              }}>
+                ⚠️ Limite piloto: máximo R$ 100.000 por oferta. Reduza o valor total.
               </div>
             )}
 
@@ -612,6 +626,33 @@ export default function NovoTokenPage() {
                 </div>
               </div>
             )}
+
+            {/* CAR — Cadastro Ambiental Rural */}
+            <div>
+              <DarkLabel>Nº do CAR — Cadastro Ambiental Rural *</DarkLabel>
+              <input
+                className="nt-input"
+                placeholder="Ex: SP-3512020-19BD8D124B524EF9B1BF5B02A1AB6C46"
+                value={form.carNumber}
+                onChange={e => set('carNumber', e.target.value.toUpperCase())}
+                style={{ fontFamily: 'monospace', letterSpacing: '0.03em' }}
+              />
+              {form.carNumber && !carOk && (
+                <p style={{ fontSize: 11, color: '#f87171', marginTop: 4 }}>
+                  Formato inválido. Use: UF-{'{7 dígitos}'}-{'{32 caracteres}'} — encontre no <a href="https://www.car.gov.br/publico/imoveis/index" target="_blank" rel="noopener" style={{ color: '#4ade80' }}>Portal CAR</a>
+                </p>
+              )}
+              {form.carNumber && carOk && (
+                <p style={{ fontSize: 11, color: '#4ade80', marginTop: 4 }}>
+                  ✓ Formato válido — <a href="https://www.car.gov.br/publico/imoveis/index" target="_blank" rel="noopener" style={{ color: '#4ade80' }}>Verificar no Portal CAR</a>
+                </p>
+              )}
+              {!form.carNumber && (
+                <p style={{ fontSize: 11, color: '#2a5c3a', marginTop: 4 }}>
+                  Obrigatório. Encontre no <a href="https://www.car.gov.br/publico/imoveis/index" target="_blank" rel="noopener" style={{ color: '#4ade80' }}>Portal CAR do governo federal</a>
+                </p>
+              )}
+            </div>
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button className="nt-btn-back" onClick={() => setStep(2)}>Voltar</button>

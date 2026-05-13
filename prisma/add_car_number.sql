@@ -1,0 +1,1 @@
+ALTER TABLE "AgroToken" ADD COLUMN IF NOT EXISTS "carNumber" TEXT;

@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     commodity, quantityKg, deliveryDate, fieldId,
     materialType, quantity, unit,
     machineType, machineModel, machineYear, usageHours,
+    carNumber,
   } = body
 
   const owned = dbUser.properties.some(p => p.id === propertyId)
@@ -52,6 +53,28 @@ export async function POST(request: Request) {
 
   const tv = parseFloat(totalValue)
   const tp = parseFloat(tokenPrice || '100')
+
+  // Validações de segurança — piloto
+  if (!type || !['SAFRA', 'MATERIAL', 'MAQUINARIO'].includes(type))
+    return NextResponse.json({ error: 'Tipo inválido' }, { status: 400 })
+  if (!title?.trim())
+    return NextResponse.json({ error: 'Título obrigatório' }, { status: 400 })
+  if (isNaN(tv) || tv <= 0)
+    return NextResponse.json({ error: 'Valor total inválido' }, { status: 400 })
+  if (tv > 100_000)
+    return NextResponse.json({ error: 'Valor máximo por oferta no piloto: R$ 100.000' }, { status: 400 })
+  if (isNaN(tp) || tp < 10)
+    return NextResponse.json({ error: 'Preço mínimo por token: R$ 10' }, { status: 400 })
+  if (tp > 10_000)
+    return NextResponse.json({ error: 'Preço máximo por token no piloto: R$ 10.000' }, { status: 400 })
+  if (!carNumber?.trim())
+    return NextResponse.json({ error: 'Número do CAR obrigatório' }, { status: 400 })
+
+  // Validar formato básico CAR: UF-{7 dígitos}-{32 hex}
+  const carRegex = /^[A-Z]{2}-\d{7}-[0-9A-F]{32}$/i
+  if (!carRegex.test(carNumber.trim()))
+    return NextResponse.json({ error: 'Formato do CAR inválido. Ex: SP-3512020-19BD8D....' }, { status: 400 })
+
   const totalTokens = Math.floor(tv / tp)
 
   const token = await prisma.agroToken.create({
@@ -59,10 +82,12 @@ export async function POST(request: Request) {
       propertyId,
       type,
       title,
-      description,
+      description: description || null,
       totalValue: tv,
       tokenPrice: tp,
       totalTokens,
+      status: 'PENDING_REVIEW',
+      carNumber: carNumber.trim().toUpperCase(),
       expectedReturn: expectedReturn ? parseFloat(expectedReturn) : null,
       periodMonths: periodMonths ? parseInt(periodMonths) : null,
       commodity: commodity || null,
