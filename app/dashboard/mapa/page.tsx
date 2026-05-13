@@ -56,7 +56,7 @@ export default async function MapaPage() {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="flex flex-col" style={{ height: 'calc(100dvh - 64px)' }}>
       {/* Header */}
       <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center justify-between flex-shrink-0">
         <div>

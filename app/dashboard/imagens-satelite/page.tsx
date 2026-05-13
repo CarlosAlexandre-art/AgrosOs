@@ -125,7 +125,7 @@ function ImagensSateliteContent() {
   }, [activeService])
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0a0e1a' }}>
+    <div className="flex flex-col overflow-hidden" style={{ background: '#0a0e1a', height: 'calc(100dvh - 64px)' }}>
       {/* Header */}
       <div className="flex-shrink-0 border-b" style={{ background: 'rgba(10,14,26,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="px-5 py-3 flex items-center gap-4">

@@ -222,7 +222,7 @@ function GradeUTMContent() {
   const utmZone = property?.lng ? getUtmZone(property.lng) : null
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#0b1120]">
+    <div className="flex flex-col overflow-hidden bg-[#0b1120]" style={{ height: 'calc(100dvh - 64px)' }}>
       {/* Top header strip */}
       <div
         className="flex-shrink-0 px-5 py-3 flex items-center justify-between gap-4 border-b"
@@ -429,7 +429,7 @@ function GradeUTMContent() {
           {/* Mobile panel toggle */}
           <button
             onClick={() => setPanelOpen(o => !o)}
-            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            className="md:hidden absolute bottom-28 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
             style={{
               background: panelOpen ? `${activePreset.color}dd` : 'rgba(15,23,42,0.85)',
               backdropFilter: 'blur(12px)',

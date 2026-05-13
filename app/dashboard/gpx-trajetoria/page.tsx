@@ -133,7 +133,7 @@ function GpxTrajetoriaContent() {
   const currentPt = points[playPos]
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#080c14' }}>
+    <div className="flex flex-col overflow-hidden" style={{ background: '#080c14', height: 'calc(100dvh - 64px)' }}>
       <div className="flex-shrink-0 px-5 py-3 flex items-center gap-4 border-b" style={{ background: 'rgba(8,12,20,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
@@ -252,7 +252,7 @@ function GpxTrajetoriaContent() {
           {/* Mobile panel toggle */}
           <button
             onClick={() => setPanelOpen(o => !o)}
-            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            className="md:hidden absolute bottom-28 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
             style={{
               background: panelOpen ? 'rgba(6,182,212,0.95)' : 'rgba(8,12,20,0.85)',
               backdropFilter: 'blur(12px)',

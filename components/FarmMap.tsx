@@ -543,7 +543,7 @@ export default function FarmMap({ data }: { data: MapData }) {
           {/* Mobile: talhões toggle button — above zoom controls */}
           <button
             onClick={() => setMobileFieldsOpen(o => !o)}
-            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            className="md:hidden absolute bottom-28 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
             style={{
               background: mobileFieldsOpen ? 'rgba(22,163,74,0.95)' : 'rgba(15,23,42,0.85)',
               backdropFilter: 'blur(12px)',

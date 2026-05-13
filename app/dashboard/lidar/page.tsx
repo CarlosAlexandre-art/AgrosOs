@@ -132,7 +132,7 @@ function LidarContent() {
   const isLasFile = fileName.toLowerCase().endsWith('.las')
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0e1a' }}>
+    <div style={{ background: '#0a0e1a' }}>
       {/* Header */}
       <div className="border-b px-5 py-3 flex items-center gap-4" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(10,14,26,0.97)' }}>
         <div className="flex items-center gap-3">

@@ -244,7 +244,7 @@ function GpxVelocidadeContent() {
   const stats = gpxData?.stats
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d14' }}>
+    <div className="flex flex-col overflow-hidden" style={{ background: '#0d0d14', height: 'calc(100dvh - 64px)' }}>
       {/* Header */}
       <div className="flex-shrink-0 px-5 py-3 flex items-center gap-4 border-b" style={{ background: 'rgba(13,13,20,0.95)', borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-3">
@@ -400,7 +400,7 @@ function GpxVelocidadeContent() {
           {/* Mobile panel toggle */}
           <button
             onClick={() => setPanelOpen(o => !o)}
-            className="md:hidden absolute bottom-20 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
+            className="md:hidden absolute bottom-28 right-3 z-[1000] flex items-center gap-1.5 px-3 py-2 rounded-xl shadow-lg text-xs font-semibold text-white transition-all hover:scale-105 active:scale-95"
             style={{
               background: panelOpen ? 'rgba(251,191,36,0.95)' : 'rgba(13,13,20,0.85)',
               backdropFilter: 'blur(12px)',

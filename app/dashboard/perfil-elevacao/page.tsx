@@ -167,7 +167,7 @@ function PerfilElevacaoContent() {
     : ''
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0d1117' }}>
+    <div className="flex flex-col" style={{ background: '#0d1117' }}>
       {/* Header */}
       <div className="flex-shrink-0 px-5 py-3 flex items-center gap-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(13,17,23,0.97)' }}>
         <div className="flex items-center gap-3">
