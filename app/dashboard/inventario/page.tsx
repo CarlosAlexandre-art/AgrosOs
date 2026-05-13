@@ -457,10 +457,10 @@ export default function InventarioPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <div className="font-semibold mb-1">Inferência YOLO indisponível no Vercel</div>
+                <div className="font-semibold mb-1">Inventário florestal em breve</div>
                 <p className="text-amber-700 text-xs leading-relaxed">
-                  O modelo ONNX requer a biblioteca nativa <code className="bg-amber-100 px-1 rounded">libonnxruntime.so</code> que não existe em ambientes serverless.
-                  Para ativar, configure a variável de ambiente <code className="bg-amber-100 px-1 rounded">QGIS_SERVICE_URL</code> no Vercel apontando para um servidor com ONNX Runtime instalado.
+                  Esta análise será integrada ao seu CAR e documentação ambiental.
+                  Configure <code className="bg-amber-100 px-1 rounded">ROBOFLOW_API_KEY</code> no Vercel para ativar a inferência real.
                 </p>
               </div>
             </div>

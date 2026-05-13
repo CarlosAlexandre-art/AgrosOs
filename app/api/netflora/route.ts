@@ -73,7 +73,7 @@ function buildDemoResult(modelId: string) {
     detections,
     summary,
     source: 'demo' as const,
-    demo_notice: 'Resultado simulado — configure ROBOFLOW_API_KEY no Vercel para inferência real.',
+    demo_notice: 'Inventário florestal em breve — esta análise será integrada ao seu CAR e documentação ambiental. Configure ROBOFLOW_API_KEY para ativar.',
   }
 }
 
