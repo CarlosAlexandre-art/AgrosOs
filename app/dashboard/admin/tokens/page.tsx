@@ -109,6 +109,9 @@ export default function AdminTokensPage() {
           <p className="text-sm text-slate-400">{pending} aguardando aprovação</p>
         </div>
         <div className="flex gap-2">
+          <Link href="/dashboard/admin/monitoring" className="text-sm border border-gray-200 px-4 py-2 rounded-xl text-slate-600 hover:bg-gray-50 transition-colors">
+            Monitoramento
+          </Link>
           <Link href="/dashboard/admin/comissoes" className="text-sm border border-gray-200 px-4 py-2 rounded-xl text-slate-600 hover:bg-gray-50 transition-colors">
             Comissões
           </Link>

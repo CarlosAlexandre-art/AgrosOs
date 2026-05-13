@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { transferTokensToInvestor } from '@/lib/wallet'
 import { getStripe } from '@/lib/stripe'
+import { logSecurityEvent } from '@/lib/security'
 
 export const runtime = 'nodejs'
 
@@ -106,6 +107,87 @@ export async function POST(req: NextRequest) {
         where: { stripeCustomerId: customerId },
         data: { plan },
       })
+      break
+    }
+
+    // ── Segurança: chargeback/disputa ────────────────────────────────────────
+    case 'charge.dispute.created': {
+      const dispute = event.data.object as Stripe.Dispute
+      const chargeId = typeof dispute.charge === 'string' ? dispute.charge : dispute.charge?.id
+
+      // Tenta encontrar a transação relacionada
+      const charge = chargeId ? await getStripe().charges.retrieve(chargeId).catch(() => null) : null
+      const meta = charge?.metadata ?? {}
+
+      await logSecurityEvent({
+        type: 'DISPUTE',
+        severity: 'CRITICAL',
+        userId: meta.buyerId,
+        tokenId: meta.tokenId,
+        stripeId: dispute.id,
+        details: {
+          amount: dispute.amount / 100,
+          reason: dispute.reason,
+          status: dispute.status,
+          chargeId,
+        },
+      })
+      break
+    }
+
+    // ── Segurança: pagamento falhou repetidamente ────────────────────────────
+    case 'payment_intent.payment_failed': {
+      const pi = event.data.object as Stripe.PaymentIntent
+      const meta = pi.metadata ?? {}
+      const errorMsg = pi.last_payment_error?.message ?? 'desconhecido'
+
+      await logSecurityEvent({
+        type: 'PAYMENT_FAILED',
+        severity: 'MEDIUM',
+        userId: meta.buyerId,
+        tokenId: meta.tokenId,
+        stripeId: pi.id,
+        details: { amount: pi.amount / 100, error: errorMsg },
+      })
+      break
+    }
+
+    // ── Segurança: payout ao produtor falhou ────────────────────────────────
+    case 'payout.failed': {
+      const payout = event.data.object as Stripe.Payout
+      await logSecurityEvent({
+        type: 'TRANSFER_FAILED',
+        severity: 'HIGH',
+        stripeId: payout.id,
+        details: {
+          amount: payout.amount / 100,
+          failure_code: payout.failure_code,
+          failure_message: payout.failure_message,
+        },
+      })
+      break
+    }
+
+    // ── Segurança: conta Connect do produtor suspensa ou desativada ──────────
+    case 'account.updated': {
+      const account = event.data.object as Stripe.Account
+      if (account.requirements?.disabled_reason) {
+        const dbUser = await prisma.user.findFirst({
+          where: { stripeAccountId: account.id },
+          select: { id: true },
+        })
+        await logSecurityEvent({
+          type: 'ACCOUNT_SUSPENDED',
+          severity: 'HIGH',
+          userId: dbUser?.id,
+          stripeId: account.id,
+          details: {
+            disabled_reason: account.requirements.disabled_reason,
+            charges_enabled: account.charges_enabled,
+            payouts_enabled: account.payouts_enabled,
+          },
+        })
+      }
       break
     }
   }

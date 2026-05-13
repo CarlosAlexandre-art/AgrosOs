@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
+import { checkResgateLock } from '@/lib/security'
 
 const SUCESSO_RATE = 0.03
 
@@ -37,6 +38,15 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
   })
   if (!token) return NextResponse.json({ error: 'Token não encontrado' }, { status: 404 })
   if (token.status !== 'ACTIVE') return NextResponse.json({ error: 'Apenas tokens ativos podem ser resgatados' }, { status: 400 })
+
+  // Lock de 3 dias: evita resgate imediato após aprovação (anti pump-and-dump)
+  const lock = await checkResgateLock(token.updatedAt)
+  if (lock.blocked) {
+    return NextResponse.json(
+      { error: `Aguarde ${lock.daysLeft} dia(s) antes de resgatar. O token precisa ficar ativo por pelo menos 3 dias.` },
+      { status: 400 }
+    )
+  }
 
   const captado = token.soldTokens * Number(token.tokenPrice)
   if (captado === 0) {

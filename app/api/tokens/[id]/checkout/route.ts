@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { getStripe, PLATFORM_FEE_RATE } from '@/lib/stripe'
 import Stripe from 'stripe'
+import { isRateLimited, checkConcentrationRisk, logSecurityEvent } from '@/lib/security'
 
 export async function POST(
   request: Request,
@@ -15,6 +16,17 @@ export async function POST(
 
   const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id } })
   if (!dbUser) return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+
+  // Rate limiting: bloqueia mais de 3 tentativas em 5 minutos
+  if (await isRateLimited(dbUser.id)) {
+    await logSecurityEvent({
+      type: 'RATE_LIMIT',
+      severity: 'MEDIUM',
+      userId: dbUser.id,
+      details: { tokenId: id, action: 'checkout' },
+    })
+    return NextResponse.json({ error: 'Muitas tentativas. Aguarde alguns minutos.' }, { status: 429 })
+  }
 
   const token = await prisma.agroToken.findUnique({
     where: { id },
@@ -30,6 +42,19 @@ export async function POST(
   const available = token.totalTokens - token.soldTokens
   if (quantity > available) {
     return NextResponse.json({ error: `Apenas ${available} tokens disponíveis` }, { status: 400 })
+  }
+
+  // Anti-concentração: investidor não pode deter mais de 40% do token
+  const concentration = await checkConcentrationRisk(id, dbUser.id, quantity, token.totalTokens)
+  if (concentration.blocked) {
+    await logSecurityEvent({
+      type: 'CONCENTRATION_RISK',
+      severity: 'HIGH',
+      userId: dbUser.id,
+      tokenId: id,
+      details: { quantity, totalTokens: token.totalTokens },
+    })
+    return NextResponse.json({ error: concentration.reason }, { status: 400 })
   }
 
   const pricePerToken = Number(token.tokenPrice)

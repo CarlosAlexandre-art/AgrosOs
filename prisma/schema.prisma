@@ -409,6 +409,22 @@ model TokenTransaction {
   @@index([buyerId])
 }
 
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  type      String
+  severity  String   @default("MEDIUM")
+  userId    String?
+  tokenId   String?
+  stripeId  String?
+  details   Json?
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
 model EnergyRecord {
   id          String   @id @default(uuid())
   propertyId  String
