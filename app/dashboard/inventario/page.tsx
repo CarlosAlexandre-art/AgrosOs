@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import HowToUse from '../../../components/HowToUse'
 
 type NetfloraModel = {
@@ -87,6 +87,26 @@ function DetectionOverlay({ detections, imageSize }: { detections: Detection[]; 
   )
 }
 
+interface HistEntry {
+  id: string
+  ts: string
+  fileName: string
+  biome: string
+  modelId: string
+  total: number
+}
+
+const HIST_KEY = 'smartagroos_inventario_history'
+const MAX_HIST = 10
+
+function saveHistory(entry: HistEntry) {
+  try {
+    const raw = localStorage.getItem(HIST_KEY)
+    const prev: HistEntry[] = raw ? JSON.parse(raw) : []
+    localStorage.setItem(HIST_KEY, JSON.stringify([entry, ...prev].slice(0, MAX_HIST)))
+  } catch { /* ignore */ }
+}
+
 export default function InventarioPage() {
   const [models, setModels] = useState<NetfloraModel[] | null>(null)
   const [loadingModels, setLoadingModels] = useState(false)
@@ -102,6 +122,16 @@ export default function InventarioPage() {
   const [serverlessNotice, setServerlessNotice] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [histOpen, setHistOpen] = useState(false)
+  const [hist, setHist] = useState<HistEntry[]>([])
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HIST_KEY)
+      if (raw) setHist(JSON.parse(raw))
+    } catch { /* ignore */ }
+  }, [])
 
   const filteredModels = (models || []).filter(m => m.biome === selectedBiome)
 
@@ -162,7 +192,18 @@ export default function InventarioPage() {
         return
       }
 
-      setResult(await res.json())
+      const data: DetectionResult = await res.json()
+      setResult(data)
+      const entry: HistEntry = {
+        id: Date.now().toString(),
+        ts: new Date().toISOString(),
+        fileName: imageFile.name,
+        biome: selectedBiome,
+        modelId: selectedModel,
+        total: data.total,
+      }
+      saveHistory(entry)
+      setHist(h => [entry, ...h].slice(0, MAX_HIST))
     } catch (e) {
       setError('Erro de rede. Tente novamente.')
     } finally {
@@ -176,9 +217,10 @@ export default function InventarioPage() {
 
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
+      <style>{`@media print { body { background: white !important; } .print\\:hidden { display: none !important; } }`}</style>
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-5">
-        <div className="max-w-6xl mx-auto flex items-start justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
@@ -192,13 +234,43 @@ export default function InventarioPage() {
               </div>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
-            <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-xs text-emerald-700 font-medium">12 modelos · 6 biomas brasileiros · YOLO/ONNX</span>
+          <div className="flex items-center gap-2 print:hidden">
+            <button onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition-colors">
+              ⬇ PDF
+            </button>
+            {hist.length > 0 && (
+              <button onClick={() => setHistOpen(o => !o)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition-colors">
+                🕐 Histórico ({hist.length})
+              </button>
+            )}
+            <div className="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5">
+              <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs text-emerald-700 font-medium">12 modelos · 6 biomas · YOLO/ONNX</span>
+            </div>
           </div>
         </div>
+
+        {/* Painel de histórico */}
+        {histOpen && hist.length > 0 && (
+          <div className="max-w-6xl mx-auto mt-3 pt-3 border-t border-gray-100 print:hidden">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Análises recentes</div>
+            <div className="flex flex-wrap gap-2">
+              {hist.map(h => (
+                <div key={h.id} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                  <span className="font-medium text-slate-700 truncate max-w-[120px]">{h.fileName}</span>
+                  <span className="text-slate-400">·</span>
+                  <span className="text-emerald-600 font-semibold">{h.biome}</span>
+                  <span className="text-slate-400">·</span>
+                  <span className="text-slate-500">{h.total} det.</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">

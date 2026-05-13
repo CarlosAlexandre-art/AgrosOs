@@ -35,6 +35,25 @@ interface Transacao {
 
 type Tab = 'animal' | 'racas' | 'transacoes'
 
+interface HistEntry {
+  id: string
+  ts: string
+  codigo: string
+  identificacao: string
+  raca: string
+}
+
+const HIST_KEY = 'smartagroos_bovinos_history'
+const MAX_HIST = 15
+
+function saveHistory(entry: HistEntry) {
+  try {
+    const raw = localStorage.getItem(HIST_KEY)
+    const prev: HistEntry[] = raw ? JSON.parse(raw) : []
+    localStorage.setItem(HIST_KEY, JSON.stringify([entry, ...prev].slice(0, MAX_HIST)))
+  } catch { /* ignore */ }
+}
+
 export default function BovinosPage() {
   const [tab, setTab] = useState<Tab>('animal')
   const [codigo, setCodigo] = useState('')
@@ -46,6 +65,15 @@ export default function BovinosPage() {
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
   const [pagina, setPagina] = useState(1)
+  const [histOpen, setHistOpen] = useState(false)
+  const [hist, setHist] = useState<HistEntry[]>([])
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(HIST_KEY)
+      if (raw) setHist(JSON.parse(raw))
+    } catch { /* ignore */ }
+  }, [])
 
   useEffect(() => {
     if (tab === 'racas' && racas.length === 0) carregarRacas()
@@ -85,7 +113,17 @@ export default function BovinosPage() {
     try {
       const res = await fetch(`/api/embrapa/bovtrace/transitos/${encodeURIComponent(codigo.trim())}`)
       if (!res.ok) throw new Error('Animal não encontrado')
-      setTransito(await res.json())
+      const data: Transito = await res.json()
+      setTransito(data)
+      const entry: HistEntry = {
+        id: Date.now().toString(),
+        ts: new Date().toISOString(),
+        codigo: codigo.trim(),
+        identificacao: data.animal?.identificacao ?? codigo.trim(),
+        raca: data.animal?.raca ?? '—',
+      }
+      saveHistory(entry)
+      setHist(h => [entry, ...h].slice(0, MAX_HIST))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro')
     } finally { setLoading(false) }
@@ -99,6 +137,7 @@ export default function BovinosPage() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0e1a' }}>
+      <style>{`@media print { body { background: white !important; color: black !important; } .print\\:hidden { display: none !important; } }`}</style>
       {/* Header */}
       <div className="border-b" style={{ background: 'rgba(10,14,26,0.97)', borderColor: 'rgba(255,255,255,0.07)' }}>
         <div className="px-6 py-4 flex items-center gap-3">
@@ -107,11 +146,46 @@ export default function BovinosPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
             </svg>
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-sm font-bold text-white">Rastreabilidade Bovina</h1>
             <p className="text-[10px] text-slate-500">BovTrace · Embrapa — rastreamento e auditoria ESG</p>
           </div>
+          <div className="flex items-center gap-2 print:hidden">
+            <button onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', color: '#fbbf24' }}>
+              ⬇ PDF
+            </button>
+            {hist.length > 0 && (
+              <button onClick={() => setHistOpen(o => !o)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                style={{ background: histOpen ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}>
+                🕐 Histórico ({hist.length})
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Painel de histórico */}
+        {histOpen && hist.length > 0 && (
+          <div className="border-t print:hidden" style={{ background: 'rgba(251,191,36,0.04)', borderColor: 'rgba(255,255,255,0.07)' }}>
+            <div className="px-6 py-3">
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Buscas recentes</div>
+              <div className="flex flex-wrap gap-2">
+                {hist.map(h => (
+                  <button key={h.id} onClick={() => { setCodigo(h.codigo); setHistOpen(false); setTab('animal') }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <span className="text-amber-400 font-mono">{h.codigo}</span>
+                    <span className="text-slate-400">{h.identificacao}</span>
+                    <span className="text-slate-600">·</span>
+                    <span className="text-slate-500">{h.raca}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="px-6 pb-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           <HowToUse
