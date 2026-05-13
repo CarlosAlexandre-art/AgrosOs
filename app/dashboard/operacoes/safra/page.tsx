@@ -7,8 +7,9 @@ import { useRouter } from 'next/navigation'
 const CULTURAS = ['Soja', 'Milho', 'Café', 'Cana-de-açúcar', 'Feijão', 'Trigo', 'Algodão', 'Arroz', 'Sorgo', 'Girassol', 'Outra']
 const ESTADOS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
 
-type Fase = { nome: string; tipo: string; inicio_dia: number; duracao_dias: number; descricao: string; insumos: string | null; prioridade: 'alta' | 'media' | 'baixa' }
-type Safra = { cultura: string; area: number; duracao_dias: number; fases: Fase[]; observacoes: string }
+type Fase = { nome: string; tipo: string; inicio_dia: number; duracao_dias: number; descricao: string; insumos: string | null; prioridade: 'alta' | 'media' | 'baixa'; responsavel?: string | null }
+type QuantumMeta = { solver: string; iterations: number; energy: number; convergence: number; membersAnalyzed: number; optimized: boolean }
+type Safra = { cultura: string; area: number; duracao_dias: number; fases: Fase[]; observacoes: string; quantum?: QuantumMeta }
 
 const PRIO_COR = { alta: 'bg-red-100 text-red-700 border-red-200', media: 'bg-amber-100 text-amber-700 border-amber-200', baixa: 'bg-slate-100 text-slate-600 border-slate-200' }
 
@@ -16,11 +17,12 @@ export default function PlanejamentoSafraPage() {
   const router = useRouter()
   const [form, setForm] = useState({ cultura: '', outraCultura: '', area: '', dataInicio: new Date().toISOString().split('T')[0], estado: 'SP' })
   const [loading, setLoading] = useState(false)
+  const [loadingQuantum, setLoadingQuantum] = useState(false)
   const [safra, setSafra] = useState<Safra | null>(null)
   const [criando, setCriando] = useState(false)
   const [criados, setCriados] = useState(0)
 
-  async function planejar(e: React.FormEvent) {
+  async function planejar(e: React.SyntheticEvent) {
     e.preventDefault()
     setLoading(true)
     setSafra(null)
@@ -37,6 +39,26 @@ export default function PlanejamentoSafraPage() {
       alert(e.message || 'Erro ao gerar planejamento')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function planejarQuantum(e: React.SyntheticEvent) {
+    e.preventDefault()
+    setLoadingQuantum(true)
+    setSafra(null)
+    try {
+      const cultura = form.cultura === 'Outra' ? form.outraCultura : form.cultura
+      const res = await fetch('/api/ai/quantum-safra', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cultura, area: Number(form.area), dataInicio: form.dataInicio, estado: form.estado }),
+      })
+      if (!res.ok) throw new Error('Erro ao otimizar')
+      setSafra(await res.json())
+    } catch (e: any) {
+      alert(e.message || 'Erro ao gerar planejamento quântico')
+    } finally {
+      setLoadingQuantum(false)
     }
   }
 
@@ -134,13 +156,22 @@ export default function PlanejamentoSafraPage() {
             </select>
           </div>
         </div>
-        <button type="submit" disabled={loading} className="w-full sm:w-auto bg-[#16a34a] text-white font-semibold px-8 py-3 rounded-xl hover:bg-[#15803d] transition-colors disabled:opacity-50 flex items-center gap-2 justify-center">
-          {loading ? (
-            <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Gerando cronograma...</>
-          ) : (
-            <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>Gerar planejamento com IA</>
-          )}
-        </button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button type="submit" disabled={loading || loadingQuantum} className="w-full sm:w-auto bg-[#16a34a] text-white font-semibold px-8 py-3 rounded-xl hover:bg-[#15803d] transition-colors disabled:opacity-50 flex items-center gap-2 justify-center">
+            {loading ? (
+              <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Gerando cronograma...</>
+            ) : (
+              <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>Gerar com IA</>
+            )}
+          </button>
+          <button type="button" onClick={planejarQuantum} disabled={loading || loadingQuantum || !form.cultura || !form.area} className="w-full sm:w-auto bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2 justify-center">
+            {loadingQuantum ? (
+              <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Otimizando...</>
+            ) : (
+              <>⚛️ Otimizar com IA Quântica</>
+            )}
+          </button>
+        </div>
       </form>
 
       {/* Resultado */}
@@ -162,6 +193,30 @@ export default function PlanejamentoSafraPage() {
               )}
             </button>
           </div>
+
+          {safra.quantum?.optimized && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl px-5 py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-base">⚛️</span>
+                <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">Otimização Quântica</span>
+                <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-semibold">{safra.quantum.solver}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <div className="text-lg font-bold text-indigo-700">{safra.quantum.convergence}%</div>
+                  <div className="text-[10px] text-indigo-500">convergência</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-indigo-700">{safra.quantum.iterations.toLocaleString()}</div>
+                  <div className="text-[10px] text-indigo-500">iterações</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-indigo-700">{safra.quantum.membersAnalyzed}</div>
+                  <div className="text-[10px] text-indigo-500">membros analisados</div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {safra.observacoes && (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-start gap-3">
@@ -195,6 +250,11 @@ export default function PlanejamentoSafraPage() {
                     </div>
                   </div>
                   <p className="text-sm text-slate-600 ml-11">{fase.descricao}</p>
+                  {fase.responsavel && (
+                    <div className="ml-11 mt-2 flex items-center gap-1.5">
+                      <span className="text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200 px-2 py-0.5 rounded-full font-semibold">⚛️ {fase.responsavel}</span>
+                    </div>
+                  )}
                   {fase.insumos && (
                     <div className="ml-11 mt-2 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-1.5">
                       <span className="font-semibold">Insumos:</span> {fase.insumos}
