@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -155,7 +157,7 @@ function SpeedometerGauge({ value, max }: { value: number; max: number }) {
   )
 }
 
-export default function GpxVelocidadePage() {
+function GpxVelocidadeContent() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L>(null)
   const trackLayer = useRef<L>(null)
@@ -424,4 +426,11 @@ export default function GpxVelocidadePage() {
       </div>
     </div>
   )
+}
+
+export default function GpxVelocidadePage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="⚡" feature="GPX Velocidade" desc="Faça upload de arquivos GPX e visualize velocidade por trecho em mapa interativo com análise de desempenho de máquinas." />
+  return <GpxVelocidadeContent />
 }

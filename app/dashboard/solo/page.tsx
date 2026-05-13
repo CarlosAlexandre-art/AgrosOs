@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 // Schema: https://www.agroapi.cnptia.embrapa.br/store/api-docs/agroapi/SmartSolosExpert/v1
 // Granulometria em g/Kg (ex: 38% = 380 g/Kg)
@@ -133,7 +135,7 @@ function saveHistory(entry: HistEntry) {
   } catch { /* ignore */ }
 }
 
-export default function SoloPage() {
+function SoloContent() {
   const [modo, setModo] = useState<'classification' | 'verification'>('classification')
   const [jsonInput, setJsonInput] = useState(JSON.stringify(EXEMPLO_PERFIL, null, 2))
   const [jsonError, setJsonError] = useState('')
@@ -436,4 +438,11 @@ export default function SoloPage() {
       </div>
     </div>
   )
+}
+
+export default function SoloPage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="🧪" feature="Análise de Solo (Embrapa)" desc="Classificação de perfis de solo pela IA SmartSolosExpert da Embrapa com sistema SIBCS e verificação de campo." />
+  return <SoloContent />
 }

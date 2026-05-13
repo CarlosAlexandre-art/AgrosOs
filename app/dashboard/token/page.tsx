@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 type Stats = { totalTokens: number; activeTokens: number; totalValue: number; investors: number }
 
@@ -126,7 +128,7 @@ const CSS = `
 }
 `
 
-export default function TokenHubPage() {
+function TokenHubContent() {
   const [stats, setStats] = useState<Stats | null>(null)
 
   useEffect(() => {
@@ -305,4 +307,11 @@ export default function TokenHubPage() {
       </div>
     </div>
   )
+}
+
+export default function TokenHubPage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="🪙" feature="AgroToken" desc="Tokenize recebíveis agrícolas (safra, insumos, maquinário), conecte investidores e acesse o mercado de capitais rural." />
+  return <TokenHubContent />
 }

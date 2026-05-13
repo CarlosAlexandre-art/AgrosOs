@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -65,7 +67,7 @@ function buildGrid(
   return cells
 }
 
-export default function GradeUTMPage() {
+function GradeUTMContent() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L>(null)
   const gridLayerRef = useRef<L>(null)
@@ -473,4 +475,11 @@ export default function GradeUTMPage() {
       </div>
     </div>
   )
+}
+
+export default function GradeUTMPage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="🗺️" feature="Grade UTM Georreferenciada" desc="Divida sua propriedade em células UTM para amostragem de solo, aplicação variável e rastreamento de operações por talhão." />
+  return <GradeUTMContent />
 }

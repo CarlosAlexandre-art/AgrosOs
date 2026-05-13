@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 type MonthData = {
   month: string
@@ -77,7 +79,7 @@ function NdviGauge({ value }: { value: number }) {
   )
 }
 
-export default function VegetacaoPage() {
+function VegetacaoContent() {
   const [data, setData] = useState<VegeData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -268,4 +270,11 @@ export default function VegetacaoPage() {
       </div>
     </div>
   )
+}
+
+export default function VegetacaoPage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="🌿" feature="Índice Vegetal (NDVI)" desc="Monitore a saúde da vegetação com proxy NDVI baseado em dados climáticos mensais integrados à sua propriedade." />
+  return <VegetacaoContent />
 }

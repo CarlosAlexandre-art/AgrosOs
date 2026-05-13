@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 interface LidarPoint { lat: number; lng: number; elevation: number }
 
@@ -40,7 +42,7 @@ function computeStats(points: LidarPoint[]): LidarStats {
   return { count: points.length, minElev: Math.round(min), maxElev: Math.round(max), avgElev: Math.round(avg), stdDev: parseFloat(std.toFixed(1)), elevRange: Math.round(max-min) }
 }
 
-export default function LidarPage() {
+function LidarContent() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [points, setPoints] = useState<LidarPoint[]>([])
@@ -253,4 +255,11 @@ export default function LidarPage() {
       </div>
     </div>
   )
+}
+
+export default function LidarPage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="🛰️" feature="LiDAR / Nuvem de Pontos" desc="Processe arquivos CSV de varredura LiDAR com renderização 3D por elevação e densidade, ideal para modelagem de terreno." />
+  return <LidarContent />
 }

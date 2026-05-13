@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -66,7 +68,7 @@ const ESRI_SERVICES: EsriService[] = [
   },
 ]
 
-export default function ImagensSatelitePage() {
+function ImagensSateliteContent() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L>(null)
   const tileLayerRef = useRef<L>(null)
@@ -206,4 +208,11 @@ export default function ImagensSatelitePage() {
       </div>
     </div>
   )
+}
+
+export default function ImagensSatelitePage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="🌍" feature="Imagens de Satélite" desc="Acesse 6 camadas de imagens Esri (satélite, topográfico, relevo, NatGeo, oceano) para análise visual do território." />
+  return <ImagensSateliteContent />
 }

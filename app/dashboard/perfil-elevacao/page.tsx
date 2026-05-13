@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import HowToUse from '../../../components/HowToUse'
+import ProPaywall from '../../../components/ProPaywall'
+import { usePlan } from '../../../lib/hooks/usePlan'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type L = any
@@ -24,7 +26,7 @@ function elevColor(elev: number, min: number, max: number): string {
   return '#ef4444'
 }
 
-export default function PerfilElevacaoPage() {
+function PerfilElevacaoContent() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L>(null)
   const markersRef = useRef<L[]>([])
@@ -342,4 +344,11 @@ export default function PerfilElevacaoPage() {
       )}
     </div>
   )
+}
+
+export default function PerfilElevacaoPage() {
+  const { loading, isPro } = usePlan()
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
+  if (!isPro) return <ProPaywall icon="⛰️" feature="Perfil de Elevação" desc="Trace seções topográficas com dois cliques e veja o perfil de elevação calculado via Open-Elevation API." />
+  return <PerfilElevacaoContent />
 }

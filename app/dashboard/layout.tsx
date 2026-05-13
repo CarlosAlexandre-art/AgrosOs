@@ -12,6 +12,16 @@ const REQUIRES_PLAN = [
   '/dashboard/metas',
   '/dashboard/agrocore',
   '/dashboard/suporte',
+  '/dashboard/grade-utm',
+  '/dashboard/gpx-velocidade',
+  '/dashboard/gpx-trajetoria',
+  '/dashboard/lidar',
+  '/dashboard/imagens-satelite',
+  '/dashboard/perfil-elevacao',
+  '/dashboard/vegetacao',
+  '/dashboard/solo',
+  '/dashboard/token',
+  '/dashboard/equipe',
 ]
 
 const NAV = [
