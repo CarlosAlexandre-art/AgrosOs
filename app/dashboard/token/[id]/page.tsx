@@ -92,6 +92,8 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
   const [totalCommission, setTotalCommission] = useState(0)
   const [laudo, setLaudo] = useState<Laudo | null>(null)
   const [resgatando, setResgatando] = useState(false)
+  const [connectStatus, setConnectStatus] = useState<{ connected: boolean } | null>(null)
+  const [connectingStripe, setConnectingStripe] = useState(false)
 
   useEffect(() => {
     fetch(`/api/tokens/${id}`)
@@ -106,7 +108,19 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
       .then(r => r.json())
       .then(d => { if (!d.error) setLaudo(d) })
       .catch(() => {})
+    fetch('/api/stripe/connect')
+      .then(r => r.json())
+      .then(d => setConnectStatus(d))
+      .catch(() => {})
   }, [id])
+
+  async function handleConnectStripe() {
+    setConnectingStripe(true)
+    const res = await fetch('/api/stripe/connect', { method: 'POST' })
+    const data = await res.json()
+    if (data.url) window.location.href = data.url
+    else setConnectingStripe(false)
+  }
 
   async function handleResgatar() {
     if (!confirm('Confirmar resgate do token? O status mudará para Resgatado e a taxa de sucesso (3%) será cobrada sobre o valor captado.')) return
@@ -394,10 +408,23 @@ export default function TokenDetailPage({ params }: { params: Promise<{ id: stri
             {deleting ? '...' : 'Excluir'}
           </button>
         )}
+        {token.status === 'ACTIVE' && connectStatus && !connectStatus.connected && (
+          <div className="w-full bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p className="text-sm text-amber-800 font-semibold mb-1">⚠️ Conta bancária não conectada</p>
+            <p className="text-xs text-amber-700 mb-3">Para resgatar, conecte sua conta bancária via Stripe. O valor líquido (captado − 3% taxa de sucesso) será transferido automaticamente.</p>
+            <button
+              onClick={handleConnectStripe}
+              disabled={connectingStripe}
+              className="w-full bg-amber-500 text-white font-semibold py-2.5 rounded-xl hover:bg-amber-600 disabled:opacity-50 transition-colors text-sm"
+            >
+              {connectingStripe ? 'Redirecionando...' : 'Conectar conta bancária'}
+            </button>
+          </div>
+        )}
         {token.status === 'ACTIVE' && (
           <button
             onClick={handleResgatar}
-            disabled={resgatando}
+            disabled={resgatando || (connectStatus !== null && !connectStatus.connected)}
             className="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {resgatando ? 'Processando...' : 'Solicitar resgate (liquidar)'}
