@@ -59,7 +59,7 @@ const CSS = `
 .ory-product-card:hover {
   transform: translateY(-4px);
   border-color: rgba(74,222,128,0.28) !important;
-  background: rgba(10,26,16,0.98) !important;
+  background: rgba(16,36,24,0.98) !important;
 }
 
 .ory-feature-pill {
@@ -75,7 +75,7 @@ const CSS = `
 }
 .ory-value-card:hover {
   border-color: rgba(34,197,94,0.22) !important;
-  background: rgba(8,20,13,0.9) !important;
+  background: rgba(14,30,20,0.9) !important;
 }
 
 .ory-cta-btn {
@@ -289,7 +289,7 @@ export default function EcossistemaPage() {
 
   return (
     <div className="ory-root" style={{
-      background: 'linear-gradient(170deg, #020c05 0%, #030f07 50%, #020c05 100%)',
+      background: 'linear-gradient(170deg, #0d2016 0%, #122819 50%, #0d2016 100%)',
       minHeight: '100%',
       color: '#e2faea',
       overflowX: 'hidden',
@@ -355,7 +355,7 @@ export default function EcossistemaPage() {
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 'clamp(16px, 2vw, 20px)',
             fontWeight: 300,
-            color: '#4a7c5c',
+            color: '#6aaa84',
             maxWidth: 560,
             lineHeight: 1.65,
             margin: '0 0 36px',
@@ -373,7 +373,7 @@ export default function EcossistemaPage() {
                 padding: '5px 12px',
                 border: '1px solid rgba(74,222,128,0.2)',
                 borderRadius: 99,
-                color: '#3a6648',
+                color: '#5a906c',
                 letterSpacing: '0.08em',
               }}>{t}</span>
             ))}
@@ -405,12 +405,12 @@ export default function EcossistemaPage() {
               borderRadius: 10,
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 14, fontWeight: 500,
-              color: '#4a7c5c',
+              color: '#6aaa84',
               textDecoration: 'none',
               transition: 'border-color .2s, color .2s',
             }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.45)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4ade80' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.22)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4a7c5c' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.22)'; (e.currentTarget as HTMLAnchorElement).style.color = '#6aaa84' }}
             >
               AgroRate
             </a>
@@ -436,7 +436,7 @@ export default function EcossistemaPage() {
         gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
         borderTop: '1px solid rgba(34,197,94,0.08)',
         borderBottom: '1px solid rgba(34,197,94,0.08)',
-        background: 'rgba(2,12,6,0.6)',
+        background: 'rgba(10,26,14,0.6)',
       }}>
         {STATS.map((s, i) => (
           <div key={i} style={{
@@ -454,7 +454,7 @@ export default function EcossistemaPage() {
             <div style={{
               fontFamily: 'DM Mono, monospace',
               fontSize: 11, fontWeight: 500,
-              color: '#2a4f36',
+              color: '#4a7a56',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
             }}>{s.label}</div>
@@ -501,7 +501,7 @@ export default function EcossistemaPage() {
               key={p.id}
               className="ory-product-card"
               style={{
-                background: 'rgba(6,18,11,0.85)',
+                background: 'rgba(12,28,18,0.85)',
                 border: '1px solid rgba(34,197,94,0.1)',
                 borderRadius: 18,
                 padding: 'clamp(24px,3vw,32px)',
@@ -526,7 +526,7 @@ export default function EcossistemaPage() {
                   <div style={{
                     fontFamily: 'DM Mono, monospace',
                     fontSize: 10, fontWeight: 500,
-                    color: '#2a4f36',
+                    color: '#4a7a56',
                     letterSpacing: '0.15em',
                     textTransform: 'uppercase',
                     marginBottom: 3,
@@ -544,7 +544,7 @@ export default function EcossistemaPage() {
               <p style={{
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: 14, fontWeight: 300,
-                color: '#3a6648',
+                color: '#5a906c',
                 lineHeight: 1.7,
                 margin: '0 0 20px',
                 flex: 1,
@@ -560,7 +560,7 @@ export default function EcossistemaPage() {
                     background: 'rgba(34,197,94,0.06)',
                     border: '1px solid rgba(34,197,94,0.12)',
                     borderRadius: 99,
-                    color: '#2a5c3a',
+                    color: '#4a8060',
                     letterSpacing: '0.06em',
                   }}>{f}</span>
                 ))}
@@ -593,7 +593,7 @@ export default function EcossistemaPage() {
       {/* ─── VISION ────────────────────────────────────────────── */}
       <section style={{
         padding: 'clamp(64px,8vw,96px) clamp(20px,6vw,80px)',
-        background: 'rgba(3,10,6,0.6)',
+        background: 'rgba(8,22,14,0.6)',
         borderTop: '1px solid rgba(34,197,94,0.06)',
         borderBottom: '1px solid rgba(34,197,94,0.06)',
       }}>
@@ -630,7 +630,7 @@ export default function EcossistemaPage() {
             <p style={{
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 15, fontWeight: 300,
-              color: '#3a6648',
+              color: '#5a906c',
               lineHeight: 1.75,
               margin: 0,
             }}>
@@ -737,7 +737,7 @@ export default function EcossistemaPage() {
                 padding: 'clamp(20px,3vw,28px)',
                 border: '1px solid rgba(34,197,94,0.09)',
                 borderRadius: 14,
-                background: 'rgba(4,14,9,0.6)',
+                background: 'rgba(10,24,15,0.6)',
               }}
             >
               <div style={{
@@ -757,7 +757,7 @@ export default function EcossistemaPage() {
               <p style={{
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: 13, fontWeight: 300,
-                color: '#2e5c3e',
+                color: '#508060',
                 margin: 0,
                 lineHeight: 1.7,
               }}>{v.desc}</p>
@@ -769,7 +769,7 @@ export default function EcossistemaPage() {
       {/* ─── TECHNOLOGY ────────────────────────────────────────── */}
       <section style={{
         padding: 'clamp(48px,6vw,72px) clamp(20px,6vw,80px)',
-        background: 'rgba(3,10,6,0.5)',
+        background: 'rgba(8,22,14,0.5)',
         borderTop: '1px solid rgba(34,197,94,0.06)',
         borderBottom: '1px solid rgba(34,197,94,0.06)',
       }}>
@@ -788,7 +788,7 @@ export default function EcossistemaPage() {
               padding: '7px 14px',
               border: '1px solid rgba(34,197,94,0.14)',
               borderRadius: 8,
-              color: '#2a4f36',
+              color: '#4a7a56',
               letterSpacing: '0.05em',
               transition: 'border-color .2s, color .2s',
             }}>{t}</span>
@@ -839,7 +839,7 @@ export default function EcossistemaPage() {
             fontFamily: 'DM Sans, sans-serif',
             fontSize: 'clamp(15px,2vw,18px)',
             fontWeight: 300,
-            color: '#3a6648',
+            color: '#5a906c',
             maxWidth: 460,
             margin: '0 auto 40px',
             lineHeight: 1.65,
@@ -873,12 +873,12 @@ export default function EcossistemaPage() {
               borderRadius: 11,
               fontFamily: 'DM Sans, sans-serif',
               fontSize: 15, fontWeight: 500,
-              color: '#4a7c5c',
+              color: '#6aaa84',
               textDecoration: 'none',
               transition: 'border-color .2s, color .2s',
             }}
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.42)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4ade80' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.2)'; (e.currentTarget as HTMLAnchorElement).style.color = '#4a7c5c' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(74,222,128,0.2)'; (e.currentTarget as HTMLAnchorElement).style.color = '#6aaa84' }}
             >
               AgroRate
             </a>

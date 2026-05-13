@@ -138,7 +138,7 @@ export default function TokenHubPage() {
 
   return (
     <div className="at-hub" style={{
-      background: 'linear-gradient(160deg, #020c08 0%, #041409 60%, #030e07 100%)',
+      background: 'linear-gradient(160deg, #0d2218 0%, #142e1e 60%, #0d2218 100%)',
       minHeight: '100%',
       position: 'relative',
       overflow: 'hidden',
@@ -183,7 +183,7 @@ export default function TokenHubPage() {
         </h1>
 
         <p style={{
-          fontSize: 14, color: '#3a6648', marginBottom: 40, fontWeight: 400,
+          fontSize: 14, color: '#5a906c', marginBottom: 40, fontWeight: 400,
           animation: 'at-fadeUp .5s ease .16s both',
         }}>
           Tokenização com liquidez, transparência e registro imutável na rede Polygon
@@ -205,9 +205,9 @@ export default function TokenHubPage() {
               { label: 'Investidores', value: String(stats.investors) },
             ].map(s => (
               <div key={s.label} style={{
-                background: 'rgba(2,12,8,0.92)', padding: 'clamp(12px,3vw,16px) clamp(14px,3vw,18px)',
+                background: 'rgba(10,28,18,0.92)', padding: 'clamp(12px,3vw,16px) clamp(14px,3vw,18px)',
               }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: '#2a5c3a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: '#4a8060', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
                   {s.label}
                 </div>
                 <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(18px,4vw,22px)', fontWeight: 800, color: '#e2faea' }}>
@@ -228,7 +228,7 @@ export default function TokenHubPage() {
               style={{
                 display: 'flex', alignItems: 'center', gap: 'clamp(12px,3vw,18px)',
                 padding: 'clamp(14px,3vw,20px) clamp(14px,3vw,22px)',
-                background: 'rgba(8, 22, 14, 0.85)',
+                background: 'rgba(12, 30, 20, 0.85)',
                 border: '1px solid rgba(22,163,74,0.1)',
                 borderRadius: 14,
                 textDecoration: 'none',
@@ -236,11 +236,11 @@ export default function TokenHubPage() {
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.borderColor = card.accentColor + '55'
-                e.currentTarget.style.background = 'rgba(10, 28, 17, 0.98)'
+                e.currentTarget.style.background = 'rgba(16, 38, 26, 0.98)'
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.borderColor = 'rgba(22,163,74,0.1)'
-                e.currentTarget.style.background = 'rgba(8, 22, 14, 0.85)'
+                e.currentTarget.style.background = 'rgba(12, 30, 20, 0.85)'
               }}
             >
               {/* Icon */}
@@ -271,7 +271,7 @@ export default function TokenHubPage() {
                     </span>
                   )}
                 </div>
-                <div style={{ fontSize: 13, color: '#3a6648', fontWeight: 400 }}>
+                <div style={{ fontSize: 13, color: '#5a906c', fontWeight: 400 }}>
                   {card.desc}
                 </div>
               </div>
@@ -288,7 +288,7 @@ export default function TokenHubPage() {
         <div className="at-footer" style={{
           display: 'flex', alignItems: 'flex-start', gap: 12,
           padding: '14px 18px',
-          background: 'rgba(4, 14, 9, 0.6)',
+          background: 'rgba(10, 24, 16, 0.6)',
           border: '1px solid rgba(22,163,74,0.07)',
           borderRadius: 12,
         }}>
@@ -296,8 +296,8 @@ export default function TokenHubPage() {
             width: 7, height: 7, borderRadius: '50%', marginTop: 4,
             background: '#16a34a', flexShrink: 0,
           }} />
-          <p style={{ fontSize: 'clamp(11px,2.5vw,12px)', color: '#2a5c3a', margin: 0, lineHeight: 1.7 }}>
-            <strong style={{ color: '#3d7a52', fontWeight: 600 }}>Polygon Mainnet</strong>
+          <p style={{ fontSize: 'clamp(11px,2.5vw,12px)', color: '#4a8060', margin: 0, lineHeight: 1.7 }}>
+            <strong style={{ color: '#5a9a72', fontWeight: 600 }}>Polygon Mainnet</strong>
             {' '}— contrato ERC-1155 · cada token tem ID único derivado do UUID · mint e transferências on-chain após aprovação admin
           </p>
         </div>
