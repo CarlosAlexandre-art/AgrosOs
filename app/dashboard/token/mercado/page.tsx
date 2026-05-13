@@ -356,6 +356,7 @@ export default function MercadoPage() {
 
                 {/* Buy controls */}
                 {available > 0 ? (
+                  <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     {/* Quantity stepper */}
                     <div style={{
@@ -441,6 +442,14 @@ export default function MercadoPage() {
                       ) : 'Comprar'}
                     </button>
                   </div>
+                  <p style={{ fontSize: 10, color: '#3a6648', marginTop: 6, lineHeight: 1.5, textAlign: 'center' }}>
+                    Ao comprar, você declara ter lido os{' '}
+                    <a href="/termos" target="_blank" style={{ color: '#86efac', textDecoration: 'underline' }}>
+                      Termos de Serviço
+                    </a>{' '}
+                    e entende os riscos deste piloto. Valores investidos podem ser perdidos.
+                  </p>
+                  </>
                 ) : (
                   <div style={{
                     textAlign: 'center', padding: '10px 0',

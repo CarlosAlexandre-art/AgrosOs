@@ -13,6 +13,8 @@ type AdminToken = {
   totalTokens: number
   soldTokens: number
   carNumber: string | null
+  clicksignDocKey: string | null
+  clicksignSignerKey: string | null
   createdAt: string
   _count: { transactions: number }
   property: {
@@ -71,6 +73,20 @@ export default function AdminTokensPage() {
       body: JSON.stringify({ action }),
     })
     load()
+    setProcessing(null)
+  }
+
+  async function handleSign(id: string) {
+    if (!confirm('Enviar acordo de investimento para assinatura digital do produtor via ClickSign?')) return
+    setProcessing(id + '-sign')
+    const res = await fetch(`/api/tokens/${id}/sign`, { method: 'POST' })
+    const data = await res.json()
+    if (res.ok) {
+      alert(`✅ Acordo enviado! O produtor receberá o e-mail para assinar.\nDoc: ${data.docKey}`)
+      load()
+    } else {
+      alert(`Erro: ${data.error}`)
+    }
     setProcessing(null)
   }
 
@@ -184,7 +200,27 @@ export default function AdminTokensPage() {
                       </button>
                     </div>
                   )}
-                  {token.status !== 'PENDING_REVIEW' && (
+                  {token.status === 'ACTIVE' && (
+                    <div className="flex items-center gap-2">
+                      {token.clicksignDocKey ? (
+                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                          ✍️ Acordo enviado
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleSign(token.id)}
+                          disabled={processing === token.id + '-sign'}
+                          className="px-3 py-1.5 text-xs border border-blue-200 text-blue-600 rounded-xl hover:bg-blue-50 disabled:opacity-50 transition-colors font-medium"
+                        >
+                          {processing === token.id + '-sign' ? '...' : '✍️ Enviar acordo'}
+                        </button>
+                      )}
+                      <Link href={`/dashboard/token/${token.id}`} className="text-xs text-[#16a34a] hover:underline">
+                        Ver →
+                      </Link>
+                    </div>
+                  )}
+                  {token.status !== 'PENDING_REVIEW' && token.status !== 'ACTIVE' && (
                     <Link href={`/dashboard/token/${token.id}`} className="text-xs text-[#16a34a] hover:underline">
                       Ver detalhe →
                     </Link>

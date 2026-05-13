@@ -28,7 +28,7 @@ type DetectionResult = {
   total: number
   detections: Detection[]
   summary: Record<string, { count: number; avg_confidence: number }>
-  source: 'qgis-microservice' | 'local-onnx' | 'demo'
+  source: 'qgis-microservice' | 'local-onnx' | 'roboflow' | 'demo'
   demo_notice?: string
 }
 
