@@ -1,6 +1,11 @@
 let cachedToken: string | null = null
 let tokenExpiry = 0
 
+export function clearEmbrapaTokenCache() {
+  cachedToken = null
+  tokenExpiry = 0
+}
+
 export async function getEmbrapaToken(): Promise<string> {
   if (cachedToken && Date.now() < tokenExpiry) return cachedToken
 

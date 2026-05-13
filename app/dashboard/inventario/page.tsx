@@ -99,11 +99,11 @@ export default function InventarioPage() {
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<DetectionResult | null>(null)
   const [error, setError] = useState('')
+  const [serverlessNotice, setServerlessNotice] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const filteredModels = (models || []).filter(m => m.biome === selectedBiome)
-  const chosenModel = (models || []).find(m => m.id === selectedModel)
 
   async function loadModels() {
     if (models) return
@@ -154,7 +154,11 @@ export default function InventarioPage() {
 
       if (!res.ok) {
         const err = await res.json()
-        setError(err.error || 'Erro na detecção')
+        if (err.serverless) {
+          setServerlessNotice(true)
+        } else {
+          setError(err.error || 'Erro na detecção')
+        }
         return
       }
 
@@ -373,6 +377,23 @@ export default function InventarioPage() {
             </button>
           </div>
         </div>
+
+        {serverlessNotice && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-4 text-sm text-amber-800">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <div className="font-semibold mb-1">Inferência YOLO indisponível no Vercel</div>
+                <p className="text-amber-700 text-xs leading-relaxed">
+                  O modelo ONNX requer a biblioteca nativa <code className="bg-amber-100 px-1 rounded">libonnxruntime.so</code> que não existe em ambientes serverless.
+                  Para ativar, configure a variável de ambiente <code className="bg-amber-100 px-1 rounded">QGIS_SERVICE_URL</code> no Vercel apontando para um servidor com ONNX Runtime instalado.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-center gap-2">

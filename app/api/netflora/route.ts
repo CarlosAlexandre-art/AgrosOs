@@ -66,7 +66,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 2) Inferência local com onnxruntime-node + modelos do GitHub Releases
+  // 2) Inferência local com onnxruntime-node — requer binários nativos
+  // Em ambientes serverless (Vercel) o .so não existe → detectar antes de crashar
+  if (process.env.VERCEL || process.env.VERCEL_ENV) {
+    return NextResponse.json({
+      error: 'Inferência YOLO local não está disponível no ambiente Vercel (onnxruntime-node requer libonnxruntime.so). Para ativar, configure QGIS_SERVICE_URL nas variáveis de ambiente apontando para um servidor com ONNX instalado.',
+      serverless: true,
+    }, { status: 503 })
+  }
+
   try {
     const imageBuffer = Buffer.from(body.image_b64, 'base64')
     const result = await detectLocal(body.model_id, imageBuffer, threshold)
