@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { createScene, createCamera, createRenderer, createLights, createShaderMaterial } from '@/lib/3d/three-utils'
 import { createBrazilGeometry, FARM_NODE_POSITIONS, latLonTo3D } from '@/lib/3d/map-geometry'
 import { createMouseState, updateMouseFromEvent, lerpMouse, applyMouseToCamera } from '@/lib/3d/interactions'
+import HeroFlagOrbiter from './HeroFlagOrbiter'
 
 interface Hero3DMapProps {
   isVisible?: boolean // Start animation only when visible
@@ -153,6 +154,10 @@ export default function Hero3DMap({ isVisible = true }: Hero3DMapProps) {
         ref={canvasRef}
         className="w-full h-full"
       />
+      {/* Overlay flag orbiter */}
+      <div className="absolute inset-0 pointer-events-none">
+        <HeroFlagOrbiter />
+      </div>
     </div>
   )
 }
