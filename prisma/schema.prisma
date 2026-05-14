@@ -93,8 +93,13 @@ model Property {
   creditRequests CreditRequest[]
   agroTokens    AgroToken[]
   energyRecords EnergyRecord[]
-  lotes         Lote[]
-  animais       Animal[]
+  lotes                Lote[]
+  animais              Animal[]
+  protocolosVacinais   ProtocoloVacinal[]
+  pastagens            Pastagem[]
+  planosNutricionais   PlanoNutricional[]
+  transacoesGado       TransacaoGado[]
+  valuations           ValuationRebanho[]
   createdAt    DateTime     @default(now())
 }
 
@@ -479,8 +484,10 @@ model Lote {
   dataEncerramento  DateTime?
   custoTotal        Float        @default(0)
   status            StatusLote   @default(ATIVO)
-  animais           Animal[]
-  registrosDiarios  LoteDiario[]
+  animais              Animal[]
+  registrosDiarios     LoteDiario[]
+  planosNutricionais   PlanoNutricional[]
+  rotacoes             RotacaoPastagem[]
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
@@ -525,8 +532,12 @@ model Animal {
   origemFazenda    String?
   gtaOrigem        String?
   ativo            Boolean   @default(true)
-  saude            AnimalSaude[]
-  movimentos       AnimalMovimento[]
+  saude                AnimalSaude[]
+  movimentos           AnimalMovimento[]
+  eventosReprodutivos  EventoReprodutivo[]
+  statusReprodutivo    StatusReprodutivo?
+  producaoLeite        ProducaoLeite[]
+  controleCarcaca      ControleCarcaca?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -565,6 +576,209 @@ model AnimalMovimento {
   createdAt  DateTime      @default(now())
 
   @@index([animalId])
+}
+
+// ── Saúde & Reprodução ────────────────────────────────────────────────────────
+
+enum TipoEventoReprodutivo {
+  CIO_DETECTADO
+  INSEMINACAO_ARTIFICIAL
+  MONTA_NATURAL
+  DIAGNOSTICO_PRENHEZ
+  CONFIRMACAO_PRENHEZ
+  PARTO
+  ABORTO
+  DESMAME
+  DESCARTE_REPRODUTIVO
+}
+
+enum StatusPrenhez {
+  VAZIA
+  PRENHA
+  INCERTA
+  PARIDA
+}
+
+model ProtocoloVacinal {
+  id           String   @id @default(uuid())
+  propertyId   String
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  nome         String
+  doenca       String
+  frequencia   String   @default("ANUAL")
+  produto      String?
+  dose         String?
+  mesesAplicar Json     @default("[3,9]")
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([propertyId])
+}
+
+model EventoReprodutivo {
+  id          String                @id @default(uuid())
+  animalId    String
+  animal      Animal                @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  tipo        TipoEventoReprodutivo
+  data        DateTime              @default(now())
+  touruId     String?
+  veterinario String?
+  resultado   String?
+  pesoBezerro Float?
+  observacao  String?
+  createdAt   DateTime              @default(now())
+
+  @@index([animalId])
+}
+
+model StatusReprodutivo {
+  id                String        @id @default(uuid())
+  animalId          String        @unique
+  animal            Animal        @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  status            StatusPrenhez @default(VAZIA)
+  dataUltimoCio     DateTime?
+  dataInseminacao   DateTime?
+  dataPrevistoParto DateTime?
+  paricoes          Int           @default(0)
+  updatedAt         DateTime      @updatedAt
+}
+
+// ── Nutrição & Pastagem ───────────────────────────────────────────────────────
+
+model PlanoNutricional {
+  id             String   @id @default(uuid())
+  propertyId     String
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  loteId         String?
+  lote           Lote?    @relation(fields: [loteId], references: [id])
+  nome           String
+  objetivo       String   @default("GANHO_PESO")
+  racaoKgDia     Float?
+  proteinaBruta  Float?
+  mineralKgDia   Float?
+  custoKgRacao   Float?
+  custoKgMineral Float?
+  ativo          Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([propertyId])
+}
+
+model Pastagem {
+  id            String            @id @default(uuid())
+  propertyId    String
+  property      Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  nome          String
+  areaHectares  Float
+  forrageira    String?
+  capacidadeUA  Float?
+  cicloDescanso Int?
+  status        String            @default("DISPONIVEL")
+  rotacoes      RotacaoPastagem[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([propertyId])
+}
+
+model RotacaoPastagem {
+  id         String   @id @default(uuid())
+  pastagemId String
+  pastagem   Pastagem @relation(fields: [pastagemId], references: [id], onDelete: Cascade)
+  loteId     String?
+  lote       Lote?    @relation(fields: [loteId], references: [id])
+  entrada    DateTime @default(now())
+  saida      DateTime?
+  cabecas    Int?
+  observacao String?
+  createdAt  DateTime @default(now())
+
+  @@index([pastagemId])
+}
+
+// ── Produção & Qualidade ──────────────────────────────────────────────────────
+
+model ProducaoLeite {
+  id          String   @id @default(uuid())
+  animalId    String
+  animal      Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  data        DateTime @default(now())
+  litrosManha Float    @default(0)
+  litrosTarde Float    @default(0)
+  totalLitros Float    @default(0)
+  ccs         Int?
+  gordura     Float?
+  proteina    Float?
+  createdAt   DateTime @default(now())
+
+  @@index([animalId])
+  @@index([data])
+}
+
+model ControleCarcaca {
+  id                String   @id @default(uuid())
+  animalId          String   @unique
+  animal            Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  dataAbate         DateTime
+  pesoVivo          Float
+  pesoCarcaca       Float?
+  rendimentoCarcaca Float?
+  classificacao     String?
+  tipificacao       String?
+  frigorificoNome   String?
+  valorArroba       Float?
+  receitaTotal      Float?
+  observacao        String?
+  createdAt         DateTime @default(now())
+
+  @@index([dataAbate])
+}
+
+// ── Financeiro Pecuário ───────────────────────────────────────────────────────
+
+enum TipoTransacaoGado {
+  COMPRA
+  VENDA
+  LEILAO_COMPRA
+  LEILAO_VENDA
+}
+
+model TransacaoGado {
+  id          String            @id @default(uuid())
+  propertyId  String
+  property    Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tipo        TipoTransacaoGado
+  data        DateTime          @default(now())
+  cabecas     Int
+  pesoTotal   Float?
+  valorArroba Float?
+  valorTotal  Float
+  contraparte String?
+  gta         String?
+  comissao    Float             @default(0)
+  observacao  String?
+  createdAt   DateTime          @default(now())
+
+  @@index([propertyId])
+  @@index([data])
+}
+
+model ValuationRebanho {
+  id                 String   @id @default(uuid())
+  propertyId         String
+  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  data               DateTime @default(now())
+  totalAnimais       Int
+  pesoTotalKg        Float
+  valorArrobaRef     Float    @default(320)
+  totalArrobas       Float
+  valorTotalEstimado Float
+  custoTotalRebanho  Float    @default(0)
+  margemBruta        Float    @default(0)
+  createdAt          DateTime @default(now())
+
+  @@index([propertyId])
 }
 
 model EnergyRecord {
