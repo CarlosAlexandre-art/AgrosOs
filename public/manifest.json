@@ -1,10 +1,10 @@
 {
-  "name": "SmartAgroOS — Sistema Operacional da Fazenda",
-  "short_name": "SmartAgroOS",
-  "description": "Planeje, execute e controle toda a operação da sua fazenda em um único lugar.",
+  "name": "SmartAgroOS — OryonAG",
+  "short_name": "AgroOS",
+  "description": "Sistema operacional da fazenda + painel admin do ecossistema OryonAG.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "background_color": "#020c05",
   "theme_color": "#16a34a",
   "orientation": "portrait-primary",
   "icons": [
@@ -23,14 +23,24 @@
   ],
   "shortcuts": [
     {
+      "name": "Admin Hub",
+      "url": "/dashboard/admin",
+      "description": "Painel administrativo do ecossistema OryonAG"
+    },
+    {
+      "name": "Tokens — Aprovações",
+      "url": "/dashboard/admin/tokens",
+      "description": "Revisar e aprovar AgroTokens pendentes"
+    },
+    {
+      "name": "Monitoramento",
+      "url": "/dashboard/admin/monitoring",
+      "description": "Alertas de segurança e eventos 24h"
+    },
+    {
       "name": "Nova atividade",
       "url": "/dashboard/operacoes/nova",
       "description": "Registrar nova atividade"
-    },
-    {
-      "name": "Lançar custo",
-      "url": "/dashboard/financeiro/novo",
-      "description": "Registrar novo custo"
     }
   ],
   "categories": ["productivity", "business"],

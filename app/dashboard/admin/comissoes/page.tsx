@@ -57,15 +57,13 @@ export default function ComissoesPage() {
   )
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-5">
+    <div className="pb-24 p-4 sm:p-6 max-w-4xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Admin — Comissões</h1>
+          <Link href="/dashboard/admin" className="text-xs text-slate-400 hover:text-slate-600 mb-1 block">← Admin Hub</Link>
+          <h1 className="text-xl font-bold text-slate-900">Comissões</h1>
           <p className="text-sm text-slate-400">Receita da plataforma</p>
         </div>
-        <Link href="/dashboard/admin/tokens" className="text-sm border border-gray-200 px-4 py-2 rounded-xl text-slate-600 hover:bg-gray-50 transition-colors">
-          Aprovações
-        </Link>
       </div>
 
       {data && (
@@ -129,6 +127,23 @@ export default function ComissoesPage() {
           </div>
         </>
       )}
+
+      {/* Bottom nav mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 pb-safe-bottom pt-2 z-50 flex justify-around">
+        {[
+          { href: '/dashboard/admin', icon: '⚡', label: 'Hub' },
+          { href: '/dashboard/admin/tokens', icon: '🪙', label: 'Tokens' },
+          { href: '/dashboard/admin/comissoes', icon: '💰', label: 'Comissões' },
+          { href: '/dashboard/admin/monitoring', icon: '🔍', label: 'Monitor' },
+          { href: '/dashboard', icon: '🏠', label: 'Dashboard' },
+        ].map(item => (
+          <Link key={item.href} href={item.href}
+            className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl text-slate-500 hover:text-slate-900 transition-colors min-w-0">
+            <span className="text-xl">{item.icon}</span>
+            <span className="text-[9px] font-semibold truncate">{item.label}</span>
+          </Link>
+        ))}
+      </nav>
     </div>
   )
 }
