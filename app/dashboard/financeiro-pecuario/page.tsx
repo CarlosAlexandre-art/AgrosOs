@@ -10,6 +10,9 @@ const TIPO_LABEL: Record<string, string> = {
   COMPRA: 'Compra', LEILAO_COMPRA: 'Leilão Compra',
   VENDA: 'Venda', LEILAO_VENDA: 'Leilão Venda',
 }
+const ALERTA_COR: Record<string, string> = { verde: '#10b981', amarelo: '#fbbf24', vermelho: '#f87171' }
+const ALERTA_BG: Record<string, string> = { verde: '#10b98115', amarelo: '#fbbf2415', vermelho: '#f8717115' }
+const ALERTA_LABEL: Record<string, string> = { verde: '✅ Situação Normal', amarelo: '⚠️ Atenção Necessária', vermelho: '🚨 Ação Urgente' }
 
 export default function FinanceiroPecuarioPage() {
   const [data, setData] = useState<any>(null)
@@ -19,6 +22,18 @@ export default function FinanceiroPecuarioPage() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ tipo: 'VENDA', cabecas: '', pesoTotal: '', valorArroba: '', valorTotal: '', contraparte: '', gta: '', comissao: '', observacao: '' })
   const [arrobaRef, setArrobaRef] = useState('320')
+  const [analiseIA, setAnaliseIA] = useState<any>(null)
+  const [loadingIA, setLoadingIA] = useState(false)
+
+  async function analisarComIA() {
+    setLoadingIA(true)
+    try {
+      const r = await fetch('/api/ai/agrotrade-analise')
+      const d = await r.json()
+      setAnaliseIA(d)
+    } catch {}
+    setLoadingIA(false)
+  }
 
   const carregar = useCallback(() => {
     setLoading(true)
@@ -83,6 +98,78 @@ export default function FinanceiroPecuarioPage() {
             <div style={{ fontSize: 22, fontWeight: 800, color: k.color }}>{k.val}</div>
           </div>
         ))}
+      </div>
+
+      {/* Painel IA */}
+      <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: analiseIA ? 14 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>🤖</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9' }}>AgroTrade Intelligence</div>
+              <div style={{ fontSize: 11, color: '#475569' }}>IA + QUBO Markowitz — portfolio e timing de mercado pecuário</div>
+            </div>
+            {analiseIA && (
+              <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: ALERTA_BG[analiseIA.nivel_alerta] ?? '#1e293b', color: ALERTA_COR[analiseIA.nivel_alerta] ?? '#94a3b8', fontWeight: 600 }}>
+                {ALERTA_LABEL[analiseIA.nivel_alerta] ?? analiseIA.nivel_alerta}
+              </span>
+            )}
+          </div>
+          <button onClick={analisarComIA} disabled={loadingIA}
+            style={{ background: loadingIA ? '#1e293b' : '#a78bfa', color: '#fff', border: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: loadingIA ? 'default' : 'pointer', opacity: loadingIA ? 0.7 : 1 }}>
+            {loadingIA ? '⏳ Analisando...' : '⚡ Analisar com IA'}
+          </button>
+        </div>
+        {analiseIA && (
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px' }}>
+                <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Diagnóstico Financeiro</div>
+                <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.5 }}>{analiseIA.diagnostico}</div>
+              </div>
+              <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px', borderLeft: `3px solid ${ALERTA_COR[analiseIA.nivel_alerta] ?? '#64748b'}` }}>
+                <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Ação Prioritária</div>
+                <div style={{ fontSize: 13, color: '#fbbf24', fontWeight: 600, lineHeight: 1.5 }}>{analiseIA.acao_prioritaria}</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+              {analiseIA.timing_mercado && (
+                <div style={{ background: '#111827', borderRadius: 10, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>📊 Timing de Mercado</div>
+                  <div style={{ fontSize: 12, color: '#10b981', lineHeight: 1.4 }}>{analiseIA.timing_mercado}</div>
+                </div>
+              )}
+              {analiseIA.otimizacao_rebanho && (
+                <div style={{ background: '#111827', borderRadius: 10, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>🐂 Otimização do Rebanho</div>
+                  <div style={{ fontSize: 12, color: '#a78bfa', lineHeight: 1.4 }}>{analiseIA.otimizacao_rebanho}</div>
+                </div>
+              )}
+              {analiseIA.alerta_fluxo && (
+                <div style={{ background: '#111827', borderRadius: 10, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>⚠️ Alerta de Fluxo</div>
+                  <div style={{ fontSize: 12, color: '#f87171', lineHeight: 1.4 }}>{analiseIA.alerta_fluxo}</div>
+                </div>
+              )}
+            </div>
+            {(analiseIA.portfolioOtimizado ?? []).length > 0 && (
+              <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px' }}>
+                <div style={{ fontSize: 10, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+                  ⚛️ QUBO Markowitz — Portfolio Pecuário Otimizado {analiseIA.quantum && <span style={{ color: '#475569', marginLeft: 4 }}>· {analiseIA.quantum.convergencia}% convergência</span>}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {(analiseIA.portfolioOtimizado as any[]).map((item: any, i: number) => (
+                    <div key={i} style={{ background: '#0f172a', border: `1px solid #1e293b`, borderRadius: 8, padding: '8px 12px', minWidth: 170 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#e2e8f0' }}>{item.categoria.replace(/_/g, ' ')}</div>
+                      <div style={{ fontSize: 10, color: '#475569', marginTop: 2 }}>{item.quantidade} animais</div>
+                      <div style={{ fontSize: 10, color: '#a78bfa', marginTop: 3, fontWeight: 600 }}>{item.estrategiaRecomendada}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Valuation card */}

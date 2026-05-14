@@ -7,6 +7,9 @@ const STATUS_PASTAGEM: Record<string, { label: string; color: string }> = {
   OCUPADA: { label: 'Ocupada', color: '#fbbf24' },
   DESCANSO: { label: 'Descanso', color: '#60a5fa' },
 }
+const ALERTA_COR: Record<string, string> = { verde: '#10b981', amarelo: '#fbbf24', vermelho: '#f87171' }
+const ALERTA_BG: Record<string, string> = { verde: '#10b98115', amarelo: '#fbbf2415', vermelho: '#f8717115' }
+const ALERTA_LABEL: Record<string, string> = { verde: '✅ Situação Normal', amarelo: '⚠️ Atenção Necessária', vermelho: '🚨 Ação Urgente' }
 
 export default function NutricaoPastagemPage() {
   const [nutricao, setNutricao] = useState<any>(null)
@@ -18,6 +21,18 @@ export default function NutricaoPastagemPage() {
   const [formPlano, setFormPlano] = useState({ nome: '', objetivo: 'GANHO_PESO', loteId: '', racaoKgDia: '', custoKgRacao: '', mineralKgDia: '', custoKgMineral: '', proteinaBruta: '' })
   const [formPastagem, setFormPastagem] = useState({ nome: '', areaHectares: '', forrageira: '', capacidadeUA: '', cicloDescanso: '' })
   const [formRotacao, setFormRotacao] = useState({ pastagemId: '', loteId: '', cabecas: '' })
+  const [analiseIA, setAnaliseIA] = useState<any>(null)
+  const [loadingIA, setLoadingIA] = useState(false)
+
+  async function analisarComIA() {
+    setLoadingIA(true)
+    try {
+      const r = await fetch('/api/ai/nutribov-analise')
+      const d = await r.json()
+      setAnaliseIA(d)
+    } catch {}
+    setLoadingIA(false)
+  }
 
   const carregar = useCallback(() => {
     setLoading(true)
@@ -71,6 +86,79 @@ export default function NutricaoPastagemPage() {
             <div style={{ fontSize: 24, fontWeight: 800, color: k.color }}>{k.val}</div>
           </div>
         ))}
+      </div>
+
+      {/* Painel IA */}
+      <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: analiseIA ? 14 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>🤖</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9' }}>NutriBov Intelligence</div>
+              <div style={{ fontSize: 11, color: '#475569' }}>IA + QUBO TSP — nutrição e rotação de pastagem otimizada</div>
+            </div>
+            {analiseIA && (
+              <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: ALERTA_BG[analiseIA.nivel_alerta] ?? '#1e293b', color: ALERTA_COR[analiseIA.nivel_alerta] ?? '#94a3b8', fontWeight: 600 }}>
+                {ALERTA_LABEL[analiseIA.nivel_alerta] ?? analiseIA.nivel_alerta}
+              </span>
+            )}
+          </div>
+          <button onClick={analisarComIA} disabled={loadingIA}
+            style={{ background: loadingIA ? '#1e293b' : '#f59e0b', color: '#fff', border: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: loadingIA ? 'default' : 'pointer', opacity: loadingIA ? 0.7 : 1 }}>
+            {loadingIA ? '⏳ Analisando...' : '⚡ Analisar com IA'}
+          </button>
+        </div>
+        {analiseIA && (
+          <div style={{ display: 'grid', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px' }}>
+                <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Diagnóstico Nutricional</div>
+                <div style={{ fontSize: 13, color: '#e2e8f0', lineHeight: 1.5 }}>{analiseIA.diagnostico}</div>
+              </div>
+              <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px', borderLeft: `3px solid ${ALERTA_COR[analiseIA.nivel_alerta] ?? '#64748b'}` }}>
+                <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>Ação Prioritária</div>
+                <div style={{ fontSize: 13, color: '#fbbf24', fontWeight: 600, lineHeight: 1.5 }}>{analiseIA.acao_prioritaria}</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+              {analiseIA.eficiencia_pastagem && (
+                <div style={{ background: '#111827', borderRadius: 10, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>🌿 Eficiência Pastagem</div>
+                  <div style={{ fontSize: 12, color: '#34d399', lineHeight: 1.4 }}>{analiseIA.eficiencia_pastagem}</div>
+                </div>
+              )}
+              {analiseIA.custo_oportunidade && (
+                <div style={{ background: '#111827', borderRadius: 10, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>💸 Custo / Oportunidade</div>
+                  <div style={{ fontSize: 12, color: '#f87171', lineHeight: 1.4 }}>{analiseIA.custo_oportunidade}</div>
+                </div>
+              )}
+              {analiseIA.sugestao_dieta && (
+                <div style={{ background: '#111827', borderRadius: 10, padding: '10px 14px' }}>
+                  <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>🌾 Sugestão de Dieta</div>
+                  <div style={{ fontSize: 12, color: '#60a5fa', lineHeight: 1.4 }}>{analiseIA.sugestao_dieta}</div>
+                </div>
+              )}
+            </div>
+            {(analiseIA.rotacaoOtimizada ?? []).length > 0 && (
+              <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px' }}>
+                <div style={{ fontSize: 10, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+                  ⚛️ QUBO TSP — Rotação de Pastagem Otimizada {analiseIA.quantum && <span style={{ color: '#475569', marginLeft: 4 }}>· {analiseIA.quantum.convergencia}% convergência</span>}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {(analiseIA.rotacaoOtimizada as any[]).filter((r: any) => r.prioridade !== 'baixa').slice(0, 6).map((item: any, i: number) => (
+                    <div key={i} style={{ background: '#0f172a', border: `1px solid ${item.prioridade === 'alta' ? '#34d39930' : '#1e293b'}`, borderRadius: 8, padding: '8px 12px', minWidth: 150 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: item.prioridade === 'alta' ? '#34d399' : '#94a3b8' }}>{item.pastagem}</div>
+                      <div style={{ fontSize: 10, color: '#475569', marginTop: 2 }}>{item.area} ha · {item.loteIndicado}</div>
+                      {item.diasParaEntrada === 0 && <div style={{ fontSize: 10, color: '#10b981', marginTop: 2 }}>Pronta para entrada</div>}
+                      {item.diasParaEntrada > 0 && <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>Em {item.diasParaEntrada}d</div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
