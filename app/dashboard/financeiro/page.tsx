@@ -7,6 +7,7 @@ import FinanceiroExport from '@/components/reports/FinanceiroExport'
 import NovaReceitaButton from './NovaReceitaButton'
 import AnaliseFinanceira from '@/components/ai/AnaliseFinanceira'
 import GerarRelatorio from '@/components/ai/GerarRelatorio'
+import RapidsPipeline from '@/components/ai/RapidsPipeline'
 
 const CATEGORY_LABEL: Record<string, string> = {
   INSUMO: 'Insumo', MAO_DE_OBRA: 'Mão de obra', MAQUINARIO: 'Maquinário',
@@ -250,6 +251,9 @@ export default async function FinanceiroPage() {
           </div>
         </div>
       </div>
+
+      {/* Pipeline RAPIDS */}
+      <RapidsPipeline />
     </div>
   )
 }
