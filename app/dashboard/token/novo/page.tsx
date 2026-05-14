@@ -180,6 +180,8 @@ export default function NovoTokenPage() {
   const [cpfVerifying, setCpfVerifying] = useState(false)
   const [cpfResult, setCpfResult] = useState<{ nome: string; nasc: string } | null>(null)
   const [cpfError, setCpfError] = useState('')
+  const [sugestaoIA, setSugestaoIA] = useState<any>(null)
+  const [loadingSugestao, setLoadingSugestao] = useState(false)
 
   const [form, setForm] = useState({
     type: '',
@@ -207,6 +209,32 @@ export default function NovoTokenPage() {
     aceitaCVM: false,
     aceitaPiloto: false,
   })
+
+  async function sugerirComIA() {
+    if (!form.type) return
+    setLoadingSugestao(true)
+    setSugestaoIA(null)
+    try {
+      const res = await fetch(`/api/ai/token-sugestao?tipo=${form.type}`)
+      if (!res.ok) return
+      const data = await res.json()
+      setSugestaoIA(data)
+      // Preenche o formulário com as sugestões
+      setForm(f => ({
+        ...f,
+        title:          data.titulo       || f.title,
+        description:    data.descricao    || f.description,
+        totalValue:     data.valorTotal   ? String(data.valorTotal)   : f.totalValue,
+        tokenPrice:     data.precoToken   ? String(data.precoToken)   : f.tokenPrice,
+        expectedReturn: data.retornoEsperado ? String(data.retornoEsperado) : f.expectedReturn,
+        periodMonths:   data.periodoMeses ? String(data.periodoMeses) : f.periodMonths,
+        commodity:      data.commodity    || f.commodity,
+        quantityKg:     data.quantidadeKg ? String(data.quantidadeKg) : f.quantityKg,
+      }))
+    } finally {
+      setLoadingSugestao(false)
+    }
+  }
 
   const set = (k: string, v: string | boolean) => {
     if (k === 'cpf') { setCpfResult(null); setCpfError('') }
@@ -420,6 +448,65 @@ export default function NovoTokenPage() {
         {/* ─── STEP 2 ─── */}
         {step === 2 && (
           <div className="nt-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+            {/* IA + QUBO Sugestão */}
+            <div style={{ background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(99,102,241,0.1)' }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#a5b4fc' }}>⚛️ Sugestão Inteligente</div>
+                  <div style={{ fontSize: 11, color: '#4f4fa0', marginTop: 2 }}>QUBO · NVIDIA NIM · preenche o formulário</div>
+                </div>
+                <button
+                  onClick={sugerirComIA}
+                  disabled={loadingSugestao || !form.type}
+                  style={{
+                    background: loadingSugestao ? 'rgba(99,102,241,0.3)' : '#4f46e5',
+                    border: 'none', borderRadius: 10, color: '#fff',
+                    fontSize: 12, fontWeight: 700, padding: '8px 16px', cursor: 'pointer',
+                    opacity: !form.type ? 0.4 : 1, display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  {loadingSugestao ? '⏳ Calculando...' : '⚡ Sugerir'}
+                </button>
+              </div>
+
+              {!sugestaoIA && !loadingSugestao && (
+                <div style={{ padding: '10px 16px', fontSize: 12, color: '#4f4fa0' }}>
+                  Analisa seus dados financeiros e usa otimização quântica (QUBO) para sugerir o preço ideal de token e preenche todos os campos automaticamente.
+                </div>
+              )}
+
+              {loadingSugestao && (
+                <div style={{ padding: '10px 16px', fontSize: 12, color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚛️</span>
+                  Otimizando preço com Simulated Annealing...
+                </div>
+              )}
+
+              {sugestaoIA && (
+                <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#4ade80', fontWeight: 600 }}>
+                      R$ {sugestaoIA.precoToken}/token
+                    </span>
+                    <span style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#4ade80', fontWeight: 600 }}>
+                      {sugestaoIA.totalTokens?.toLocaleString('pt-BR')} tokens
+                    </span>
+                    <span style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#4ade80', fontWeight: 600 }}>
+                      {sugestaoIA.retornoEsperado}% a.a.
+                    </span>
+                    <span style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: '#a5b4fc', fontWeight: 600 }}>
+                      Liquidez {sugestaoIA.liquidityScore}%
+                    </span>
+                  </div>
+                  {sugestaoIA.justificativa && (
+                    <div style={{ fontSize: 11, color: '#3d7a52', fontStyle: 'italic' }}>{sugestaoIA.justificativa}</div>
+                  )}
+                  <div style={{ fontSize: 10, color: '#2a3f30' }}>✅ Formulário preenchido — revise e ajuste se necessário</div>
+                </div>
+              )}
+            </div>
+
             <div>
               <DarkLabel>Título do token</DarkLabel>
               <input
