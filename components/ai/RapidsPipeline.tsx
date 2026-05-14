@@ -136,7 +136,7 @@ export default function RapidsPipeline() {
           {/* Anomalias financeiras */}
           {data.financeiro.anomaliasMeses.length > 0 && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              <div className="text-xs font-semibold text-amber-700 mb-1">⚠️ Meses com volatilidade anômala (>2σ)</div>
+              <div className="text-xs font-semibold text-amber-700 mb-1">⚠️ Meses com volatilidade anômala (&gt;2σ)</div>
               <div className="text-xs text-amber-600">{data.financeiro.anomaliasMeses.join(' · ')}</div>
             </div>
           )}
