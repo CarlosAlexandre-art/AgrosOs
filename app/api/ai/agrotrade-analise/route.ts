@@ -13,6 +13,9 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id }, include: { properties: true } })
+    if (!['pro', 'enterprise', 'admin'].includes(dbUser?.plan ?? '')) {
+      return NextResponse.json({ error: 'UPGRADE_REQUIRED', plan: 'pro', mensagem: 'Análise com IA disponível no plano Pro ou superior' }, { status: 403 })
+    }
     const property = dbUser?.properties[0]
     if (!property) return NextResponse.json({ error: 'Sem propriedade' }, { status: 404 })
 
@@ -79,9 +82,7 @@ Responda EXATAMENTE neste JSON (sem markdown):
     // Fases = oportunidades de investimento/desinvestimento por categoria
     // Membros = estratégias de alocação de capital
     const categoriasArr = Object.entries(categorias)
-    const fasesPortfolio: Phase[] = categoriasArr.map(([cat, qtd], i) => {
-      const idsCategoria = animais.filter((a: any) => (a.categoria || 'OUTRO') === cat)
-      const pesoMedioCat = idsCategoria.reduce((acc: number, a: any) => acc + Number(a.pesoAtual ?? 0), 0) / Math.max(idsCategoria.length, 1)
+    const fasesPortfolio: Phase[] = categoriasArr.map(([cat], i) => {
       const rentabilidade = cat === 'VACA_LEITE' ? 0.9 : cat === 'TOURO' ? 0.6 : cat === 'NOVILHA' ? 0.85 : 0.75
       return {
         index: i,

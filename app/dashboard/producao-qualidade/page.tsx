@@ -97,7 +97,16 @@ export default function ProducaoQualidadePage() {
             {loadingIA ? '⏳ Analisando...' : '⚡ Analisar com IA'}
           </button>
         </div>
-        {analiseIA && (
+        {analiseIA?.error === 'UPGRADE_REQUIRED' && (
+          <div style={{ marginTop: 14, background: '#1e1a0e', border: '1px solid #fbbf2430', borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 22 }}>🔒</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>Recurso do Plano Pro</div>
+              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>A análise com IA + QUBO está disponível no plano Pro ou Empresas. <a href="/dashboard/planos" style={{ color: '#fbbf24', textDecoration: 'underline' }}>Fazer upgrade →</a></div>
+            </div>
+          </div>
+        )}
+        {analiseIA && !analiseIA.error && (
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div style={{ background: '#111827', borderRadius: 10, padding: '12px 14px' }}>

@@ -7,8 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 import AIAssistant from '@/components/AIAssistant'
 import AgroOSLogo from '@/components/AgroOSLogo'
 
-// Itens que exigem plano pago
-const REQUIRES_PLAN = [
+// ── TIERS ─────────────────────────────────────────────
+// GRATUITO (starter): Visão Geral, Operacional, Financeiro, Clima, BovTrace, Carteira Animal
+// PRO (pro): + IA on-demand, Safra, Análise Agrícola completa, AgroToken, Equipe
+// EMPRESAS (enterprise): + Monitoramento 24h automático, alertas push, multi-propriedade
+
+const REQUIRES_PRO = [
   '/dashboard/metas',
   '/dashboard/agrocore',
   '/dashboard/suporte',
@@ -22,7 +26,24 @@ const REQUIRES_PLAN = [
   '/dashboard/solo',
   '/dashboard/token',
   '/dashboard/equipe',
+  '/dashboard/saude-reproducao',
+  '/dashboard/nutricao-pastagem',
+  '/dashboard/producao-qualidade',
+  '/dashboard/financeiro-pecuario',
 ]
+
+// Alias para compatibilidade com código existente
+const REQUIRES_PLAN = REQUIRES_PRO
+
+// Tipo do alerta mapeado ao módulo (para badges dinâmicos)
+const ALERT_TYPE_MAP: Record<string, string> = {
+  '/dashboard/saude-reproducao': 'AGROVET',
+  '/dashboard/nutricao-pastagem': 'NUTRIBOV',
+  '/dashboard/producao-qualidade': 'AGROGRADE',
+  '/dashboard/financeiro-pecuario': 'AGROTRADE',
+  '/dashboard/bovinos': 'BOVINOS',
+  '/dashboard/confinamento': 'CONFINAMENTO',
+}
 
 const NAV = [
   {
@@ -112,37 +133,31 @@ const NAV = [
         href: '/dashboard/confinamento',
         label: 'Confinamento Inteligente',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" /></svg>,
-        badge: true,
       },
       {
         href: '/dashboard/carteira-animal',
         label: 'Carteira Animal',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" /></svg>,
-        badge: true,
       },
       {
         href: '/dashboard/saude-reproducao',
         label: 'AgroVet — Saúde & Repro',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>,
-        badge: true,
       },
       {
         href: '/dashboard/nutricao-pastagem',
         label: 'NutriBov — Nutrição',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.522 4.82 3.889 6.115-.163.39-.34.765-.527 1.118a.75.75 0 00.848 1.066 18.36 18.36 0 004.94-1.538 10.27 10.27 0 002.85.39c4.97 0 9-3.185 9-7.151S16.97 3 12 3z" /></svg>,
-        badge: true,
       },
       {
         href: '/dashboard/producao-qualidade',
         label: 'AgroGrade — Qualidade',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>,
-        badge: true,
       },
       {
         href: '/dashboard/financeiro-pecuario',
         label: 'AgroTrade — Financeiro',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" /></svg>,
-        badge: true,
       },
     ],
   },
@@ -214,7 +229,6 @@ const NAV = [
         href: '/dashboard/alertas',
         label: 'Alertas',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>,
-        badge: true,
       },
       {
         href: '/dashboard/metas',
@@ -230,7 +244,6 @@ const NAV = [
         href: '/dashboard/agrorate',
         label: 'AgroRate',
         icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-        badge: true,
         featured: true,
       },
       {
@@ -258,8 +271,8 @@ const NAV = [
 ]
 
 function SidebarLink({
-  href, label, icon, badge, locked, comingSoon, onClick,
-}: { href: string; label: string; icon: React.ReactNode; badge?: boolean; locked?: boolean; comingSoon?: boolean; onClick?: () => void }) {
+  href, label, icon, alertCount, locked, comingSoon, onClick,
+}: { href: string; label: string; icon: React.ReactNode; alertCount?: number; locked?: boolean; comingSoon?: boolean; onClick?: () => void }) {
   const pathname = usePathname()
   const exact = href === '/dashboard'
   const active = exact ? pathname === href : pathname.startsWith(href)
@@ -290,8 +303,10 @@ function SidebarLink({
           EM BREVE
         </span>
       )}
-      {badge && !locked && !comingSoon && (
-        <span className="ml-auto w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+      {!locked && !comingSoon && alertCount != null && alertCount > 0 && (
+        <span className="ml-auto min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 flex-shrink-0">
+          {alertCount > 9 ? '9+' : alertCount}
+        </span>
       )}
     </Link>
   )
@@ -306,11 +321,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [propMenuOpen, setPropMenuOpen] = useState(false)
   const [userPlan, setUserPlan] = useState<string>('starter')
   const [userRole, setUserRole] = useState<string>('')
+  const [alertCounts, setAlertCounts] = useState<Record<string, number>>({})
   const router = useRouter()
   const pathname = usePathname()
 
   // Fechar sidebar ao navegar (mobile)
   useEffect(() => { setSidebarOpen(false) }, [pathname])
+
+  function fetchAlertCounts() {
+    fetch('/api/alerts/unread-count')
+      .then(r => r.json())
+      .then((d: { total: number; byType: Record<string, number> }) => {
+        if (d.byType) setAlertCounts(d.byType)
+      })
+      .catch(() => {})
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -327,6 +352,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     fetch('/api/user/role').then(r => r.json()).then((d: { role: string }) => {
       if (d.role) setUserRole(d.role)
     })
+    fetchAlertCounts()
+    // Recarrega alertas a cada 5 minutos
+    const interval = setInterval(fetchAlertCounts, 5 * 60 * 1000)
+    return () => clearInterval(interval)
     fetch('/api/properties').then(r => r.json()).then((data: { id: string; name: string }[]) => {
       if (Array.isArray(data)) {
         setProperties(data)
@@ -437,8 +466,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {section.items.map(item => (
                 <SidebarLink
                   key={item.href}
-                  {...item}
+                  href={item.href}
+                  label={item.label}
+                  icon={item.icon}
+                  alertCount={ALERT_TYPE_MAP[item.href] ? alertCounts[ALERT_TYPE_MAP[item.href]] : undefined}
                   locked={REQUIRES_PLAN.includes(item.href) && !['pro', 'enterprise', 'admin'].includes(userPlan)}
+                  comingSoon={(item as any).comingSoon}
                   onClick={() => setSidebarOpen(false)}
                 />
               ))}

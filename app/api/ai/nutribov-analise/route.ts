@@ -13,6 +13,9 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id }, include: { properties: true } })
+    if (!['pro', 'enterprise', 'admin'].includes(dbUser?.plan ?? '')) {
+      return NextResponse.json({ error: 'UPGRADE_REQUIRED', plan: 'pro', mensagem: 'Análise com IA disponível no plano Pro ou superior' }, { status: 403 })
+    }
     const property = dbUser?.properties[0]
     if (!property) return NextResponse.json({ error: 'Sem propriedade' }, { status: 404 })
 
