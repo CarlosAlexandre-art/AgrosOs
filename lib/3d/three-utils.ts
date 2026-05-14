@@ -40,7 +40,6 @@ export function createRenderer(
   renderer.setPixelRatio(options.pixelRatio ?? window.devicePixelRatio)
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFShadowMap
-  renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   return renderer
 }

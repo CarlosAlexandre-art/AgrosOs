@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
+import HeroSection from '@/components/Hero/HeroSection'
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
@@ -205,6 +206,9 @@ export default function EcossistemaPublicPage() {
     <div className="ory-pub" style={{ background: 'linear-gradient(170deg, #020c05 0%, #030f07 50%, #020c05 100%)', minHeight: '100vh', color: '#e2faea' }}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <Nav />
+
+      {/* NEW HERO */}
+      <HeroSection />
 
       {/* ─── HERO ── */}
       <section style={{ position: 'relative', minHeight: '90vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(100px,14vh,140px) clamp(20px,6vw,80px) clamp(60px,10vh,100px)', overflow: 'hidden' }}>
