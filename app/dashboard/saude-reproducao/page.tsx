@@ -25,6 +25,7 @@ export default function SaudeReproducaoPage() {
   const [formEvento, setFormEvento] = useState({ animalId: '', tipo: 'INSEMINACAO_ARTIFICIAL', veterinario: '', resultado: '', pesoBezerro: '', observacao: '' })
   const [analiseIA, setAnaliseIA] = useState<any>(null)
   const [loadingIA, setLoadingIA] = useState(false)
+  const [erroForm, setErroForm] = useState('')
 
   async function analisarComIA() {
     setLoadingIA(true)
@@ -47,16 +48,25 @@ export default function SaudeReproducaoPage() {
 
   useEffect(() => { carregar() }, [carregar])
 
-  async function salvar(e: React.FormEvent) {
+  async function salvar(e: React.SyntheticEvent) {
     e.preventDefault()
     setSaving(true)
-    const body = showForm === 'protocolo'
-      ? { _type: 'protocolo', ...formProtocolo }
-      : { _type: 'evento', ...formEvento }
-    await fetch('/api/saude-reproducao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    setShowForm(null)
-    carregar()
-    setSaving(false)
+    setErroForm('')
+    try {
+      const body = showForm === 'protocolo'
+        ? { _type: 'protocolo', ...formProtocolo }
+        : { _type: 'evento', animalIdentificacao: formEvento.animalId, tipo: formEvento.tipo, veterinario: formEvento.veterinario, resultado: formEvento.resultado, pesoBezerro: formEvento.pesoBezerro, observacao: formEvento.observacao }
+      const res = await fetch('/api/saude-reproducao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const data = await res.json()
+      if (!res.ok) { setErroForm(data.error || 'Erro ao salvar'); return }
+      setShowForm(null)
+      setFormEvento({ animalId: '', tipo: 'INSEMINACAO_ARTIFICIAL', veterinario: '', resultado: '', pesoBezerro: '', observacao: '' })
+      carregar()
+    } catch {
+      setErroForm('Erro de conexão. Tente novamente.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const kpis = data?.kpis ?? {}
@@ -173,7 +183,7 @@ export default function SaudeReproducaoPage() {
           </button>
         ))}
         <div style={{ flex: 1 }} />
-        <button onClick={() => setShowForm(tab === 'protocolos' ? 'protocolo' : 'evento')}
+        <button onClick={() => { setShowForm(tab === 'protocolos' ? 'protocolo' : 'evento'); setErroForm('') }}
           style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
           + {tab === 'protocolos' ? 'Protocolo' : 'Evento'}
         </button>
@@ -292,8 +302,8 @@ export default function SaudeReproducaoPage() {
               ) : (
                 <>
                   <div>
-                    <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>ID / Identificação do Animal *</label>
-                    <input value={formEvento.animalId} placeholder="Cole o ID do animal"
+                    <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Identificação do Animal * (código, SISBOV, brinco ou RFID)</label>
+                    <input value={formEvento.animalId} placeholder="Ex: #0055, brinco, SISBOV..."
                       onChange={e => setFormEvento(p => ({ ...p, animalId: e.target.value }))} required
                       style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
@@ -314,8 +324,13 @@ export default function SaudeReproducaoPage() {
                   ))}
                 </>
               )}
+              {erroForm && (
+                <div style={{ background: '#1a0a0a', border: '1px solid #ef444430', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#f87171', lineHeight: 1.5 }}>
+                  {erroForm}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-                <button type="button" onClick={() => setShowForm(null)}
+                <button type="button" onClick={() => { setShowForm(null); setErroForm('') }}
                   style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 10, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                 <button type="submit" disabled={saving}
                   style={{ flex: 1, background: '#10b981', color: '#fff', border: 'none', borderRadius: 10, padding: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
