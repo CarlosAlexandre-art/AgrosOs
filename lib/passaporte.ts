@@ -15,7 +15,7 @@ export interface DadosPassaporte {
 }
 
 export async function gerarQrCodeDataUrl(animalId: string, baseUrl = ''): Promise<string> {
-  const url = `${baseUrl}/dashboard/carteira-animal/${animalId}`
+  const url = `${baseUrl}/passaporte/${animalId}`
   return QRCode.toDataURL(url, {
     width: 300,
     margin: 2,
@@ -25,7 +25,7 @@ export async function gerarQrCodeDataUrl(animalId: string, baseUrl = ''): Promis
 }
 
 export async function gerarQrCodeBuffer(animalId: string, baseUrl = ''): Promise<Buffer> {
-  const url = `${baseUrl}/dashboard/carteira-animal/${animalId}`
+  const url = `${baseUrl}/passaporte/${animalId}`
   return QRCode.toBuffer(url, {
     width: 400,
     margin: 2,

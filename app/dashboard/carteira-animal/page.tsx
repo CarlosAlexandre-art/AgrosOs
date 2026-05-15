@@ -43,15 +43,20 @@ export default function CarteiraAnimalPage() {
   async function salvarAnimal(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    const res = await fetch('/api/carteira-animal', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
-    })
-    const data = await res.json()
-    if (data.error) { alert(data.error); setSaving(false); return }
-    setShowForm(false)
-    setForm({ identificacao: '', sexo: 'MACHO', raca: '', brincoEletronico: '', sisbovId: '', dataNascimento: '', pesoAtual: '', loteId: '', origemFazenda: '', gtaOrigem: '' })
-    carregar()
-    setSaving(false)
+    try {
+      const res = await fetch('/api/carteira-animal', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) { alert(data.error || 'Erro ao cadastrar animal'); setSaving(false); return }
+      setShowForm(false)
+      setForm({ identificacao: '', sexo: 'MACHO', raca: '', brincoEletronico: '', sisbovId: '', dataNascimento: '', pesoAtual: '', loteId: '', origemFazenda: '', gtaOrigem: '' })
+      carregar()
+    } catch {
+      alert('Erro de conexão. Tente novamente.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const filtrados = animais.filter(a =>

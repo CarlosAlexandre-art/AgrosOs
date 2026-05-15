@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 interface AnimalDetalhe {
   id: string; identificacao: string; brincoEletronico?: string; sisbovId?: string; rfid?: string
@@ -61,10 +60,21 @@ export default function PassaporteAnimalPage() {
 
   const { animal, idadeTexto, resumoSaude: rs, propriedade } = data
   const qrUrl = `/api/carteira-animal/${id}/qrcode`
+  const passaporteUrl = `https://agroos.site/passaporte/${id}`
 
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '24px', color: '#f1f5f9' }}>
-      <Link href="/dashboard/carteira-animal" style={{ fontSize: 12, color: '#64748b', textDecoration: 'none' }}>← Carteira Animal</Link>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <Link href="/dashboard/carteira-animal" style={{ fontSize: 12, color: '#64748b', textDecoration: 'none' }}>← Carteira Animal</Link>
+        <a
+          href={passaporteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ background: '#f59e0b', color: '#fff', borderRadius: 9, padding: '7px 14px', fontSize: 12, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}
+        >
+          📄 Carteira PDF
+        </a>
+      </div>
 
       {/* Passaporte header */}
       <div style={{ background: 'linear-gradient(135deg, #111827 0%, #1a1f2e 100%)', border: '1px solid #1e293b', borderRadius: 16, padding: 20, marginTop: 12, marginBottom: 16 }}>
