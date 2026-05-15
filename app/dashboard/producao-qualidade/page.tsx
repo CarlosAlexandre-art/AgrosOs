@@ -63,7 +63,7 @@ export default function ProducaoQualidadePage() {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, marginBottom: 20 }}>
         {[
           { label: 'Litros Hoje', val: `${(leite?.kpis?.totalHoje ?? 0).toFixed(0)} L`, color: '#60a5fa', icon: '🥛' },
           { label: 'Média/Animal', val: `${(leite?.kpis?.mediaAnimal ?? 0).toFixed(1)} L`, color: '#34d399', icon: '🐄' },
@@ -79,7 +79,7 @@ export default function ProducaoQualidadePage() {
 
       {/* Painel IA */}
       <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: analiseIA ? 14 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: analiseIA ? 14 : 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 18 }}>🤖</span>
             <div>
@@ -159,7 +159,7 @@ export default function ProducaoQualidadePage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[['leite', '🥛 Produção Leiteira'], ['carcaca', '🥩 Controle de Carcaça']].map(([id, label]) => (
           <button key={id} onClick={() => setTab(id as any)}
             style={{ padding: '8px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,

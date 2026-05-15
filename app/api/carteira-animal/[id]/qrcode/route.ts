@@ -16,13 +16,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const property = dbUser?.properties[0]
   if (!property) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
 
-  const animal = await prisma.animal.findFirst({ where: { id, propertyId: property.id } })
+  const animal = await (prisma as any).animal.findFirst({ where: { id, propertyId: property.id } })
   if (!animal) return NextResponse.json({ error: 'Animal não encontrado' }, { status: 404 })
 
-  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://agroos.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://agroos.site'
   const buffer = await gerarQrCodeBuffer(id, baseUrl)
 
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
       'Content-Type': 'image/png',
       'Content-Disposition': `inline; filename="passaporte-${animal.identificacao}.png"`,

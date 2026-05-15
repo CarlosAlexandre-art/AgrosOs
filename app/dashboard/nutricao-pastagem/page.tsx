@@ -74,7 +74,7 @@ export default function NutricaoPastagemPage() {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, marginBottom: 20 }}>
         {[
           { label: 'Custo Diário Total', val: `R$${(nutricao?.kpis?.custoTotal ?? 0).toFixed(2)}`, color: '#fbbf24', icon: '💰' },
           { label: 'Planos Ativos', val: (nutricao?.planos ?? []).filter((p: any) => p.ativo).length, color: '#10b981', icon: '📋' },
@@ -90,7 +90,7 @@ export default function NutricaoPastagemPage() {
 
       {/* Painel IA */}
       <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: analiseIA ? 14 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: analiseIA ? 14 : 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 18 }}>🤖</span>
             <div>
@@ -171,7 +171,7 @@ export default function NutricaoPastagemPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[['planos', 'Planos Nutricionais'], ['pastagens', 'Pastagens']].map(([id, label]) => (
           <button key={id} onClick={() => setTab(id as any)}
             style={{ padding: '8px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,

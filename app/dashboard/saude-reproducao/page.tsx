@@ -69,7 +69,7 @@ export default function SaudeReproducaoPage() {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, marginBottom: 20 }}>
         {[
           { label: 'Animais Prenhes', val: kpis.prenhas ?? 0, color: '#10b981', icon: '🐄' },
           { label: 'Partos em 30 dias', val: kpis.partosPrevistos ?? 0, color: '#60a5fa', icon: '🍼' },
@@ -85,7 +85,7 @@ export default function SaudeReproducaoPage() {
 
       {/* Painel IA */}
       <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: analiseIA ? 14 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: analiseIA ? 14 : 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 18 }}>🤖</span>
             <div>
@@ -164,7 +164,7 @@ export default function SaudeReproducaoPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[['reproducao', 'Reprodução'], ['protocolos', 'Protocolos Vacinais'], ['eventos', 'Eventos']].map(([id, label]) => (
           <button key={id} onClick={() => setTab(id as any)}
             style={{ padding: '8px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,

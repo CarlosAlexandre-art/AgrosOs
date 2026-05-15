@@ -86,7 +86,7 @@ export default function FinanceiroPecuarioPage() {
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, marginBottom: 20 }}>
         {[
           { label: 'Receita Vendas', val: `R$${(kpis.receitas ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, color: '#10b981', icon: '📈' },
           { label: 'Custo Compras', val: `R$${(kpis.custos ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, color: '#f87171', icon: '📉' },
@@ -102,7 +102,7 @@ export default function FinanceiroPecuarioPage() {
 
       {/* Painel IA */}
       <div style={{ background: '#0d1117', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: analiseIA ? 14 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: analiseIA ? 14 : 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 18 }}>🤖</span>
             <div>
@@ -183,7 +183,7 @@ export default function FinanceiroPecuarioPage() {
 
       {/* Valuation card */}
       {valuation && (
-        <div style={{ background: '#111827', border: '1px solid #a78bfa40', borderRadius: 14, padding: '16px 20px', marginBottom: 16, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        <div style={{ background: '#111827', border: '1px solid #a78bfa40', borderRadius: 14, padding: '16px 20px', marginBottom: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 12 }}>
           {[
             { l: 'Animais', v: valuation.totalAnimais, c: '#a78bfa' },
             { l: 'Total arrobas', v: `${valuation.totalArrobas.toFixed(1)} @`, c: '#fbbf24' },
@@ -199,7 +199,7 @@ export default function FinanceiroPecuarioPage() {
       )}
 
       {/* Tabs + botões */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {[['transacoes', 'Transações'], ['valuation', 'Valuation']].map(([id, label]) => (
           <button key={id} onClick={() => setTab(id as any)}
             style={{ padding: '8px 16px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
