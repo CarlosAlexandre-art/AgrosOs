@@ -33,7 +33,16 @@ interface Transacao {
   esg_score?: number
 }
 
-type Tab = 'animal' | 'racas' | 'transacoes'
+type Tab = 'animal' | 'racas' | 'transacoes' | 'cadastrar'
+
+interface AnimalIA {
+  identificacao: string
+  sexo: 'MACHO' | 'FEMEA'
+  raca?: string | null
+  dataNascimento?: string | null
+  pesoAtual?: number | null
+  origemFazenda?: string | null
+}
 
 interface HistEntry {
   id: string
@@ -67,6 +76,14 @@ export default function BovinosPage() {
   const [pagina, setPagina] = useState(1)
   const [histOpen, setHistOpen] = useState(false)
   const [hist, setHist] = useState<HistEntry[]>([])
+
+  // IA em massa
+  const [descIA, setDescIA] = useState('')
+  const [parsandoIA, setParsandoIA] = useState(false)
+  const [animaisIA, setAnimaisIA] = useState<AnimalIA[] | null>(null)
+  const [importando, setImportando] = useState(false)
+  const [resultadoImport, setResultadoImport] = useState<{ criados: number; erros: string[]; total: number } | null>(null)
+  const [erroIA, setErroIA] = useState('')
 
   useEffect(() => {
     try {
@@ -129,10 +146,47 @@ export default function BovinosPage() {
     } finally { setLoading(false) }
   }
 
+  async function parsearComIA() {
+    if (!descIA.trim()) return
+    setParsandoIA(true); setErroIA(''); setAnimaisIA(null); setResultadoImport(null)
+    try {
+      const res = await fetch('/api/carteira-animal/ai-parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descricao: descIA }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao interpretar')
+      setAnimaisIA(data.animais)
+    } catch (e) {
+      setErroIA(e instanceof Error ? e.message : 'Erro ao interpretar. Tente ser mais específico.')
+    } finally { setParsandoIA(false) }
+  }
+
+  async function confirmarImport() {
+    if (!animaisIA?.length) return
+    setImportando(true); setErroIA('')
+    try {
+      const res = await fetch('/api/carteira-animal/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ animais: animaisIA }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao importar')
+      setResultadoImport(data)
+      setAnimaisIA(null)
+      setDescIA('')
+    } catch (e) {
+      setErroIA(e instanceof Error ? e.message : 'Erro ao importar')
+    } finally { setImportando(false) }
+  }
+
   const TABS: { id: Tab; label: string; icon: string }[] = [
     { id: 'animal', label: 'Rastrear Animal', icon: '🐄' },
     { id: 'racas', label: 'Raças', icon: '📋' },
     { id: 'transacoes', label: 'Transações', icon: '📦' },
+    { id: 'cadastrar', label: 'Cadastro em Massa', icon: '🤖' },
   ]
 
   return (
@@ -382,6 +436,137 @@ export default function BovinosPage() {
                 <div className="text-5xl mb-3">📦</div>
                 <div className="text-slate-500 text-sm">Nenhuma transação encontrada para o período</div>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Cadastro em Massa com IA */}
+        {tab === 'cadastrar' && (
+          <div className="space-y-4">
+            {/* Banner explicativo */}
+            <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
+              <span className="text-2xl flex-shrink-0">🤖</span>
+              <div>
+                <div className="text-sm font-bold text-amber-400">Cadastro em Massa com Inteligência Artificial</div>
+                <div className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Descreva seu lote em linguagem natural — o modelo LLaMA 3.3 70B interpreta e gera a lista de animais automaticamente.
+                  Revise e confirme para cadastrar todos de uma vez na Carteira Animal.
+                </div>
+              </div>
+            </div>
+
+            {/* Resultado de importação */}
+            {resultadoImport && (
+              <div className="rounded-2xl p-5 space-y-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">✅</span>
+                  <span className="text-sm font-bold text-green-400">Importação concluída</span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: 'Total enviado', value: resultadoImport.total, color: '#94a3b8' },
+                    { label: 'Criados', value: resultadoImport.criados, color: '#22c55e' },
+                    { label: 'Com erro', value: resultadoImport.erros.length, color: resultadoImport.erros.length ? '#ef4444' : '#22c55e' },
+                  ].map(s => (
+                    <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                      <div className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</div>
+                      <div className="text-[10px] text-slate-500 mt-0.5">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {resultadoImport.erros.length > 0 && (
+                  <div className="rounded-xl p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                    <div className="text-[10px] text-red-400 font-bold mb-1">Não cadastrados (identificação duplicada ou erro):</div>
+                    <div className="text-xs text-slate-400">{resultadoImport.erros.join(', ')}</div>
+                  </div>
+                )}
+                <button onClick={() => setResultadoImport(null)}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                  style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24' }}>
+                  Cadastrar mais animais
+                </button>
+              </div>
+            )}
+
+            {!resultadoImport && (
+              <>
+                {/* Textarea de descrição */}
+                <div className="rounded-2xl p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <label className="block text-xs font-semibold text-slate-300">Descreva o lote em linguagem natural</label>
+                  <textarea
+                    rows={5}
+                    placeholder={'Exemplos:\n• "20 vacas Nelore com média de 380kg, nascidas em 2023, da Fazenda Bela Vista"\n• "10 bois Angus machos, peso 450kg, sem procedência"\n• "Lote 15 fêmeas Girolando #F001 a #F015, 280kg, 2 anos"'}
+                    value={descIA}
+                    onChange={e => setDescIA(e.target.value)}
+                    disabled={parsandoIA}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none resize-none disabled:opacity-50"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  />
+                  {erroIA && (
+                    <div className="px-3 py-2 rounded-xl text-xs text-red-400" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      {erroIA}
+                    </div>
+                  )}
+                  <button
+                    onClick={parsearComIA}
+                    disabled={parsandoIA || !descIA.trim()}
+                    className="w-full py-3 rounded-xl text-sm font-bold text-white disabled:opacity-40 transition-all"
+                    style={{ background: parsandoIA ? 'rgba(251,191,36,0.2)' : 'linear-gradient(135deg, #d97706, #f59e0b)', boxShadow: parsandoIA ? 'none' : '0 4px 20px rgba(217,119,6,0.3)' }}>
+                    {parsandoIA ? '⏳ Interpretando com IA...' : '✨ Interpretar com IA'}
+                  </button>
+                </div>
+
+                {/* Preview dos animais interpretados */}
+                {animaisIA && animaisIA.length > 0 && (
+                  <div className="rounded-2xl p-5 space-y-4" style={{ background: 'rgba(251,191,36,0.04)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-bold text-amber-400">{animaisIA.length} animais interpretados</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Revise antes de confirmar</div>
+                      </div>
+                      <button onClick={() => setAnimaisIA(null)}
+                        className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                        Descartar
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {animaisIA.map((a, i) => (
+                        <div key={i} className="rounded-xl px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold text-amber-400" style={{ background: 'rgba(251,191,36,0.12)' }}>
+                            {i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-semibold text-white">{a.identificacao}</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold"
+                                style={a.sexo === 'MACHO'
+                                  ? { background: 'rgba(59,130,246,0.15)', color: '#60a5fa' }
+                                  : { background: 'rgba(236,72,153,0.15)', color: '#f472b6' }}>
+                                {a.sexo === 'MACHO' ? '♂ Macho' : '♀ Fêmea'}
+                              </span>
+                              {a.raca && <span className="text-xs text-amber-400">{a.raca}</span>}
+                            </div>
+                            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                              {a.pesoAtual && <span className="text-[11px] text-slate-400">{a.pesoAtual} kg</span>}
+                              {a.dataNascimento && <span className="text-[11px] text-slate-500">{a.dataNascimento}</span>}
+                              {a.origemFazenda && <span className="text-[11px] text-slate-500 truncate">{a.origemFazenda}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={confirmarImport}
+                      disabled={importando}
+                      className="w-full py-3 rounded-xl text-sm font-bold text-white disabled:opacity-40 transition-all"
+                      style={{ background: importando ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg, #16a34a, #22c55e)', boxShadow: importando ? 'none' : '0 4px 20px rgba(34,197,94,0.25)' }}>
+                      {importando ? '⏳ Cadastrando...' : `✅ Cadastrar ${animaisIA.length} animais na Carteira`}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
