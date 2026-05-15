@@ -9,10 +9,10 @@ export const maxDuration = 60
 export async function GET() {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id }, include: { properties: true } })
+    const dbUser = await prisma.user.findUnique({ where: { supabaseId: session.user.id }, include: { properties: true } })
     if (!['pro', 'enterprise', 'admin'].includes(dbUser?.plan ?? '')) {
       return NextResponse.json({ error: 'UPGRADE_REQUIRED', plan: 'pro', mensagem: 'Análise com IA disponível no plano Pro ou superior' }, { status: 403 })
     }
@@ -22,28 +22,28 @@ export async function GET() {
     const [planos, pastagens, lotes, animais] = await Promise.all([
       (prisma as any).planoNutricional.findMany({
         where: { propertyId: property.id, ativo: true },
-        include: { lote: { include: { animals: { select: { id: true } } } } },
+        include: { lote: { include: { animais: { select: { id: true } } } } },
         take: 20,
       }),
       (prisma as any).pastagem.findMany({
         where: { propertyId: property.id },
-        include: { rotacoes: { where: { saida: null }, take: 1 } },
+        include: { rotacoes: { where: { saida: null }, take: 1, orderBy: { entrada: 'desc' } } },
         take: 20,
       }),
       (prisma as any).lote.findMany({
         where: { propertyId: property.id },
-        include: { animals: { select: { id: true, pesoAtual: true } } },
+        include: { animais: { select: { id: true, pesoAtual: true } } },
         take: 20,
       }),
       (prisma as any).animal.findMany({
         where: { propertyId: property.id, ativo: true },
-        select: { id: true, pesoAtual: true, categoria: true },
+        select: { id: true, pesoAtual: true, sexo: true },
         take: 100,
       }),
     ])
 
     const custoTotal = planos.reduce((acc: number, p: any) => {
-      const cabecas = p.lote?.animals?.length ?? 0
+      const cabecas = p.lote?.animais?.length ?? p.lote?.cabecas ?? 0
       return acc + (Number(p.racaoKgDia ?? 0) * Number(p.custoKgRacao ?? 0) * cabecas * 30)
     }, 0)
 
@@ -56,15 +56,12 @@ export async function GET() {
       ? animais.reduce((acc: number, a: any) => acc + Number(a.pesoAtual ?? 0), 0) / animais.length
       : 0
 
-    const ganhoPesoPrevisto = planos.reduce((acc: number, p: any) => acc + Number(p.ganhoEsperadoKgDia ?? 0), 0) / Math.max(planos.length, 1)
-
     // Análise IA
     const prompt = `Análise nutricional e de pastagem do rebanho:
 - Total de animais: ${totalCabecas} (peso médio: ${pesoMedio.toFixed(0)} kg)
 - Planos nutricionais ativos: ${planos.length}
 - Custo nutricional mensal estimado: R$ ${custoTotal.toFixed(0)}
 - Pastagens: ${totalPastagens} (${pastagensOcupadas} ocupadas, ${pastagensDescanso} em descanso)
-- Ganho de peso médio esperado: ${ganhoPesoPrevisto.toFixed(3)} kg/dia/animal
 - Lotes gerenciados: ${lotes.length}
 
 Responda EXATAMENTE neste JSON (sem markdown):
@@ -82,34 +79,33 @@ Responda EXATAMENTE neste JSON (sem markdown):
     const analise = JSON.parse(clean)
 
     // QUBO: otimizar rotação de pastagens (TSP-like)
-    // Fases = sequências de ocupação de pastagem
-    // Membros = lotes de animais a serem distribuídos
     const fasesPastagem: Phase[] = pastagens.slice(0, 12).map((p: any, i: number) => {
-      const diasDescansoIdeal = 21
-      const diasDesde = p.ultimaEntrada
-        ? Math.ceil((Date.now() - new Date(p.ultimaEntrada).getTime()) / 86400000)
+      const diasDescansoIdeal = p.cicloDescanso ?? 21
+      const ultimaRotacao = p.rotacoes?.[0]
+      const diasDesde = ultimaRotacao?.entrada
+        ? Math.ceil((Date.now() - new Date(ultimaRotacao.entrada).getTime()) / 86400000)
         : diasDescansoIdeal
       const prontoParaUso = diasDesde >= diasDescansoIdeal
       return {
         index: i,
-        tipo: p.tipoForrageira || 'pastagem',
+        tipo: p.forrageira || 'pastagem',
         inicio_dia: prontoParaUso ? 0 : diasDescansoIdeal - diasDesde,
-        duracao_dias: p.capacidadeUa ? Math.ceil(p.areaHa / p.capacidadeUa * 7) : 7,
+        duracao_dias: p.capacidadeUA ? Math.ceil(p.areaHectares / p.capacidadeUA * 7) : 7,
         prioridade: p.status === 'DESCANSO' && prontoParaUso ? 'alta' : p.status === 'OCUPADA' ? 'baixa' : 'media',
       }
     })
 
     const membrosLotes: Member[] = lotes.slice(0, 8).map((l: any) => {
-      const cabecas = l.animals?.length ?? 0
-      const pesoLote = l.animals?.reduce((a: number, x: any) => a + Number(x.pesoAtual ?? 0), 0) ?? 0
-      const ua = pesoLote / 450 // UA = 450 kg
+      const cabecas = l.animais?.length ?? 0
+      const pesoLote = l.animais?.reduce((a: number, x: any) => a + Number(x.pesoAtual ?? 0), 0) ?? 0
+      const ua = pesoLote / 450
       return {
         id: l.id,
         name: l.nome || `Lote ${l.id.slice(-4)}`,
         role: 'lote',
         currentLoad: ua,
         completionRate: cabecas > 0 ? 0.8 : 0.5,
-        specializations: [l.tipo || 'gado', 'pastagem'],
+        specializations: ['pastagem'],
       }
     })
 
@@ -120,10 +116,10 @@ Responda EXATAMENTE neste JSON (sem markdown):
     const quboResult = fasesPastagem.length > 0 ? solveQUBO(fasesPastagem, membrosLotes) : null
 
     const rotacaoOtimizada = quboResult ? pastagens.slice(0, 12).map((p: any, i: number) => {
-      const assignment = quboResult.assignments.find(a => a.phaseIndex === i)
+      const assignment = quboResult.assignments.find((a: any) => a.phaseIndex === i)
       return {
         pastagem: p.nome,
-        area: p.areaHa,
+        area: p.areaHectares,
         status: p.status,
         loteIndicado: assignment?.memberName ?? 'A definir',
         diasParaEntrada: fasesPastagem[i]?.inicio_dia ?? 0,
@@ -133,7 +129,7 @@ Responda EXATAMENTE neste JSON (sem markdown):
 
     return NextResponse.json({
       ...analise,
-      kpis: { totalCabecas, pesoMedio: Math.round(pesoMedio), custoTotal: Math.round(custoTotal), pastagensOcupadas, pastagensDescanso, totalPastagens, ganhoPesoPrevisto: Math.round(ganhoPesoPrevisto * 1000) / 1000 },
+      kpis: { totalCabecas, pesoMedio: Math.round(pesoMedio), custoTotal: Math.round(custoTotal), pastagensOcupadas, pastagensDescanso, totalPastagens },
       rotacaoOtimizada,
       quantum: quboResult ? {
         solver: 'QUBO TSP-Pastagem',
@@ -144,6 +140,7 @@ Responda EXATAMENTE neste JSON (sem markdown):
       } : null,
     })
   } catch (e: any) {
+    console.error('[nutribov-analise]', e.message)
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
