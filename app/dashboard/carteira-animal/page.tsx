@@ -17,23 +17,44 @@ interface AnimalCard {
   _count: { saude: number; movimentos: number }
 }
 
+interface AnimalIA {
+  identificacao: string
+  sexo: string
+  raca?: string
+  dataNascimento?: string
+  pesoAtual?: number
+  origemFazenda?: string
+}
+
 export default function CarteiraAnimalPage() {
   const [animais, setAnimais] = useState<AnimalCard[]>([])
   const [loading, setLoading] = useState(true)
+  const [semPropriedade, setSemPropriedade] = useState(false)
   const [busca, setBusca] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     identificacao: '', sexo: 'MACHO', raca: '', brincoEletronico: '',
-    sisbovId: '', dataNascimento: '', pesoAtual: '', loteId: '',
+    sisbovId: '', rfid: '', dataNascimento: '', pesoAtual: '', loteId: '',
     origemFazenda: '', gtaOrigem: '',
   })
+
+  // IA em massa
+  const [showIA, setShowIA] = useState(false)
+  const [descIA, setDescIA] = useState('')
+  const [parsandoIA, setParsandoIA] = useState(false)
+  const [animaisIA, setAnimaisIA] = useState<AnimalIA[]>([])
+  const [importando, setImportando] = useState(false)
+  const [resultadoImport, setResultadoImport] = useState<{ criados: number; erros: string[] } | null>(null)
 
   const carregar = useCallback(() => {
     setLoading(true)
     fetch('/api/carteira-animal')
       .then(r => r.json())
-      .then(d => { if (!d.error) setAnimais(d) })
+      .then(d => {
+        if (d.error === 'Propriedade não encontrada') { setSemPropriedade(true); return }
+        if (!d.error) setAnimais(d)
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
@@ -48,9 +69,9 @@ export default function CarteiraAnimalPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { alert(data.error || 'Erro ao cadastrar animal'); setSaving(false); return }
+      if (!res.ok || data.error) { alert(data.error || 'Erro ao cadastrar animal'); return }
       setShowForm(false)
-      setForm({ identificacao: '', sexo: 'MACHO', raca: '', brincoEletronico: '', sisbovId: '', dataNascimento: '', pesoAtual: '', loteId: '', origemFazenda: '', gtaOrigem: '' })
+      setForm({ identificacao: '', sexo: 'MACHO', raca: '', brincoEletronico: '', sisbovId: '', rfid: '', dataNascimento: '', pesoAtual: '', loteId: '', origemFazenda: '', gtaOrigem: '' })
       carregar()
     } catch {
       alert('Erro de conexão. Tente novamente.')
@@ -59,11 +80,78 @@ export default function CarteiraAnimalPage() {
     }
   }
 
+  async function parsearComIA() {
+    if (!descIA.trim()) return
+    setParsandoIA(true)
+    setAnimaisIA([])
+    try {
+      const res = await fetch('/api/carteira-animal/ai-parse', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descricao: descIA }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) { alert(data.error); return }
+      setAnimaisIA(data.animais)
+    } catch {
+      alert('Erro de conexão.')
+    } finally {
+      setParsandoIA(false)
+    }
+  }
+
+  async function confirmarImport() {
+    if (animaisIA.length === 0) return
+    setImportando(true)
+    try {
+      const res = await fetch('/api/carteira-animal/bulk', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ animais: animaisIA }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) { alert(data.error); return }
+      setResultadoImport({ criados: data.criados, erros: data.erros })
+      carregar()
+    } catch {
+      alert('Erro de conexão.')
+    } finally {
+      setImportando(false)
+    }
+  }
+
+  function fecharIA() {
+    setShowIA(false)
+    setDescIA('')
+    setAnimaisIA([])
+    setResultadoImport(null)
+  }
+
   const filtrados = animais.filter(a =>
     a.identificacao.toLowerCase().includes(busca.toLowerCase()) ||
     (a.sisbovId?.toLowerCase().includes(busca.toLowerCase())) ||
     (a.raca?.toLowerCase().includes(busca.toLowerCase()))
   )
+
+  // Estado: sem propriedade cadastrada
+  if (!loading && semPropriedade) {
+    return (
+      <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', maxWidth: 420 }}>
+          <div style={{ fontSize: 56, marginBottom: 16 }}>🏚️</div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Cadastre sua fazenda primeiro</h2>
+          <p style={{ fontSize: 14, color: '#64748b', marginBottom: 24, lineHeight: 1.6 }}>
+            A Carteira Animal precisa de uma propriedade vinculada à sua conta. Complete o cadastro da sua fazenda para começar a registrar animais.
+          </p>
+          <Link href="/onboarding"
+            style={{ display: 'inline-block', background: '#f59e0b', color: '#fff', borderRadius: 12, padding: '12px 28px', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+            Cadastrar Fazenda →
+          </Link>
+          <p style={{ fontSize: 12, color: '#475569', marginTop: 12 }}>
+            Já cadastrou? Tente <button onClick={carregar} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', fontSize: 12 }}>recarregar</button>.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9' }}>
@@ -81,15 +169,21 @@ export default function CarteiraAnimalPage() {
         tip="Animais com SISBOV registrado são elegíveis para protocolos de exportação via BovTrace (Embrapa)."
       />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>Carteira Animal</h1>
           <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>{animais.length} {animais.length === 1 ? 'animal' : 'animais'} cadastrados</p>
         </div>
-        <button onClick={() => setShowForm(true)}
-          style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-          + Novo Animal
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setShowIA(true)}
+            style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+            🤖 IA em Massa
+          </button>
+          <button onClick={() => setShowForm(true)}
+            style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            + Novo Animal
+          </button>
+        </div>
       </div>
 
       {/* Busca */}
@@ -107,9 +201,14 @@ export default function CarteiraAnimalPage() {
           <div style={{ fontSize: 48, marginBottom: 12 }}>🐄</div>
           <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Nenhum animal cadastrado</p>
           <p style={{ fontSize: 13 }}>Cadastre animais para criar o passaporte digital e rastrear o histórico sanitário</p>
-          <button onClick={() => setShowForm(true)} style={{ marginTop: 16, background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            Cadastrar Primeiro Animal
-          </button>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+            <button onClick={() => setShowForm(true)} style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              Cadastrar Primeiro Animal
+            </button>
+            <button onClick={() => setShowIA(true)} style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              🤖 Importar com IA
+            </button>
+          </div>
         </div>
       )}
 
@@ -185,6 +284,94 @@ export default function CarteiraAnimalPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal IA em Massa */}
+      {showIA && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16, overflowY: 'auto' }}>
+          <div style={{ background: '#111827', border: '1px solid #312e81', borderRadius: 16, padding: 28, width: '100%', maxWidth: 600, margin: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+              <div style={{ fontSize: 24 }}>🤖</div>
+              <h2 style={{ fontSize: 16, fontWeight: 700 }}>Cadastro em Massa com IA</h2>
+            </div>
+            <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 20 }}>
+              Descreva seu rebanho em linguagem natural. A IA interpreta e cria os registros automaticamente.
+            </p>
+
+            {!resultadoImport ? (
+              <>
+                <textarea
+                  value={descIA}
+                  onChange={e => setDescIA(e.target.value)}
+                  placeholder={'Exemplos:\n• 15 novilhas Nelore fêmea, nascidas em março de 2024, peso médio 280kg, vindo da Fazenda São João\n• 8 touros Angus macho, brinco #0100 a #0107, 450kg cada\n• Lote misto: 10 Girolando fêmea (nascidas jan/2023) e 5 machos Zebu sem data'}
+                  rows={5}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #312e81', borderRadius: 10, padding: '12px 14px', color: '#f1f5f9', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box', marginBottom: 12 }}
+                />
+
+                {animaisIA.length === 0 ? (
+                  <button onClick={parsearComIA} disabled={parsandoIA || !descIA.trim()}
+                    style={{ width: '100%', background: parsandoIA ? '#4338ca' : 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 10, padding: '11px', fontSize: 14, fontWeight: 700, cursor: parsandoIA ? 'wait' : 'pointer', opacity: !descIA.trim() ? 0.5 : 1 }}>
+                    {parsandoIA ? '🧠 Interpretando com IA...' : '🧠 Interpretar com IA'}
+                  </button>
+                ) : (
+                  <>
+                    <div style={{ background: '#0f172a', borderRadius: 10, padding: '12px 14px', marginBottom: 12, maxHeight: 200, overflowY: 'auto', border: '1px solid #1e293b' }}>
+                      <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8, fontWeight: 600 }}>
+                        {animaisIA.length} animais identificados — revise antes de importar:
+                      </div>
+                      {animaisIA.map((a, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #1e293b' }}>
+                          <div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9' }}>{a.identificacao}</span>
+                            <span style={{ fontSize: 11, color: '#64748b', marginLeft: 8 }}>{a.sexo === 'MACHO' ? '♂ Macho' : '♀ Fêmea'}</span>
+                            {a.raca && <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 6 }}>· {a.raca}</span>}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#64748b', textAlign: 'right' }}>
+                            {a.pesoAtual ? `${a.pesoAtual}kg` : ''}
+                            {a.dataNascimento ? ` · ${new Date(a.dataNascimento).toLocaleDateString('pt-BR')}` : ''}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button onClick={() => setAnimaisIA([])}
+                        style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: '10px', color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>
+                        ← Reeditar
+                      </button>
+                      <button onClick={confirmarImport} disabled={importando}
+                        style={{ flex: 2, background: '#10b981', color: '#fff', border: 'none', borderRadius: 10, padding: '10px', fontSize: 13, fontWeight: 700, cursor: importando ? 'wait' : 'pointer', opacity: importando ? 0.6 : 1 }}>
+                        {importando ? 'Importando...' : `✓ Importar ${animaisIA.length} animais`}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>{resultadoImport.erros.length === 0 ? '🎉' : '⚠️'}</div>
+                <p style={{ fontSize: 18, fontWeight: 700, color: '#10b981', marginBottom: 8 }}>
+                  {resultadoImport.criados} {resultadoImport.criados === 1 ? 'animal importado' : 'animais importados'}!
+                </p>
+                {resultadoImport.erros.length > 0 && (
+                  <p style={{ fontSize: 13, color: '#f87171', marginBottom: 8 }}>
+                    {resultadoImport.erros.length} falha(s): {resultadoImport.erros.join(', ')}
+                  </p>
+                )}
+                <button onClick={fecharIA}
+                  style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}>
+                  Ver animais
+                </button>
+              </div>
+            )}
+
+            {!resultadoImport && (
+              <button onClick={fecharIA}
+                style={{ width: '100%', marginTop: 10, background: 'transparent', border: 'none', color: '#475569', fontSize: 12, cursor: 'pointer', padding: '6px' }}>
+                Cancelar
+              </button>
+            )}
           </div>
         </div>
       )}
