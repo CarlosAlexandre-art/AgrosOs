@@ -34,7 +34,7 @@ export async function GET() {
       }),
       (prisma as any).animal.findMany({
         where: { propertyId: property.id, ativo: true },
-        select: { id: true, identificacao: true, sexo: true, categoria: true },
+        select: { id: true, identificacao: true, sexo: true },
         take: 50,
       }),
       (prisma as any).statusReprodutivo.findMany({
@@ -44,7 +44,7 @@ export async function GET() {
       }),
     ])
 
-    const prenhas = statusRepro.filter((s: any) => s.statusPrenhez === 'POSITIVA').length
+    const prenhas = statusRepro.filter((s: any) => s.status === 'PRENHA').length
     const vacinasPendentes = protocolos.filter((p: any) => {
       if (!p.proximaAplicacao) return false
       const dias = Math.ceil((new Date(p.proximaAplicacao).getTime() - Date.now()) / 86400000)

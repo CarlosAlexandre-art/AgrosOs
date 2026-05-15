@@ -32,7 +32,7 @@ export async function GET() {
       }),
       (prisma as any).animal.findMany({
         where: { propertyId: property.id, ativo: true },
-        select: { id: true, pesoAtual: true, categoria: true, dataNascimento: true },
+        select: { id: true, pesoAtual: true, sexo: true, dataNascimento: true },
         take: 200,
       }),
     ])
@@ -42,14 +42,14 @@ export async function GET() {
     const margem = receitas > 0 ? ((receitas - custos) / receitas * 100) : 0
 
     const ultimoValuation = valuations[0]
-    const valuacaoAtual = Number(ultimoValuation?.valorTotal ?? 0)
-    const valuacaoAnterior = Number(valuations[1]?.valorTotal ?? 0)
+    const valuacaoAtual = Number(ultimoValuation?.valorTotalEstimado ?? 0)
+    const valuacaoAnterior = Number(valuations[1]?.valorTotalEstimado ?? 0)
     const variacaoValuation = valuacaoAnterior > 0 ? ((valuacaoAtual - valuacaoAnterior) / valuacaoAnterior * 100) : 0
 
     const pesoTotal = animais.reduce((acc: number, a: any) => acc + Number(a.pesoAtual ?? 0), 0)
     const arrobasTotal = pesoTotal / 15
     const categorias = animais.reduce((acc: Record<string, number>, a: any) => {
-      acc[a.categoria || 'OUTRO'] = (acc[a.categoria || 'OUTRO'] || 0) + 1
+      acc[a.sexo || 'OUTRO'] = (acc[a.sexo || 'OUTRO'] || 0) + 1
       return acc
     }, {})
 

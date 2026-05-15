@@ -11,61 +11,70 @@ async function getProperty(supabaseId: string) {
 }
 
 export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  try {
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const property = await getProperty(user.id)
-  if (!property) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
+    const property = await getProperty(session.user.id)
+    if (!property) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
 
-  const [planos, lotes] = await Promise.all([
-    prisma.planoNutricional.findMany({
-      where: { propertyId: property.id },
-      include: { lote: { select: { nome: true, cabecas: true } } },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.lote.findMany({
-      where: { propertyId: property.id, status: 'ATIVO' },
-      select: { id: true, nome: true, cabecas: true },
-    }),
-  ])
+    const [planos, lotes] = await Promise.all([
+      (prisma as any).planoNutricional.findMany({
+        where: { propertyId: property.id },
+        include: { lote: { select: { nome: true, cabecas: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      (prisma as any).lote.findMany({
+        where: { propertyId: property.id, status: 'ATIVO' },
+        select: { id: true, nome: true, cabecas: true },
+      }),
+    ])
 
-  // Custo diário total estimado
-  const custoTotal = planos
-    .filter(p => p.ativo)
-    .reduce((acc, p) => {
-      const cabecas = p.lote?.cabecas ?? 0
-      const custoRacao = (p.racaoKgDia ?? 0) * (p.custoKgRacao ?? 0) * cabecas
-      const custoMineral = (p.mineralKgDia ?? 0) * (p.custoKgMineral ?? 0) * cabecas
-      return acc + custoRacao + custoMineral
-    }, 0)
+    const custoTotal = planos
+      .filter((p: any) => p.ativo)
+      .reduce((acc: number, p: any) => {
+        const cabecas = p.lote?.cabecas ?? 0
+        const custoRacao = (p.racaoKgDia ?? 0) * (p.custoKgRacao ?? 0) * cabecas
+        const custoMineral = (p.mineralKgDia ?? 0) * (p.custoKgMineral ?? 0) * cabecas
+        return acc + custoRacao + custoMineral
+      }, 0)
 
-  return NextResponse.json({ planos, lotes, kpis: { custoTotal } })
+    return NextResponse.json({ planos, lotes, kpis: { custoTotal } })
+  } catch (e: any) {
+    console.error('[nutricao GET]', e.message)
+    return NextResponse.json({ error: e.message || 'Erro ao carregar planos' }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  try {
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const property = await getProperty(user.id)
-  if (!property) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
+    const property = await getProperty(session.user.id)
+    if (!property) return NextResponse.json({ error: 'Propriedade não encontrada. Complete o cadastro em /onboarding.' }, { status: 404 })
 
-  const { nome, objetivo, loteId, racaoKgDia, proteinaBruta, mineralKgDia, custoKgRacao, custoKgMineral } = await req.json()
-  if (!nome) return NextResponse.json({ error: 'nome é obrigatório' }, { status: 400 })
+    const { nome, objetivo, loteId, racaoKgDia, proteinaBruta, mineralKgDia, custoKgRacao, custoKgMineral } = await req.json()
+    if (!nome) return NextResponse.json({ error: 'nome é obrigatório' }, { status: 400 })
 
-  const plano = await prisma.planoNutricional.create({
-    data: {
-      propertyId: property.id,
-      loteId: loteId || null,
-      nome,
-      objetivo: objetivo || 'GANHO_PESO',
-      racaoKgDia: racaoKgDia ? Number(racaoKgDia) : null,
-      proteinaBruta: proteinaBruta ? Number(proteinaBruta) : null,
-      mineralKgDia: mineralKgDia ? Number(mineralKgDia) : null,
-      custoKgRacao: custoKgRacao ? Number(custoKgRacao) : null,
-      custoKgMineral: custoKgMineral ? Number(custoKgMineral) : null,
-    },
-  })
-  return NextResponse.json(plano, { status: 201 })
+    const plano = await (prisma as any).planoNutricional.create({
+      data: {
+        propertyId: property.id,
+        loteId: loteId || null,
+        nome,
+        objetivo: objetivo || 'GANHO_PESO',
+        racaoKgDia: racaoKgDia ? Number(racaoKgDia) : null,
+        proteinaBruta: proteinaBruta ? Number(proteinaBruta) : null,
+        mineralKgDia: mineralKgDia ? Number(mineralKgDia) : null,
+        custoKgRacao: custoKgRacao ? Number(custoKgRacao) : null,
+        custoKgMineral: custoKgMineral ? Number(custoKgMineral) : null,
+      },
+    })
+    return NextResponse.json(plano, { status: 201 })
+  } catch (e: any) {
+    console.error('[nutricao POST]', e.message)
+    return NextResponse.json({ error: e.message || 'Erro ao salvar plano' }, { status: 500 })
+  }
 }

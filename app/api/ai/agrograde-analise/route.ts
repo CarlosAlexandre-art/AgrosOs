@@ -34,7 +34,7 @@ export async function GET() {
       }),
       (prisma as any).animal.findMany({
         where: { propertyId: property.id, ativo: true },
-        select: { id: true, identificacao: true, pesoAtual: true, dataNascimento: true, categoria: true },
+        select: { id: true, identificacao: true, pesoAtual: true, dataNascimento: true, sexo: true },
         take: 100,
       }),
     ])
@@ -98,7 +98,7 @@ Responda EXATAMENTE neste JSON (sem markdown):
       const diasOtimo = peso >= 480 ? 0 : Math.ceil((480 - peso) / 0.8)
       return {
         index: i,
-        tipo: a.categoria || 'bovino',
+        tipo: a.sexo || 'bovino',
         inicio_dia: diasOtimo,
         duracao_dias: 1,
         prioridade: peso >= 480 && idadeMeses >= 30 ? 'alta' : peso >= 420 ? 'media' : 'baixa',
