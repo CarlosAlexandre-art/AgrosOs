@@ -76,13 +76,13 @@ export async function POST(req: NextRequest) {
         category: 'AGROLINK',
         description: tipo ? `Serviço AgroCore: ${tipo}` : 'Serviço AgroCore',
       },
-    }).catch(() => {})
+    }).catch((e) => console.error('[webhook] Erro ao registrar custo AgroCore:', e?.message))
   }
 
   // Push + alerta para o dono da propriedade
   const notif = STATUS_NOTIF[status]
   if (notif && activity.property?.user?.id) {
-    const agrocoreUrl = process.env.AGROCORE_API_URL || 'https://agrolink-opal.vercel.app'
+    const agrocoreUrl = process.env.AGROCORE_API_URL || 'https://agrocore.live'
     const trackUrl = `${agrocoreUrl}/rastrear/${serviceId}`
 
     sendPushToUser(activity.property.user.id, {

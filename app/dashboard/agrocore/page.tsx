@@ -110,7 +110,7 @@ export default async function AgroCoreInternalPage() {
               <p className="text-slate-500 text-sm mt-1">Marketplace de serviços agrícolas conectado à sua operação</p>
             </div>
             <a
-              href="https://agrolink-opal.vercel.app"
+              href={process.env.NEXT_PUBLIC_AGROCORE_URL || 'https://agrocore.live'}
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -165,7 +165,7 @@ export default async function AgroCoreInternalPage() {
               {SERVICOS.map(s => (
                 <a
                   key={s.nome}
-                  href="https://agrolink-opal.vercel.app"
+                  href={process.env.NEXT_PUBLIC_AGROCORE_URL || 'https://agrocore.live'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="service-card"

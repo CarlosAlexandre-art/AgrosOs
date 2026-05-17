@@ -5,6 +5,11 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AIAssistant from '@/components/AIAssistant'
+import VozParaAtividade from '@/components/VozParaAtividade'
+import AnalisarDocumento from '@/components/AnalisarDocumento'
+import DiagnosticoAnimal from '@/components/DiagnosticoAnimal'
+import MonitorClimaIA from '@/components/MonitorClimaIA'
+import AnalisePastagem from '@/components/AnalisePastagem'
 import AgroOSLogo from '@/components/AgroOSLogo'
 
 // ── TIERS ─────────────────────────────────────────────
@@ -566,6 +571,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Assistente IA flutuante */}
       <AIAssistant />
+      <VozParaAtividade />
+      <AnalisarDocumento />
+      <DiagnosticoAnimal />
+      <MonitorClimaIA />
+      <AnalisePastagem />
     </div>
   )
 }

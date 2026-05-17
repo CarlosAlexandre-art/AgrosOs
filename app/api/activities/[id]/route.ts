@@ -57,7 +57,7 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   // Se havia serviço vinculado no AgroCore, cancela lá também
   const activity = await prisma.activity.findUnique({ where: { id }, select: { agrolinkServiceId: true } })
   if (activity?.agrolinkServiceId) {
-    const agrocoreUrl = process.env.AGROCORE_API_URL || 'https://agrolink-opal.vercel.app'
+    const agrocoreUrl = process.env.AGROCORE_API_URL || 'https://agrocore.live'
     fetch(`${agrocoreUrl}/api/internal/servicos/${activity.agrolinkServiceId}`, {
       method: 'DELETE',
       headers: { 'x-internal-secret': process.env.AGROLINK_INTERNAL_SECRET! },

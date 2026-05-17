@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const AGROCORE_URL = 'https://agrolink-opal.vercel.app'
+const AGROCORE_URL = process.env.NEXT_PUBLIC_AGROCORE_URL || 'https://agrocore.live'
 const AGROCORE_TRACK_PATH = '/rastrear'
 
 const STATUS_LABEL: Record<string, { label: string; icon: string; color: string }> = {

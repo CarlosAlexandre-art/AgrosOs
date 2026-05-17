@@ -186,7 +186,7 @@ export default function AdminHubPage() {
               </svg>
             </a>
 
-            <a href="https://agrolink-opal.vercel.app/dashboard" target="_blank" rel="noopener"
+            <a href={`${process.env.NEXT_PUBLIC_AGROCORE_URL || 'https://agrocore.live'}/dashboard`} target="_blank" rel="noopener"
               className="flex items-center gap-4 bg-white border border-slate-100 rounded-2xl px-4 py-4 active:bg-slate-50 transition-colors">
               <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-lg shrink-0">🤝</div>
               <div className="flex-1 min-w-0">
@@ -209,7 +209,7 @@ export default function AdminHubPage() {
               <span className="font-bold text-sm">ORYON Intelligence Hub</span>
               <span className="ml-auto text-[10px] bg-white/10 px-2 py-0.5 rounded-full font-mono">v1 · live</span>
             </div>
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="grid grid-cols-3 gap-2 mb-4">
               {[
                 { label: 'Módulos', val: '11' },
                 { label: 'Modelo', val: 'NIM' },
@@ -221,15 +221,53 @@ export default function AdminHubPage() {
                 </div>
               ))}
             </div>
-            <div className="space-y-1">
-              {[
-                '⚛️ QUBO Token Pricing · RAPIDS Pipeline',
-                '📈 Previsão de Demanda · Score Predição',
-                '💧 ET₀ Hídrico · Portfolio Otimizador',
-              ].map(line => (
-                <div key={line} className="text-[10px] text-white/60 font-mono">{line}</div>
-              ))}
-            </div>
+            {/* 11 módulos agrupados por produto */}
+            {[
+              {
+                product: 'SmartAgroOS',
+                color: 'text-green-300',
+                modules: [
+                  { icon: '⚡', name: 'RAPIDS Pipeline', algo: 'StdDev anomaly · 6 domínios' },
+                  { icon: '🪙', name: 'Due Diligence AgroToken', algo: 'Score 0-100 · NIM laudo' },
+                  { icon: '⚛️', name: 'QUBO Token Pricing', algo: 'Simulated Annealing' },
+                  { icon: '🌾', name: 'SafraPlanner QUBO', algo: 'SA por talhão · retorno/risco' },
+                  { icon: '💧', name: 'ET₀ Hídrico', algo: 'Hargreaves-Samani FAO-56' },
+                ],
+              },
+              {
+                product: 'AgroCore',
+                color: 'text-amber-300',
+                modules: [
+                  { icon: '📈', name: 'Previsão de Demanda', algo: 'OLS Regression · Haversine' },
+                  { icon: '💰', name: 'Precificação Dinâmica', algo: 'Análise de mercado · NIM' },
+                  { icon: '🤖', name: 'AgroBot Contextual', algo: 'NLP · contexto do usuário' },
+                ],
+              },
+              {
+                product: 'AgroRate',
+                color: 'text-blue-300',
+                modules: [
+                  { icon: '🎯', name: 'Score Predição', algo: 'Logistic Regression P(default)' },
+                  { icon: '📊', name: 'Portfolio Otimizador', algo: 'Markowitz Greedy · sigmoid' },
+                  { icon: '🔍', name: 'Análise de Crédito', algo: 'NIM insights financeiros' },
+                ],
+              },
+            ].map(group => (
+              <div key={group.product} className="mb-3">
+                <div className={`text-[9px] font-bold uppercase tracking-widest mb-1.5 ${group.color}`}>{group.product}</div>
+                <div className="space-y-1">
+                  {group.modules.map(m => (
+                    <div key={m.name} className="flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1.5">
+                      <span className="text-xs">{m.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-semibold text-white/80 truncate">{m.name}</div>
+                        <div className="text-[9px] text-white/40 font-mono truncate">{m.algo}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
             <Link href="/ecosistema" className="mt-3 flex items-center gap-1 text-xs text-violet-300 hover:text-white transition-colors">
               Ver página do ecossistema →
             </Link>
