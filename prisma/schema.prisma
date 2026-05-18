@@ -49,6 +49,7 @@ model User {
   properties        Property[]
   pushSubscriptions PushSubscription[]
   tokenTransactions TokenTransaction[]
+  agentConfigs      AgentConfig[]
   createdAt         DateTime           @default(now())
 }
 
@@ -797,4 +798,60 @@ model EnergyRecord {
 
   @@unique([propertyId, month, year])
   @@index([propertyId])
+}
+
+// ── Equipe IA — Agentes Autônomos ─────────────────────────────────────────────
+
+enum AgentTipo {
+  PRONTO
+  PERSONALIZADO
+}
+
+enum AgentTrigger {
+  CRON
+  MANUAL
+  EVENTO
+}
+
+enum RunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model AgentConfig {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nome         String
+  descricao    String?
+  role         String
+  tipo         AgentTipo    @default(PERSONALIZADO)
+  tools        String[]
+  trigger      AgentTrigger @default(MANUAL)
+  schedule     String?
+  modelo       String       @default("llama-3.3-70b-versatile")
+  systemPrompt String?
+  ativo        Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  runs         AgentRun[]
+
+  @@index([userId])
+}
+
+model AgentRun {
+  id         String      @id @default(uuid())
+  agentId    String
+  agent      AgentConfig @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  userId     String
+  startedAt  DateTime    @default(now())
+  finishedAt DateTime?
+  status     RunStatus   @default(RUNNING)
+  resultado  String?
+  toolCalls  String?
+  erro       String?
+
+  @@index([agentId])
+  @@index([userId])
 }

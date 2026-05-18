@@ -202,7 +202,7 @@ export default function FrontendDesignPage() {
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-semibold transition-colors">
                 SmartAgroOS
               </a>
-              <a href="https://agrolink-opal.vercel.app" target="_blank" rel="noopener noreferrer"
+              <a href="https://agrocore.live" target="_blank" rel="noopener noreferrer"
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold transition-colors">
                 AgroCore
               </a>
@@ -435,7 +435,7 @@ export default function FrontendDesignPage() {
                 className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl font-bold transition-all transform hover:scale-105">
                 Começar com SmartAgroOS
               </a>
-              <a href="https://agrolink-opal.vercel.app" target="_blank" rel="noopener noreferrer"
+              <a href="https://agrocore.live" target="_blank" rel="noopener noreferrer"
                 className="px-8 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold transition-all">
                 Explorar AgroCore
               </a>

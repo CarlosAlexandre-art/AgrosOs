@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       const mortalidades = registros.reduce((s, r) => s + r.mortalidade, 0)
       const custoDia = ultimoReg?.custoDia ?? (lote.planosNutricionais[0]?.custoKgRacao ?? 0) * (lote.planosNutricionais[0]?.racaoKgDia ?? 0)
       const custoAcumulado = lote.custoTotal
-      const ocorrenciasSaude = lote.animais.filter(a => a.saude.length > 0 && a.saude[0].status !== 'CURADO').length
+      const ocorrenciasSaude = lote.animais.filter(a => a.saude.length > 0).length
 
       return {
         nome: lote.nome,
