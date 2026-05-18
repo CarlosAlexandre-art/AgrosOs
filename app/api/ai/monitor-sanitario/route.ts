@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
                   where: { ativo: true },
                   select: {
                     pesoAtual: true,
-                    saude: { orderBy: { data: 'desc' }, take: 1, select: { diagnostico: true, status: true, data: true } },
+                    saude: { orderBy: { dataRegistro: 'desc' }, take: 1, select: { tipo: true, descricao: true, dataRegistro: true } },
                   },
                 },
               },
