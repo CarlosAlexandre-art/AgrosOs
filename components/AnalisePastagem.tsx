@@ -99,7 +99,7 @@ export default function AnalisePastagem() {
       {/* Botão flutuante — acima do clima */}
       <button
         onClick={() => setModalAberto(true)}
-        className="fixed z-50 w-12 h-12 rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+        className="hidden md:flex fixed z-50 w-12 h-12 rounded-2xl items-center justify-center transition-all hover:scale-105 active:scale-95"
         style={{
           bottom: '22.5rem',
           right: '1.5rem',
@@ -209,7 +209,7 @@ export default function AnalisePastagem() {
                     </div>
                   )}
 
-                  <input ref={inputRef} type="file" accept="image/*" capture="environment"
+                  <input ref={inputRef} type="file" accept="image/*"
                     className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) onFileChange(f); e.target.value = '' }} />
 
                   {estado === 'erro' && (
