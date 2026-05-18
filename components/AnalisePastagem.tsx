@@ -99,7 +99,7 @@ export default function AnalisePastagem() {
       {/* Botão flutuante — acima do clima */}
       <button
         onClick={() => setModalAberto(true)}
-        className="hidden md:flex fixed z-50 w-12 h-12 rounded-2xl items-center justify-center transition-all hover:scale-105 active:scale-95"
+        className="flex fixed z-50 w-12 h-12 rounded-2xl items-center justify-center transition-all hover:scale-105 active:scale-95"
         style={{
           bottom: '22.5rem',
           right: '1.5rem',
