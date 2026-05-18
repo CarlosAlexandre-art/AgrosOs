@@ -468,6 +468,103 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   )
 }
 
+// ── Modal Execução (loading + rate limit + resultado) ─────────────────────────
+
+function ExecModal({ agent, onClose }: { agent: Agent | null; onClose: () => void }) {
+  const [status, setStatus] = useState<'loading' | 'done' | 'error' | 'rate_limit'>('loading')
+  const [result, setResult] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState(0)
+
+  const tpl = TEMPLATES.find(t => t.nome === agent?.nome)
+
+  const doRun = useCallback(async (a: Agent) => {
+    setStatus('loading'); setResult(null); setError(null); setCountdown(0)
+    try {
+      const res = await fetch(`/api/agents/${a.id}/run`, { method: 'POST' })
+      const data = await res.json()
+      if (data.ok) { setStatus('done'); setResult(data.resultado) }
+      else if (data.error === 'RATE_LIMIT') { setStatus('rate_limit'); setCountdown(data.retryAfter ?? 15) }
+      else { setStatus('error'); setError(data.error ?? 'Erro na execução') }
+    } catch (e: any) { setStatus('error'); setError(e.message) }
+  }, [])
+
+  useEffect(() => { if (agent) doRun(agent) }, [agent, doRun])
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      if (status === 'rate_limit' && agent) doRun(agent)
+      return
+    }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [countdown, status, agent, doRun])
+
+  if (!agent) return null
+  const border = tpl?.border ?? 'rgba(99,102,241,0.3)'
+  const glow = tpl?.glow ?? 'rgba(99,102,241,0.15)'
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.7)' }} onClick={onClose}>
+      <div style={{ width: '100%', maxWidth: 520, borderRadius: 24, background: 'linear-gradient(180deg,#0f172a 0%,#0b1628 100%)', border: `1px solid ${border}`, boxShadow: `0 0 48px ${glow}, 0 24px 64px rgba(0,0,0,0.6)`, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 14, background: `linear-gradient(135deg,${border.replace('0.3','0.25')},${border.replace('0.3','0.08')})`, border: `1px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+            {tpl?.icon ?? '🤖'}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#f1f5f9' }}>{agent.nome}</div>
+            <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>
+              {status === 'loading' ? 'Executando análise…' : status === 'done' ? 'Análise concluída' : status === 'rate_limit' ? 'Alta demanda — aguardando' : 'Erro na execução'}
+            </div>
+          </div>
+          <button onClick={onClose} style={{ padding: 8, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div style={{ padding: 24 }}>
+          {status === 'loading' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '32px 0' }}>
+              <div style={{ position: 'relative', width: 52, height: 52 }}>
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.04)' }} />
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `2px solid transparent`, borderTopColor: border.replace('0.3','0.8'), animation: 'spin 0.9s linear infinite' }} />
+                <div style={{ position: 'absolute', inset: 12, borderRadius: '50%', background: glow }} />
+              </div>
+              <p style={{ fontSize: 13, color: '#64748b', fontFamily: 'monospace' }}>Agente coletando e analisando dados…</p>
+            </div>
+          )}
+          {status === 'rate_limit' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '24px 0' }}>
+              <div style={{ fontSize: 42 }}>⏳</div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontWeight: 800, fontSize: 15, color: '#f1f5f9', marginBottom: 6 }}>Alta demanda dos agentes autônomos</div>
+                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 16 }}>Aguarde a recuperação — retentando automaticamente</p>
+                <div style={{ fontSize: 48, fontWeight: 900, color: '#f59e0b', letterSpacing: '-3px', lineHeight: 1 }}>{countdown}s</div>
+              </div>
+            </div>
+          )}
+          {status === 'error' && (
+            <div style={{ padding: '14px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}>
+              <p style={{ fontSize: 13, color: '#f87171', lineHeight: 1.6 }}>{error}</p>
+            </div>
+          )}
+          {status === 'done' && result && (
+            <div style={{ padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', maxHeight: 320, overflowY: 'auto' }}>
+              <p style={{ fontSize: 13, color: '#cbd5e1', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{result}</p>
+            </div>
+          )}
+        </div>
+        {(status === 'done' || status === 'error') && (
+          <div style={{ padding: '0 24px 24px' }}>
+            <button onClick={onClose} style={{ width: '100%', padding: '11px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              Fechar
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Modal Resultado ───────────────────────────────────────────────────────────
 
 function ResultModal({ agent, onClose }: { agent: Agent; onClose: () => void }) {
@@ -549,6 +646,7 @@ export default function EquipeIaPage() {
   const [running, setRunning] = useState<Record<string, boolean>>({})
   const [showCreate, setShowCreate] = useState(false)
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
+  const [execAgent, setExecAgent] = useState<Agent | null>(null)
   const [tab, setTab] = useState<'especialistas' | 'personalizados'>('especialistas')
 
   const fetchAgents = useCallback(async () => {
@@ -564,21 +662,11 @@ export default function EquipeIaPage() {
 
   useEffect(() => { fetchAgents() }, [fetchAgents])
 
-  async function handleRun(agentId: string) {
+  function handleRun(agentId: string) {
+    const agent = agents.find(a => a.id === agentId)
+    if (!agent) return
     setRunning(r => ({ ...r, [agentId]: true }))
-    try {
-      const res = await fetch(`/api/agents/${agentId}/run`, { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      await fetchAgents()
-      const updated = agents.find(a => a.id === agentId)
-      if (updated) setSelectedAgent({ ...updated, runs: [{ id: 'new', status: 'COMPLETED', startedAt: new Date().toISOString(), finishedAt: new Date().toISOString(), resultado: data.resultado, erro: null }] })
-    } catch (e: any) {
-      console.error('[AgentRun]', e.message)
-    } finally {
-      setRunning(r => ({ ...r, [agentId]: false }))
-      fetchAgents()
-    }
+    setExecAgent(agent)
   }
 
   async function criarPronto(tpl: typeof TEMPLATES[number]) {
@@ -798,6 +886,7 @@ export default function EquipeIaPage() {
 
       {showCreate && <CreateModal onClose={() => setShowCreate(false)} onCreated={fetchAgents} />}
       {selectedAgent && <ResultModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} />}
+      {execAgent && <ExecModal agent={execAgent} onClose={() => { setExecAgent(null); setRunning({}); fetchAgents() }} />}
     </div>
   )
 }
