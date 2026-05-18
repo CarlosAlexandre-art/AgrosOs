@@ -70,6 +70,7 @@ const PLANS = [
       { text: 'Relatórios personalizados + exportação', ok: true },
       { text: 'Integração AgroCore prioritária', ok: true },
       { text: 'Dashboard executivo com KPIs', ok: true },
+      { text: 'Equipe IA com agentes autônomos', ok: true },
       { text: 'Suporte prioritário 24/7 via WhatsApp', ok: true },
     ],
     cta: 'Assinar Enterprise',

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 
@@ -323,12 +324,13 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 60, display: 'flex',
-      alignItems: 'flex-end', justifyContent: 'center', padding: 16,
-      background: 'rgba(0,0,0,0.7)',
+      alignItems: 'center', justifyContent: 'center', padding: 16,
+      background: 'rgba(0,0,0,0.7)', overflowY: 'auto',
     }} onClick={onClose}>
       <div
         style={{
           width: '100%', maxWidth: 520, borderRadius: 24, overflow: 'hidden',
+          maxHeight: '90vh', overflowY: 'auto',
           background: 'linear-gradient(180deg,#0f172a 0%,#0b1628 100%)',
           border: '1px solid rgba(255,255,255,0.1)',
           boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
@@ -612,6 +614,17 @@ export default function EquipeIaPage() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+              <Link href="/dashboard/equipe" style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#94a3b8', flexShrink: 0, textDecoration: 'none',
+              }}>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
               <div style={{
                 width: 40, height: 40, borderRadius: 14,
                 background: 'linear-gradient(135deg, rgba(99,102,241,0.4), rgba(79,70,229,0.2))',
