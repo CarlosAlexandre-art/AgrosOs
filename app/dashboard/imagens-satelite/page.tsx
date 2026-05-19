@@ -73,10 +73,14 @@ function ImagensSateliteContent() {
   const mapInstance = useRef<L>(null)
   const tileLayerRef = useRef<L>(null)
 
+  const ftwLayerRef = useRef<L>(null)
   const [activeId, setActiveId] = useState('world_imagery')
   const [zoom, setZoom] = useState(5)
   const [center, setCenter] = useState({ lat: -14.235, lng: -51.925 })
   const [showInfo, setShowInfo] = useState(false)
+  const [showFtw, setShowFtw] = useState(false)
+  const [ftwLoading, setFtwLoading] = useState(false)
+  const [ftwCount, setFtwCount] = useState(0)
 
   const activeService = ESRI_SERVICES.find(s => s.id === activeId)!
 
@@ -114,6 +118,43 @@ function ImagensSateliteContent() {
     setActiveId(id)
   }, [])
 
+  const handleToggleFtw = useCallback(async () => {
+    const map = mapInstance.current
+    if (!map || !(window as L).L) return
+    if (showFtw) {
+      ftwLayerRef.current?.remove()
+      setShowFtw(false)
+      return
+    }
+    setFtwLoading(true)
+    try {
+      const Lx: L = (window as L).L
+      const bounds = map.getBounds()
+      const bbox = `${bounds.getWest().toFixed(6)},${bounds.getSouth().toFixed(6)},${bounds.getEast().toFixed(6)},${bounds.getNorth().toFixed(6)}`
+      const res = await fetch(`/api/geo/ftw?bbox=${bbox}`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      if (ftwLayerRef.current) { ftwLayerRef.current.remove() }
+      ftwLayerRef.current = Lx.geoJSON(data, {
+        style: (feature: L) => {
+          const ndvi = feature?.properties?.ndvi ?? 0.5
+          const color = ndvi >= 0.7 ? '#16a34a' : ndvi >= 0.5 ? '#65a30d' : ndvi >= 0.35 ? '#ca8a04' : ndvi >= 0.2 ? '#ea580c' : '#dc2626'
+          return { color, fillColor: color, fillOpacity: 0.3, weight: 1.5 }
+        },
+        onEachFeature: (feature: L, layer: L) => {
+          const p = feature.properties
+          layer.bindPopup(`<b>${p.cultura ?? 'Campo agrícola'}</b><br>${p.area_ha} ha · NDVI ${Number(p.ndvi ?? 0).toFixed(2)}<br><small>Fonte: FTW Sentinel-2</small>`)
+        },
+      }).addTo(map)
+      setFtwCount(data.features?.length ?? 0)
+      setShowFtw(true)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setFtwLoading(false)
+    }
+  }, [showFtw])
+
   const handleDownload = useCallback(() => {
     const map = mapInstance.current; if (!map) return
     const bounds = map.getBounds()
@@ -147,6 +188,18 @@ function ImagensSateliteContent() {
               <span className="text-slate-600">·</span>
               <span>z{zoom}</span>
             </div>
+            <button
+              onClick={handleToggleFtw}
+              disabled={ftwLoading}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
+              style={{
+                background: showFtw ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.06)',
+                color: showFtw ? '#34d399' : '#94a3b8',
+                border: `1px solid ${showFtw ? 'rgba(52,211,153,0.4)' : 'rgba(255,255,255,0.1)'}`,
+              }}
+            >
+              {ftwLoading ? '...' : showFtw ? `Campos FTW (${ftwCount})` : 'Campos FTW'}
+            </button>
             <button onClick={() => setShowInfo(o => !o)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style={{ background: showInfo ? 'rgba(56,189,248,0.2)' : 'rgba(255,255,255,0.06)', color: '#38bdf8', border: '1px solid rgba(56,189,248,0.3)' }}>
               Serviços
             </button>
