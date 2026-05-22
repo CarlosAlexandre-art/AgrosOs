@@ -588,8 +588,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Topbar */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between flex-shrink-0 h-16">
+        {/* Topbar — oculta no mobile em rotas admin (têm header próprio) */}
+        <header className={`bg-white border-b border-gray-200 px-6 py-4 items-center justify-between flex-shrink-0 h-16 ${pathname.startsWith('/dashboard/admin') ? 'hidden md:flex' : 'flex'}`}>
           <button
             className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-colors"
             onClick={() => setSidebarOpen(true)}
