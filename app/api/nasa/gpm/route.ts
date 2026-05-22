@@ -76,37 +76,43 @@ async function fetchPoint(
   opendapUrl: string, li: number, lni: number, token: string
 ): Promise<{ mm: number | null; debugUrl: string; debugStatus: number; debugBody?: string }> {
   const enc = (i: number) => `%5B${i}%5D`
-  // IMERG Daily usa "precipitation" (não "precipitationCal" — essa é do produto 30-min)
-  // Testar ambas as ordens de dimensão: [time][lat][lon] e [time][lon][lat]
+  // IMERG Daily: dimensões [time=1][lon=3600][lat=1800] — lon antes de lat
+  // Tentar brackets literais (alguns servidores rejeitam URL-encoded) e encoded
   const suffixes = [
-    `.ascii?precipitation${enc(0)}${enc(li)}${enc(lni)}`,
-    `.ascii?precipitation${enc(0)}${enc(lni)}${enc(li)}`,
-    `.ascii?precipitationCal${enc(0)}${enc(li)}${enc(lni)}`,
-    `.ascii?precipitationCal${enc(0)}${enc(lni)}${enc(li)}`,
+    `.ascii?precipitation[0][${lni}][${li}]`,              // literal [lon][lat] — correto para IMERG
+    `.ascii?precipitation[0][${li}][${lni}]`,              // literal [lat][lon] — fallback
+    `.ascii?precipitation${enc(0)}${enc(lni)}${enc(li)}`,  // encoded [lon][lat]
+    `.ascii?precipitation${enc(0)}${enc(li)}${enc(lni)}`,  // encoded [lat][lon]
   ]
-  // CMR pode retornar URL com ou sem .nc4
   const bases = opendapUrl.endsWith('.nc4')
     ? [opendapUrl]
     : [opendapUrl + '.nc4', opendapUrl]
 
+  let lastDebug = { url: bases[0] + suffixes[0], status: 0, body: undefined as string | undefined }
+
   for (const base of bases) {
     for (const suffix of suffixes) {
       const result = await fetchAuth(base + suffix, token)
+      lastDebug = { url: result.finalUrl, status: result.status, body: result.body?.slice(0, 300) ?? undefined }
+
       if (result.status === 200 && result.body) {
         const lines = result.body.trim().split('\n').filter(l => l.trim())
         const val = parseFloat(lines[lines.length - 1])
         if (!isNaN(val) && val >= 0) {
           return { mm: Math.round(val * 10) / 10, debugUrl: result.finalUrl, debugStatus: 200 }
         }
-        // Retornou 200 mas valor inválido — guardar URL para debug e continuar
-        return { mm: null, debugUrl: base + suffix, debugStatus: 200 }
+        // 200 mas valor inválido (fill negativo ou NaN) — continuar tentando
+        continue
       }
-      if (result.status !== 404 && result.status !== 0 && result.status !== -1) {
-        return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status, debugBody: result.body ?? undefined }
+
+      // 401/403 = erro de auth — parar imediatamente (outra combinação não vai resolver)
+      if (result.status === 401 || result.status === 403) {
+        return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status, debugBody: result.body?.slice(0, 300) ?? undefined }
       }
+      // 404/400/0/-1: tentar próxima combinação de variável/dimensão
     }
   }
-  return { mm: null, debugUrl: bases[0] + suffixes[0], debugStatus: 0 }
+  return { mm: null, debugUrl: lastDebug.url, debugStatus: lastDebug.status, debugBody: lastDebug.body }
 }
 
 export async function GET() {
