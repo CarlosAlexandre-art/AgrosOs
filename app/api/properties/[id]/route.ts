@@ -15,7 +15,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { name, location, sizeHectares, coverUrl } = await req.json()
+  const { name, location, sizeHectares, coverUrl, lat, lng, fieldId, ...fieldLatLng } = await req.json()
+
+  // Salvar coordenadas de um talhão específico
+  if (fieldId && (fieldLatLng.lat !== undefined || lat !== undefined)) {
+    const fLat = fieldLatLng.lat ?? lat
+    const fLng = fieldLatLng.lng ?? lng
+    const field = await prisma.field.update({
+      where: { id: fieldId },
+      data: { lat: fLat, lng: fLng },
+    })
+    return NextResponse.json(field)
+  }
+
   const property = await prisma.property.update({
     where: { id },
     data: {
@@ -23,6 +35,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       ...(location !== undefined && { location }),
       ...(sizeHectares !== undefined && { sizeHectares }),
       ...(coverUrl !== undefined && { coverUrl }),
+      ...(lat !== undefined && { lat }),
+      ...(lng !== undefined && { lng }),
     },
   })
   return NextResponse.json(property)
