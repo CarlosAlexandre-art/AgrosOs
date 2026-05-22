@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Field {
   id: string
@@ -85,6 +86,7 @@ const BR_CENTER: [number, number] = [-14.235, -51.925]
 type L = any
 
 export default function FarmMap({ data }: { data: MapData }) {
+  const router = useRouter()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L>(null)
   const propMarker = useRef<L>(null)
@@ -101,8 +103,10 @@ export default function FarmMap({ data }: { data: MapData }) {
   const [activeField, setActiveField] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [searching, setSearching] = useState(false)
+  const [searchNotFound, setSearchNotFound] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(false)
   const [activeLayer, setActiveLayer] = useState<LayerId>('satellite')
   const [layerPanelOpen, setLayerPanelOpen] = useState(false)
   const [mobileFieldsOpen, setMobileFieldsOpen] = useState(false)
@@ -252,13 +256,23 @@ export default function FarmMap({ data }: { data: MapData }) {
   const handleSearch = useCallback(async () => {
     if (!search.trim() || !mapInstance.current) return
     setSearching(true)
+    setSearchNotFound(false)
     try {
+      const query = search.includes('Brasil') ? search : search + ', Brasil'
       const r = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(search + ', Brasil')}&limit=1`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=br`,
         { headers: { 'Accept-Language': 'pt' } }
       )
       const results = await r.json()
-      if (results[0]) mapInstance.current.flyTo([parseFloat(results[0].lat), parseFloat(results[0].lon)], 14)
+      if (results[0]) {
+        mapInstance.current.flyTo([parseFloat(results[0].lat), parseFloat(results[0].lon)], 14)
+      } else {
+        setSearchNotFound(true)
+        setTimeout(() => setSearchNotFound(false), 3000)
+      }
+    } catch {
+      setSearchNotFound(true)
+      setTimeout(() => setSearchNotFound(false), 3000)
     } finally { setSearching(false) }
   }, [search])
 
@@ -279,6 +293,7 @@ export default function FarmMap({ data }: { data: MapData }) {
 
   const handleSave = useCallback(async () => {
     setSaving(true)
+    setSaveError(false)
     try {
       const calls: Promise<Response>[] = []
       if (pendingLat != null && pendingLng != null && (pendingLat !== data.lat || pendingLng !== data.lng)) {
@@ -297,15 +312,25 @@ export default function FarmMap({ data }: { data: MapData }) {
           body: JSON.stringify({ fieldId, lat: c.lat, lng: c.lng }),
         }))
       })
-      await Promise.all(calls)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+      const responses = await Promise.all(calls)
+      const allOk = responses.every(r => r.ok)
+      if (allOk) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2500)
+        router.refresh()
+      } else {
+        setSaveError(true)
+        setTimeout(() => setSaveError(false), 4000)
+      }
+    } catch {
+      setSaveError(true)
+      setTimeout(() => setSaveError(false), 4000)
     } finally {
       setSaving(false)
       setMode('view')
       setActiveField(null)
     }
-  }, [pendingLat, pendingLng, fieldCoords, data])
+  }, [pendingLat, pendingLng, fieldCoords, data, router])
 
   const hasChanges =
     (pendingLat != null && (pendingLat !== data.lat || pendingLng !== data.lng)) ||
@@ -387,8 +412,10 @@ export default function FarmMap({ data }: { data: MapData }) {
             />
           </div>
           <button onClick={handleSearch} disabled={searching}
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-medium text-slate-600 transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0">
-            {searching ? '...' : 'Buscar'}
+            className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0 ${
+              searchNotFound ? 'bg-red-100 text-red-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+            }`}>
+            {searching ? '...' : searchNotFound ? 'Não encontrado' : 'Buscar'}
           </button>
         </div>
 
@@ -425,10 +452,15 @@ export default function FarmMap({ data }: { data: MapData }) {
             <span className="hidden sm:inline">{mode === 'move' ? 'Clique no mapa...' : 'Marcar fazenda'}</span>
           </button>
 
+          {saveError && (
+            <span className="ml-auto text-xs text-red-600 font-medium flex-shrink-0">Erro ao salvar</span>
+          )}
           <button
             onClick={handleSave}
             disabled={saving || !hasChanges}
-            className="ml-auto flex items-center gap-1.5 px-4 py-2 text-sm bg-[#16a34a] text-white font-semibold rounded-xl hover:bg-[#15803d] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex-shrink-0"
+            className={`${saveError ? '' : 'ml-auto'} flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex-shrink-0 ${
+              saveError ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-[#16a34a] text-white hover:bg-[#15803d]'
+            }`}
           >
             {saved ? (
               <>
