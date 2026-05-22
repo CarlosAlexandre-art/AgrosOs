@@ -87,8 +87,8 @@ export default function ClimaPage() {
   useEffect(() => {
     fetch('/api/nasa/gpm')
       .then(r => r.json())
-      .then(d => { if (d.hasKey && !d.error) setGpm(d) })
-      .catch(() => {})
+      .then(d => setGpm(d))
+      .catch(() => setGpm({ hasKey: false, days: [], summary: { total10d: 0, maxDay: null, validDays: 0 }, resolution: '', source: '', updatedAt: '' }))
       .finally(() => setGpmLoading(false))
   }, [])
 
