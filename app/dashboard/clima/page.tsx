@@ -35,6 +35,15 @@ type NasaData = {
   updatedAt: string
 }
 
+type GpmData = {
+  hasKey: boolean
+  days: { date: string; mm: number | null }[]
+  summary: { total10d: number; maxDay: { date: string; mm: number } | null; validDays: number }
+  resolution: string
+  source: string
+  updatedAt: string
+}
+
 export default function ClimaPage() {
   const [data, setData] = useState<WeatherData | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +52,8 @@ export default function ClimaPage() {
   const [loadingSim, setLoadingSim] = useState(false)
   const [nasa, setNasa] = useState<NasaData | null>(null)
   const [nasaLoading, setNasaLoading] = useState(true)
+  const [gpm, setGpm] = useState<GpmData | null>(null)
+  const [gpmLoading, setGpmLoading] = useState(true)
 
   async function simularFisica() {
     setLoadingSim(true)
@@ -71,6 +82,14 @@ export default function ClimaPage() {
       .then(d => { if (!d.error) setNasa(d) })
       .catch(() => {})
       .finally(() => setNasaLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/nasa/gpm')
+      .then(r => r.json())
+      .then(d => { if (d.hasKey && !d.error) setGpm(d) })
+      .catch(() => {})
+      .finally(() => setGpmLoading(false))
   }, [])
 
   if (loading) {
@@ -477,6 +496,87 @@ export default function ClimaPage() {
           )}
         </div>
       </div>
+
+      {/* ── NASA GPM IMERG ────────────────────────────────────────────────── */}
+      {(gpm || gpmLoading) && (
+        <div className="mt-6 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="px-5 py-4 flex items-center justify-between"
+            style={{ background: 'linear-gradient(135deg, #0c4a6e 0%, #075985 100%)' }}>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🌧️</span>
+              <div>
+                <div className="text-white font-bold text-sm">NASA GPM IMERG</div>
+                <div className="text-sky-200 text-[10px] mt-0.5">Late Daily Run V07B · 0.1° (~11 km) · satélite real</div>
+              </div>
+            </div>
+            {gpm && (
+              <div className="text-right text-sky-300 text-[10px]">
+                <div>Atualizado</div>
+                <div>{new Date(gpm.updatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+              </div>
+            )}
+          </div>
+
+          <div className="p-5">
+            {gpmLoading ? (
+              <div className="flex items-center gap-2 py-2">
+                <div className="w-4 h-4 border-2 border-sky-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                <span className="text-sm text-slate-400">Consultando satélite GPM...</span>
+              </div>
+            ) : !gpm ? (
+              <p className="text-sm text-slate-400 text-center py-2">
+                Adicione <code className="bg-slate-100 px-1 rounded text-xs">EARTHDATA_TOKEN</code> no Vercel para ativar o GPM IMERG.
+              </p>
+            ) : (
+              <>
+                {/* Métricas resumo */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div className="bg-sky-50 border border-sky-100 rounded-xl p-3 text-center">
+                    <div className="text-2xl font-bold text-sky-700">{gpm.summary.total10d}</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5 font-semibold">mm · 10 dias</div>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                    <div className="text-2xl font-bold text-slate-700">{gpm.summary.validDays}</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5 font-semibold">dias com dados</div>
+                  </div>
+                  <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-center">
+                    <div className="text-xl font-bold text-indigo-700">
+                      {gpm.summary.maxDay ? `${gpm.summary.maxDay.mm} mm` : '—'}
+                    </div>
+                    <div className="text-[10px] text-slate-500 mt-0.5 font-semibold">
+                      {gpm.summary.maxDay ? `pico ${gpm.summary.maxDay.date}` : 'sem pico'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gráfico de barras diário */}
+                {gpm.days.filter(d => d.mm !== null).length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-slate-600 mb-2">Precipitação diária · últimos 10 dias (GPM IMERG)</div>
+                    <ResponsiveContainer width="100%" height={90}>
+                      <BarChart data={gpm.days} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+                        <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <Tooltip
+                          formatter={(v: number | null) => v !== null ? [`${v} mm`, 'Chuva'] : ['—', 'Chuva']}
+                          contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0' }}
+                        />
+                        <Bar dataKey="mm" radius={[3, 3, 0, 0]}>
+                          {gpm.days.map((d, i) => (
+                            <Cell key={i} fill={d.mm !== null && d.mm > 10 ? '#0284c7' : d.mm !== null && d.mm > 0 ? '#7dd3fc' : '#e2e8f0'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                <p className="text-[10px] text-slate-400 mt-3">Fonte: {gpm.source}</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
