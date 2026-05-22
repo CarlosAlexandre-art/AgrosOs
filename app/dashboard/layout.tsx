@@ -414,9 +414,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (d.role) setUserRole(d.role)
     })
     fetchAlertCounts()
-    // Recarrega alertas a cada 5 minutos
-    const interval = setInterval(fetchAlertCounts, 5 * 60 * 1000)
-    return () => clearInterval(interval)
     fetch('/api/properties').then(r => r.json()).then((data: { id: string; name: string }[]) => {
       if (Array.isArray(data)) {
         setProperties(data)
@@ -424,6 +421,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setActivePropertyId(cookie || data[0]?.id || '')
       }
     })
+    // Recarrega alertas a cada 5 minutos
+    const interval = setInterval(fetchAlertCounts, 5 * 60 * 1000)
+    return () => clearInterval(interval)
   }, [])
 
   async function handleSelectProperty(id: string) {
