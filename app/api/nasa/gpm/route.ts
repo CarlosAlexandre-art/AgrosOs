@@ -66,18 +66,21 @@ async function fetchAuth(url: string, token: string): Promise<{ status: number; 
       const loc = res.headers.get('location')
       if (loc) { current = loc; continue }
     }
-    return { status: res.status, body: null, finalUrl: current }
+    const errBody = await res.text().catch(() => null)
+    return { status: res.status, body: errBody?.slice(0, 300) ?? null, finalUrl: current }
   }
   return { status: 0, body: null, finalUrl: current }
 }
 
 async function fetchPoint(
   opendapUrl: string, li: number, lni: number, token: string
-): Promise<{ mm: number | null; debugUrl: string; debugStatus: number }> {
-  // Colchetes precisam ser URL-encoded no servidor opendap.earthdata.nasa.gov
+): Promise<{ mm: number | null; debugUrl: string; debugStatus: number; debugBody?: string }> {
   const enc = (i: number) => `%5B${i}%5D`
-  // IMERG: verificar ambas as ordens de dimensão [time][lat][lon] e [time][lon][lat]
+  // IMERG Daily usa "precipitation" (não "precipitationCal" — essa é do produto 30-min)
+  // Testar ambas as ordens de dimensão: [time][lat][lon] e [time][lon][lat]
   const suffixes = [
+    `.ascii?precipitation${enc(0)}${enc(li)}${enc(lni)}`,
+    `.ascii?precipitation${enc(0)}${enc(lni)}${enc(li)}`,
     `.ascii?precipitationCal${enc(0)}${enc(li)}${enc(lni)}`,
     `.ascii?precipitationCal${enc(0)}${enc(lni)}${enc(li)}`,
   ]
@@ -99,7 +102,7 @@ async function fetchPoint(
         return { mm: null, debugUrl: base + suffix, debugStatus: 200 }
       }
       if (result.status !== 404 && result.status !== 0 && result.status !== -1) {
-        return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status }
+        return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status, debugBody: result.body ?? undefined }
       }
     }
   }
