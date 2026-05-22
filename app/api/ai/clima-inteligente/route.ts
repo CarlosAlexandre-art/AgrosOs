@@ -140,8 +140,9 @@ Responda APENAS com JSON válido, sem markdown.`
 
     let analise: Record<string, unknown>
     try {
-      const clean = resultado.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      analise = JSON.parse(clean)
+      const jsonMatch = resultado.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) throw new Error()
+      analise = JSON.parse(jsonMatch[0])
     } catch {
       return NextResponse.json({ error: 'Não foi possível estruturar a análise climática' })
     }

@@ -1,17 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const PLANS = [
   {
     id: 'starter',
     name: 'Starter',
-    price: 'Grátis',
-    priceNote: 'para sempre',
     color: 'border-slate-200',
     badge: null,
     desc: 'Para quem está começando a organizar a fazenda.',
+    price: 'Grátis',
+    priceNote: 'para sempre',
+    priceId: null as string | null,
     features: [
       { text: 'Dashboard + visão geral', ok: true },
       { text: 'Operações, financeiro e propriedades', ok: true },
@@ -24,18 +25,16 @@ const PLANS = [
       { text: 'AgroToken + metas', ok: false },
       { text: 'Suporte', ok: false },
     ],
-    cta: 'Plano atual',
-    ctaStyle: 'bg-slate-100 text-slate-500 cursor-default',
-    priceId: null,
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: 'R$ 97',
-    priceNote: '/mês',
     color: 'border-[#16a34a] ring-2 ring-[#16a34a]',
     badge: '🌿 Mais popular',
     desc: 'Para produtores que querem controle total da operação.',
+    price: 'R$ 97',
+    priceNote: '/mês',
+    priceId: process.env.NEXT_PUBLIC_AGROOS_PRO_MENSAL_PRICE_ID ?? 'price_1TLVBkHOdd4LjuVT865UeWY0',
     features: [
       { text: 'Tudo do Starter', ok: true },
       { text: 'Grade UTM georreferenciada', ok: true },
@@ -48,18 +47,16 @@ const PLANS = [
       { text: 'Gestão de equipe + AgroCore', ok: true },
       { text: 'Suporte por e-mail', ok: true },
     ],
-    cta: 'Assinar Pro',
-    ctaStyle: 'bg-[#16a34a] text-white hover:bg-[#15803d]',
-    priceId: 'price_1TLVBkHOdd4LjuVT865UeWY0',
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 'R$ 297',
-    priceNote: '/mês',
     color: 'border-slate-800',
     badge: '👑 Completo',
     desc: 'Para grandes operações e gestão profissional de múltiplas fazendas.',
+    price: 'R$ 297',
+    priceNote: '/mês',
+    priceId: process.env.NEXT_PUBLIC_AGROOS_ENTERPRISE_MENSAL_PRICE_ID ?? 'price_1TLVCSHOdd4LjuVTHZEme1gr',
     features: [
       { text: 'Propriedades ilimitadas', ok: true },
       { text: 'Talhões e tudo ilimitado', ok: true },
@@ -73,60 +70,105 @@ const PLANS = [
       { text: 'Equipe IA com agentes autônomos', ok: true },
       { text: 'Suporte prioritário 24/7 via WhatsApp', ok: true },
     ],
-    cta: 'Assinar Enterprise',
-    ctaStyle: 'bg-slate-900 text-white hover:bg-slate-800',
-    priceId: 'price_1TLVCSHOdd4LjuVTHZEme1gr',
   },
 ]
 
-export default function PlanosPage() {
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+function PlanosContent() {
   const [currentPlan, setCurrentPlan] = useState<string>('starter')
+  const [hasCustomer, setHasCustomer] = useState(false)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+  const [loadingPortal, setLoadingPortal] = useState(false)
+  const [erro, setErro] = useState('')
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    fetch('/api/user/plan').then(r => r.json()).then(d => setCurrentPlan(d.plan || 'starter'))
+    fetch('/api/user/plan')
+      .then(r => r.json())
+      .then(d => {
+        const plan = d.plan || 'starter'
+        setCurrentPlan(plan)
+        setHasCustomer(plan !== 'starter' && plan !== 'admin')
+      })
   }, [])
 
-  async function handleCheckout(plan: typeof PLANS[0]) {
-    if (currentPlan === plan.id || !plan.priceId) return
-    setLoadingPlan(plan.id)
+  async function handleCheckout(priceId: string, planId: string) {
+    setLoadingPlan(planId)
+    setErro('')
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: plan.priceId }),
+        body: JSON.stringify({ priceId }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
+      else setErro(data.error || 'Erro ao iniciar checkout.')
     } catch {
+      setErro('Erro de conexão. Tente novamente.')
+    } finally {
       setLoadingPlan(null)
     }
   }
 
+  async function handlePortal() {
+    setLoadingPortal(true)
+    setErro('')
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else setErro(data.error || 'Erro ao abrir portal.')
+    } catch {
+      setErro('Erro de conexão. Tente novamente.')
+    } finally {
+      setLoadingPortal(false)
+    }
+  }
+
   const isAdmin = currentPlan === 'admin'
+  const sucesso = searchParams.get('plano') === 'ativado'
 
   return (
-    <div className="p-6 space-y-8 max-w-5xl mx-auto">
-      <div className="text-center">
-        <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+    <div className="p-4 sm:p-6 space-y-8 max-w-5xl mx-auto">
+
+      {sucesso && (
+        <div className="bg-green-50 border border-green-200 text-green-800 rounded-2xl px-5 py-4 flex items-center gap-3">
+          <span className="text-2xl">🎉</span>
+          <div>
+            <div className="font-bold">Plano ativado!</div>
+            <div className="text-sm text-green-700">Seu plano foi atualizado. Aproveite todos os benefícios.</div>
+          </div>
+        </div>
+      )}
+
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
           🌱 Planos SmartAgroOS
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Escolha o plano ideal</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Escolha o plano ideal</h1>
         <p className="text-slate-500 max-w-md mx-auto">
-          Comece grátis e escale conforme sua operação cresce. Sem fidelidade — cancele quando quiser.
+          Comece grátis e escale conforme sua operação cresce. Cancele quando quiser.
         </p>
         {isAdmin && (
-          <div className="mt-3 inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+          <div className="inline-flex items-center gap-2 bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full">
             👑 Conta Admin — acesso completo ativo
           </div>
         )}
       </div>
 
+      {erro && (
+        <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm font-medium">
+          ⚠️ {erro}
+        </div>
+      )}
+
+      {/* Cards */}
       <div className="grid md:grid-cols-3 gap-6">
         {PLANS.map(plan => {
           const isCurrent = currentPlan === plan.id || (isAdmin && plan.id === 'enterprise')
+
           return (
-            <div key={plan.id} className={`relative bg-white rounded-2xl border p-6 flex flex-col transition-shadow hover:shadow-md ${plan.color}`}>
+            <div key={plan.id} className={`relative bg-white rounded-2xl border p-6 flex flex-col shadow-sm transition-shadow hover:shadow-md ${plan.color}`}>
               {plan.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className={`text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap ${plan.id === 'enterprise' ? 'bg-slate-800' : 'bg-[#16a34a]'}`}>
@@ -161,26 +203,58 @@ export default function PlanosPage() {
                 ))}
               </ul>
 
-              <button
-                onClick={() => handleCheckout(plan)}
-                disabled={isCurrent || loadingPlan === plan.id}
-                className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 ${isCurrent ? 'bg-slate-100 text-slate-500 cursor-default' : plan.ctaStyle}`}
-              >
-                {loadingPlan === plan.id ? 'Redirecionando...' : isCurrent ? '✓ Plano atual' : plan.cta}
-              </button>
+              {isCurrent ? (
+                <div className="w-full py-2.5 rounded-xl text-sm font-semibold text-center bg-slate-100 text-slate-500 cursor-default">
+                  ✓ Plano atual
+                </div>
+              ) : plan.id === 'starter' ? (
+                <div className="w-full py-2.5 rounded-xl text-sm font-semibold text-center bg-slate-100 text-slate-400 cursor-default">
+                  Sempre gratuito
+                </div>
+              ) : (
+                <button
+                  onClick={() => plan.priceId && handleCheckout(plan.priceId, plan.id)}
+                  disabled={!!loadingPlan}
+                  className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${
+                    plan.id === 'enterprise'
+                      ? 'bg-slate-900 text-white hover:bg-slate-800'
+                      : 'bg-[#16a34a] text-white hover:bg-[#15803d]'
+                  }`}
+                >
+                  {loadingPlan === plan.id ? 'Redirecionando...' : `Assinar ${plan.name}`}
+                </button>
+              )}
             </div>
           )
         })}
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-6">
+      {/* Gerenciar / Cancelar assinatura */}
+      {hasCustomer && !isAdmin && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-3xl mx-auto">
+          <div>
+            <div className="font-semibold text-slate-900">Gerenciar assinatura</div>
+            <div className="text-sm text-slate-500">Altere método de pagamento, veja faturas ou cancele.</div>
+          </div>
+          <button
+            onClick={handlePortal}
+            disabled={loadingPortal}
+            className="flex-shrink-0 px-4 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition disabled:opacity-50"
+          >
+            {loadingPortal ? 'Abrindo...' : 'Abrir portal →'}
+          </button>
+        </div>
+      )}
+
+      {/* FAQ */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 max-w-3xl mx-auto">
         <h2 className="font-bold text-slate-900 mb-5">Perguntas frequentes</h2>
         <div className="grid md:grid-cols-2 gap-6">
           {[
-            { q: 'Posso cancelar a qualquer momento?', a: 'Sim. Sem fidelidade. Cancele quando quiser — sem multas ou taxas.' },
-            { q: 'O plano Starter tem limite de tempo?', a: 'Não. O plano Starter é gratuito para sempre, com as funcionalidades básicas sempre disponíveis.' },
-            { q: 'Posso mudar de plano depois?', a: 'Sim, upgrade ou downgrade a qualquer momento. Cobranças são proporcionais ao período.' },
-            { q: 'Como funciona o suporte Enterprise?', a: 'Suporte prioritário 24/7 com tempo de resposta em até 2 horas via WhatsApp e e-mail.' },
+            { q: 'Posso cancelar a qualquer momento?', a: 'Sim. Sem fidelidade. Clique em "Abrir portal" acima e cancele sem multas.' },
+            { q: 'O plano Starter tem limite de tempo?', a: 'Não. É gratuito para sempre, com as funcionalidades básicas sempre disponíveis.' },
+            { q: 'Posso mudar de plano depois?', a: 'Sim, upgrade ou downgrade a qualquer momento pelo portal de assinaturas.' },
+            { q: 'Como funciona o suporte Enterprise?', a: 'Suporte prioritário 24/7 com resposta em até 2 horas via WhatsApp e e-mail.' },
           ].map((item, i) => (
             <div key={i}>
               <div className="text-sm font-semibold text-slate-900 mb-1">{item.q}</div>
@@ -190,5 +264,13 @@ export default function PlanosPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PlanosPage() {
+  return (
+    <Suspense>
+      <PlanosContent />
+    </Suspense>
   )
 }

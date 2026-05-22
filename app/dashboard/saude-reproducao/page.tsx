@@ -26,6 +26,16 @@ export default function SaudeReproducaoPage() {
   const [analiseIA, setAnaliseIA] = useState<any>(null)
   const [loadingIA, setLoadingIA] = useState(false)
   const [erroForm, setErroForm] = useState('')
+  const [animaisRegistrados, setAnimaisRegistrados] = useState<{ id: string; identificacao: string; sexo: string }[]>([])
+
+  useEffect(() => {
+    if (showForm === 'evento' && animaisRegistrados.length === 0) {
+      fetch('/api/carteira-animal')
+        .then(r => r.json())
+        .then(d => { if (Array.isArray(d)) setAnimaisRegistrados(d) })
+        .catch(() => {})
+    }
+  }, [showForm])
 
   async function analisarComIA() {
     setLoadingIA(true)
@@ -120,6 +130,12 @@ export default function SaudeReproducaoPage() {
               <div style={{ fontSize: 13, fontWeight: 700, color: '#fbbf24' }}>Recurso do Plano Pro</div>
               <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>A análise com IA + QUBO está disponível no plano Pro ou Empresas. <a href="/dashboard/planos" style={{ color: '#fbbf24', textDecoration: 'underline' }}>Fazer upgrade →</a></div>
             </div>
+          </div>
+        )}
+        {analiseIA?.error && analiseIA.error !== 'UPGRADE_REQUIRED' && (
+          <div style={{ marginTop: 14, background: '#1e0e0e', border: '1px solid #f8717130', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <div style={{ fontSize: 12, color: '#f87171' }}>Erro ao analisar: {analiseIA.error}</div>
           </div>
         )}
         {analiseIA && !analiseIA.error && (
@@ -302,10 +318,22 @@ export default function SaudeReproducaoPage() {
               ) : (
                 <>
                   <div>
-                    <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Identificação do Animal * (código, SISBOV, brinco ou RFID)</label>
-                    <input value={formEvento.animalId} placeholder="Ex: #0055, brinco, SISBOV..."
-                      onChange={e => setFormEvento(p => ({ ...p, animalId: e.target.value }))} required
-                      style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                    <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Animal *</label>
+                    {animaisRegistrados.length > 0 ? (
+                      <select value={formEvento.animalId} onChange={e => setFormEvento(p => ({ ...p, animalId: e.target.value }))} required
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '9px 12px', color: formEvento.animalId ? '#f1f5f9' : '#475569', fontSize: 13, outline: 'none' }}>
+                        <option value="">Selecione um animal...</option>
+                        {animaisRegistrados.map(a => (
+                          <option key={a.id} value={a.identificacao}>
+                            {a.identificacao} {a.sexo === 'FEMEA' ? '♀' : '♂'}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input value={formEvento.animalId} placeholder="Digite o código do animal..."
+                        onChange={e => setFormEvento(p => ({ ...p, animalId: e.target.value }))} required
+                        style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                    )}
                   </div>
                   <div>
                     <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Tipo de Evento *</label>

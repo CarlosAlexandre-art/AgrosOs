@@ -67,14 +67,14 @@ export default function NutricaoPastagemPage() {
   }
 
   return (
-    <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9' }}>
+    <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: 'clamp(16px, 4vw, 28px) clamp(12px, 4vw, 24px)', color: '#f1f5f9' }}>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>NutriBov — Nutrição & Pastagem</h1>
         <p style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>Planos nutricionais, custo alimentar e gestão de pastagens com rotação</p>
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 10, marginBottom: 20 }}>
         {[
           { label: 'Custo Diário Total', val: `R$${(nutricao?.kpis?.custoTotal ?? 0).toFixed(2)}`, color: '#fbbf24', icon: '💰' },
           { label: 'Planos Ativos', val: (nutricao?.planos ?? []).filter((p: any) => p.ativo).length, color: '#10b981', icon: '📋' },

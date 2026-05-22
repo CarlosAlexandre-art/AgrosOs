@@ -4,19 +4,37 @@ import { useState } from 'react'
 
 export default function OtimizacaoEquipe() {
   const [analise, setAnalise] = useState('')
+  const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function buscar() {
     setLoading(true)
+    setErro('')
     try {
       const res = await fetch('/api/ai/equipe')
       const data = await res.json()
-      setAnalise(data.analise || data.error || 'Sem análise disponível.')
+      if (data.error) {
+        setErro(data.error)
+      } else {
+        setAnalise(data.analise || 'Sem análise disponível.')
+      }
     } catch {
-      setAnalise('Erro ao buscar análise.')
+      setErro('Erro de conexão. Tente novamente.')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (erro) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+        <span className="text-lg flex-shrink-0">⚠️</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-red-700">{erro}</p>
+        </div>
+        <button onClick={() => setErro('')} className="text-red-400 hover:text-red-600 text-xs flex-shrink-0">Fechar</button>
+      </div>
+    )
   }
 
   if (analise) {

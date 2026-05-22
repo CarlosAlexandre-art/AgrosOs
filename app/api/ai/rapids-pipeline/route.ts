@@ -62,11 +62,15 @@ export async function GET() {
     const revMean   = revValues.reduce((s, v) => s + v, 0) / (revValues.length || 1)
     const anomaliasMeses = months.filter((m, i) => Math.abs(revValues[i] - revMean) > 2 * revStd)
 
+    const CAT_LABELS: Record<string, string> = {
+      INSUMO: 'Insumo', MAO_DE_OBRA: 'Mão de obra', MAQUINARIO: 'Maquinário',
+      AGROLINK: 'AgroCore', OUTROS: 'Outros',
+    }
     // Cost by category
     const costByCat: Record<string, number> = {}
     for (const c of property.costs) costByCat[c.category] = (costByCat[c.category] ?? 0) + Number(c.amount)
     const topCostCat = Object.entries(costByCat).sort((a, b) => b[1] - a[1]).slice(0, 3)
-      .map(([cat, val]) => ({ cat, val: Math.round(val), pct: totalCost > 0 ? Math.round((val / totalCost) * 100) : 0 }))
+      .map(([cat, val]) => ({ cat: CAT_LABELS[cat] ?? cat, val: Math.round(val), pct: totalCost > 0 ? Math.round((val / totalCost) * 100) : 0 }))
 
     // ── Operacional ─────────────────────────────────────────────────────────
     const acts = property.activities

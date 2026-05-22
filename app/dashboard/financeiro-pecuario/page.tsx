@@ -129,6 +129,12 @@ export default function FinanceiroPecuarioPage() {
             </div>
           </div>
         )}
+        {analiseIA?.error && analiseIA.error !== 'UPGRADE_REQUIRED' && (
+          <div style={{ marginTop: 14, background: '#1e0e0e', border: '1px solid #f8717130', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <div style={{ fontSize: 12, color: '#f87171' }}>Erro ao analisar: {analiseIA.error}</div>
+          </div>
+        )}
         {analiseIA && !analiseIA.error && (
           <div style={{ display: 'grid', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

@@ -78,8 +78,9 @@ Responda EXATAMENTE neste JSON (sem markdown):
 }`
 
     const text = await groq([{ role: 'user', content: prompt }], 400)
-    const clean = text.replace(/```json\n?|\n?```/g, '').trim()
-    const analise = JSON.parse(clean)
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) throw new Error('IA não retornou JSON válido')
+    const analise = JSON.parse(jsonMatch[0])
 
     // QUBO: otimizar agendamento de protocolos vacinais
     // Fases = protocolos ordenados por urgência

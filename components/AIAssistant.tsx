@@ -148,7 +148,7 @@ export default function AIAssistant() {
       {/* Botão flutuante */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-[1100] w-14 h-14 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
         style={{
           background: open
             ? 'linear-gradient(135deg,#15803d,#14532d)'
@@ -172,7 +172,7 @@ export default function AIAssistant() {
       {/* Painel de chat */}
       {open && (
         <div
-          className="fixed bottom-24 right-6 z-50 flex flex-col overflow-hidden"
+          className="fixed bottom-24 right-6 z-[1100] flex flex-col overflow-hidden"
           style={{
             width: 380,
             maxWidth: 'calc(100vw - 2rem)',

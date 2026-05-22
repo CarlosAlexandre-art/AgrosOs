@@ -118,6 +118,17 @@ export default function CarteiraAnimalPage() {
     }
   }
 
+  function gerarIdAnimal(): string {
+    const ano = new Date().getFullYear().toString().slice(-2)
+    const seq = String(animais.length + 1).padStart(4, '0')
+    return `BR-${ano}-${seq}`
+  }
+
+  function abrirFormNovo() {
+    setForm(p => ({ ...p, identificacao: gerarIdAnimal() }))
+    setShowForm(true)
+  }
+
   function fecharIA() {
     setShowIA(false)
     setDescIA('')
@@ -179,7 +190,7 @@ export default function CarteiraAnimalPage() {
             style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             🤖 IA em Massa
           </button>
-          <button onClick={() => setShowForm(true)}
+          <button onClick={abrirFormNovo}
             style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             + Novo Animal
           </button>
@@ -202,7 +213,7 @@ export default function CarteiraAnimalPage() {
           <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Nenhum animal cadastrado</p>
           <p style={{ fontSize: 13 }}>Cadastre animais para criar o passaporte digital e rastrear o histórico sanitário</p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-            <button onClick={() => setShowForm(true)} style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            <button onClick={abrirFormNovo} style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
               Cadastrar Primeiro Animal
             </button>
             <button onClick={() => setShowIA(true)} style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 22px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
@@ -247,8 +258,22 @@ export default function CarteiraAnimalPage() {
           <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, margin: 'auto' }}>
             <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Cadastrar Animal</h2>
             <form onSubmit={salvarAnimal} style={{ display: 'grid', gap: 12 }}>
-              {[
-                { label: 'Identificação (brinco/nome) *', key: 'identificacao', placeholder: 'Ex: BR-001 ou #0042' },
+              <div>
+                <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Identificação (brinco/nome) *</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input type="text" placeholder="Ex: BR-26-0001"
+                    value={form.identificacao}
+                    onChange={e => setForm(p => ({ ...p, identificacao: e.target.value }))}
+                    required
+                    style={{ flex: 1, background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '9px 12px', color: '#f1f5f9', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                  <button type="button" onClick={() => setForm(p => ({ ...p, identificacao: gerarIdAnimal() }))}
+                    title="Gerar novo código"
+                    style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8, padding: '9px 10px', color: '#94a3b8', fontSize: 14, cursor: 'pointer', flexShrink: 0 }}>
+                    🔄
+                  </button>
+                </div>
+              </div>
+              {([
                 { label: 'Brinco eletrônico', key: 'brincoEletronico', placeholder: '982 000412345678' },
                 { label: 'Nº SISBOV', key: 'sisbovId', placeholder: '076 0001 00000001 0' },
                 { label: 'RFID', key: 'rfid', placeholder: 'Código do brinco RFID' },
@@ -257,7 +282,7 @@ export default function CarteiraAnimalPage() {
                 { label: 'Peso atual (kg)', key: 'pesoAtual', placeholder: '380', type: 'number' },
                 { label: 'Fazenda de origem', key: 'origemFazenda', placeholder: 'Nome da propriedade de origem' },
                 { label: 'GTA de entrada', key: 'gtaOrigem', placeholder: 'Nº da Guia de Trânsito Animal' },
-              ].map(f => (
+              ] as { label: string; key: string; placeholder?: string; type?: string }[]).map(f => (
                 <div key={f.key}>
                   <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>{f.label}</label>
                   <input type={f.type || 'text'} placeholder={f.placeholder}
