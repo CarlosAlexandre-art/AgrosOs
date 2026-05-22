@@ -15,6 +15,16 @@ function yyyymmdd(d: Date): string {
   return d.toISOString().slice(0, 10).replace(/-/g, '')
 }
 
+// CMR retorna URLs concept-ID que não suportam .ascii — converter para formato providers/
+function toOpendapUrl(href: string): string {
+  const decoded = decodeURIComponent(href)
+  const m = decoded.match(/\/granules\/GPM_3IMERGDL\.\d+:(.+)$/)
+  if (m) {
+    return `https://opendap.earthdata.nasa.gov/providers/GES_DISC/collections/GPM_3IMERGDL.07/granules/${m[1]}`
+  }
+  return href
+}
+
 // Busca URLs OPeNDAP reais via CMR (sem autenticação)
 async function getCmrUrls(dates: Date[]): Promise<Map<string, string>> {
   const sorted = [...dates].sort((a, b) => a.getTime() - b.getTime())
@@ -40,7 +50,7 @@ async function getCmrUrls(dates: Date[]): Promise<Map<string, string>> {
         (l) => l.subtype?.includes('OPeNDAP') ||
           (l.href?.includes('opendap') && l.rel?.includes('service'))
       )
-      if (opendap?.href) map.set(dateStr, opendap.href)
+      if (opendap?.href) map.set(dateStr, toOpendapUrl(opendap.href))
     }
     return map
   } catch {
@@ -170,7 +180,7 @@ export async function GET() {
     days,
     summary: { total10d, maxDay, validDays: valid.length },
     hasKey: true,
-    debug: { cmrFound: cmrUrls.size, firstUrl: first.debugUrl, firstStatus: first.debugStatus },
+    debug: { cmrFound: cmrUrls.size, firstUrl: first.debugUrl, firstStatus: first.debugStatus, firstBody: first.debugBody },
     updatedAt: new Date().toISOString(),
   })
 }
