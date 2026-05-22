@@ -26,12 +26,23 @@ function dayLabel(dateStr: string, idx: number) {
   return DAY_SHORT[new Date(dateStr + 'T12:00:00').getDay()]
 }
 
+type NasaData = {
+  soil: { percent: number | null; label: string; color: string; level: number }
+  precipitation: { total30d: number; byDay: { date: string; mm: number }[] }
+  temperature: { avg30d: number | null }
+  fires: { count: number; closest: { distKm: number; date: string; confidence: string } | null; hasKey: boolean }
+  source: string
+  updatedAt: string
+}
+
 export default function ClimaPage() {
   const [data, setData] = useState<WeatherData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [sim, setSim] = useState<any>(null)
   const [loadingSim, setLoadingSim] = useState(false)
+  const [nasa, setNasa] = useState<NasaData | null>(null)
+  const [nasaLoading, setNasaLoading] = useState(true)
 
   async function simularFisica() {
     setLoadingSim(true)
@@ -52,6 +63,14 @@ export default function ClimaPage() {
       })
       .catch(() => setError('Falha de conexão'))
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/nasa/earth-data')
+      .then(r => r.json())
+      .then(d => { if (!d.error) setNasa(d) })
+      .catch(() => {})
+      .finally(() => setNasaLoading(false))
   }, [])
 
   if (loading) {
@@ -295,6 +314,169 @@ export default function ClimaPage() {
           </p>
         </div>
       )}
+
+      {/* ── NASA Earth Intelligence ─────────────────────────────────────── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="bg-[#0b3d91] px-5 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">🛰️</span>
+            <div>
+              <div className="text-white font-bold text-sm">NASA Earth Intelligence</div>
+              <div className="text-blue-200 text-[10px] mt-0.5">POWER (MERRA-2) + FIRMS VIIRS · satélite real</div>
+            </div>
+          </div>
+          {nasa && (
+            <div className="text-[10px] text-blue-300 font-mono text-right">
+              <div>atualizado</div>
+              <div>{new Date(nasa.updatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="p-5 space-y-5">
+          {nasaLoading ? (
+            <div className="flex items-center gap-3 py-4">
+              <div className="w-5 h-5 border-2 border-[#0b3d91] border-t-transparent rounded-full animate-spin" />
+              <span className="text-sm text-slate-400">Consultando satélites NASA...</span>
+            </div>
+          ) : !nasa ? (
+            <p className="text-sm text-slate-400 py-4 text-center">Dados NASA indisponíveis (adicione coordenadas à fazenda).</p>
+          ) : (
+            <>
+              {/* Métricas principais */}
+              <div className="grid grid-cols-3 gap-3">
+                {/* Umidade do solo */}
+                <div className={`rounded-2xl p-4 text-center ${
+                  nasa.soil.color === 'red'    ? 'bg-red-50 border border-red-200' :
+                  nasa.soil.color === 'orange' ? 'bg-orange-50 border border-orange-200' :
+                  nasa.soil.color === 'green'  ? 'bg-green-50 border border-green-200' :
+                  nasa.soil.color === 'blue'   ? 'bg-blue-50 border border-blue-200' :
+                  nasa.soil.color === 'indigo' ? 'bg-indigo-50 border border-indigo-200' :
+                  'bg-slate-50 border border-slate-200'
+                }`}>
+                  <div className="text-2xl mb-1">🌱</div>
+                  <div className={`text-2xl font-black ${
+                    nasa.soil.color === 'red'    ? 'text-red-600' :
+                    nasa.soil.color === 'orange' ? 'text-orange-600' :
+                    nasa.soil.color === 'green'  ? 'text-green-700' :
+                    nasa.soil.color === 'blue'   ? 'text-blue-700' :
+                    nasa.soil.color === 'indigo' ? 'text-indigo-700' :
+                    'text-slate-500'
+                  }`}>
+                    {nasa.soil.percent !== null ? `${nasa.soil.percent}%` : '—'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-semibold">{nasa.soil.label}</div>
+                  <div className="text-[9px] text-slate-400 mt-0.5">Umidade Solo</div>
+                </div>
+
+                {/* Chuva 30 dias */}
+                <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 text-center">
+                  <div className="text-2xl mb-1">🌧️</div>
+                  <div className="text-2xl font-black text-sky-700">
+                    {nasa.precipitation.total30d > 0 ? `${nasa.precipitation.total30d}` : '0'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-semibold">mm acumulado</div>
+                  <div className="text-[9px] text-slate-400 mt-0.5">Chuva 30 dias</div>
+                </div>
+
+                {/* Temp média */}
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                  <div className="text-2xl mb-1">🌡️</div>
+                  <div className="text-2xl font-black text-amber-700">
+                    {nasa.temperature.avg30d !== null ? `${nasa.temperature.avg30d}°` : '—'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-semibold">Temperatura</div>
+                  <div className="text-[9px] text-slate-400 mt-0.5">Média 30 dias</div>
+                </div>
+              </div>
+
+              {/* Gráfico de chuva NASA */}
+              {nasa.precipitation.byDay.length > 0 && (
+                <div>
+                  <div className="text-xs font-semibold text-slate-600 mb-2">Precipitação diária · últimos 14 dias (NASA POWER)</div>
+                  <ResponsiveContainer width="100%" height={110}>
+                    <BarChart data={nasa.precipitation.byDay} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+                      <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8' }} interval={3} />
+                      <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} />
+                      <Tooltip
+                        formatter={(v: any) => [`${v} mm`, 'Chuva']}
+                        contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #e2e8f0' }}
+                      />
+                      <Bar dataKey="mm" radius={[3, 3, 0, 0]}>
+                        {nasa.precipitation.byDay.map((d, i) => (
+                          <Cell key={i} fill={d.mm > 10 ? '#0369a1' : d.mm > 0 ? '#7dd3fc' : '#e2e8f0'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Focos de incêndio */}
+              <div className={`rounded-xl px-4 py-3 flex items-start gap-3 ${
+                nasa.fires.count > 0
+                  ? 'bg-red-50 border border-red-200'
+                  : 'bg-green-50 border border-green-200'
+              }`}>
+                <span className="text-xl flex-shrink-0 mt-0.5">{nasa.fires.count > 0 ? '🔥' : '✅'}</span>
+                <div className="flex-1 min-w-0">
+                  {nasa.fires.count === 0 ? (
+                    <>
+                      <div className="text-sm font-semibold text-green-700">Nenhum foco de incêndio</div>
+                      <div className="text-xs text-green-600 mt-0.5">
+                        {nasa.fires.hasKey
+                          ? 'Raio de 200 km monitorado · últimos 7 dias (VIIRS SNPP)'
+                          : 'Adicione NASA_FIRMS_KEY para monitorar focos de incêndio'}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-sm font-semibold text-red-700">
+                        {nasa.fires.count} foco{nasa.fires.count > 1 ? 's' : ''} detectado{nasa.fires.count > 1 ? 's' : ''} em 200 km
+                      </div>
+                      {nasa.fires.closest && (
+                        <div className="text-xs text-red-600 mt-0.5">
+                          Mais próximo: <strong>{nasa.fires.closest.distKm} km</strong> · {nasa.fires.closest.date} · confiança {nasa.fires.closest.confidence}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Indicador de nível de umidade */}
+              {nasa.soil.percent !== null && (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-semibold text-slate-600">Saturação do solo</span>
+                    <span className="text-xs text-slate-400 font-mono">{nasa.soil.percent}% · {nasa.soil.label}</span>
+                  </div>
+                  <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        nasa.soil.color === 'red'    ? 'bg-red-500' :
+                        nasa.soil.color === 'orange' ? 'bg-orange-500' :
+                        nasa.soil.color === 'green'  ? 'bg-green-500' :
+                        nasa.soil.color === 'blue'   ? 'bg-blue-500' :
+                        'bg-indigo-600'
+                      }`}
+                      style={{ width: `${Math.min(nasa.soil.percent, 100)}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[9px] text-slate-400 mt-1">
+                    <span>Seco</span><span>Normal</span><span>Saturado</span>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-[10px] text-slate-400">
+                Fonte: {nasa.source}
+              </p>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
