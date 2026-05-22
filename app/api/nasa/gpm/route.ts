@@ -74,26 +74,36 @@ async function fetchAuth(url: string, token: string): Promise<{ status: number; 
 async function fetchPoint(
   opendapUrl: string, li: number, lni: number, token: string
 ): Promise<{ mm: number | null; debugUrl: string; debugStatus: number }> {
-  const suffix = `.ascii?precipitationCal[0][${li}][${lni}]`
-  // CMR pode retornar URL com ou sem .nc4 — tentar os dois
+  // Colchetes precisam ser URL-encoded no servidor opendap.earthdata.nasa.gov
+  const enc = (i: number) => `%5B${i}%5D`
+  // IMERG: verificar ambas as ordens de dimensão [time][lat][lon] e [time][lon][lat]
+  const suffixes = [
+    `.ascii?precipitationCal${enc(0)}${enc(li)}${enc(lni)}`,
+    `.ascii?precipitationCal${enc(0)}${enc(lni)}${enc(li)}`,
+  ]
+  // CMR pode retornar URL com ou sem .nc4
   const bases = opendapUrl.endsWith('.nc4')
     ? [opendapUrl]
     : [opendapUrl + '.nc4', opendapUrl]
 
   for (const base of bases) {
-    const result = await fetchAuth(base + suffix, token)
-    if (result.status === 200 && result.body) {
-      const lines = result.body.trim().split('\n').filter(l => l.trim())
-      const val = parseFloat(lines[lines.length - 1])
-      if (!isNaN(val) && val >= 0) {
-        return { mm: Math.round(val * 10) / 10, debugUrl: result.finalUrl, debugStatus: 200 }
+    for (const suffix of suffixes) {
+      const result = await fetchAuth(base + suffix, token)
+      if (result.status === 200 && result.body) {
+        const lines = result.body.trim().split('\n').filter(l => l.trim())
+        const val = parseFloat(lines[lines.length - 1])
+        if (!isNaN(val) && val >= 0) {
+          return { mm: Math.round(val * 10) / 10, debugUrl: result.finalUrl, debugStatus: 200 }
+        }
+        // Retornou 200 mas valor inválido — guardar URL para debug e continuar
+        return { mm: null, debugUrl: base + suffix, debugStatus: 200 }
+      }
+      if (result.status !== 404 && result.status !== 0 && result.status !== -1) {
+        return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status }
       }
     }
-    if (result.status !== 404 && result.status !== 0 && result.status !== -1) {
-      return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status }
-    }
   }
-  return { mm: null, debugUrl: bases[0] + suffix, debugStatus: 0 }
+  return { mm: null, debugUrl: bases[0] + suffixes[0], debugStatus: 0 }
 }
 
 export async function GET() {
