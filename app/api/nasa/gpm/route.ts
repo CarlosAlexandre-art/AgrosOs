@@ -8,21 +8,48 @@ function latIdx(lat: number): number {
 function lonIdx(lng: number): number {
   return Math.min(3599, Math.max(0, Math.round((lng + 179.95) / 0.1)))
 }
-function julianDay(d: Date): string {
-  const start = new Date(d.getFullYear(), 0, 0)
-  return String(Math.floor((d.getTime() - start.getTime()) / 86400000)).padStart(3, '0')
+function ddmm(d: Date): string {
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 function yyyymmdd(d: Date): string {
   return d.toISOString().slice(0, 10).replace(/-/g, '')
 }
-function ddmm(d: Date): string {
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
+
+// Busca URLs OPeNDAP reais via CMR (sem autenticação)
+async function getCmrUrls(dates: Date[]): Promise<Map<string, string>> {
+  const sorted = [...dates].sort((a, b) => a.getTime() - b.getTime())
+  const start = sorted[0].toISOString().slice(0, 10) + 'T00:00:00Z'
+  const end = sorted[sorted.length - 1].toISOString().slice(0, 10) + 'T23:59:59Z'
+
+  const url = `https://cmr.earthdata.nasa.gov/search/granules.json` +
+    `?short_name=GPM_3IMERGDL&version=07&temporal=${start},${end}&page_size=20`
+
+  try {
+    const res = await fetch(url, { next: { revalidate: 86400 } })
+    if (!res.ok) return new Map()
+    const data = await res.json()
+
+    const map = new Map<string, string>()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const granule of (data.feed?.entry ?? []) as any[]) {
+      const dateStr = granule.time_start?.slice(0, 10).replace(/-/g, '')
+      if (!dateStr) continue
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const opendap = (granule.links as any[])?.find(
+        (l) => l.subtype?.includes('OPeNDAP') ||
+          (l.href?.includes('opendap') && l.rel?.includes('service'))
+      )
+      if (opendap?.href) map.set(dateStr, opendap.href)
+    }
+    return map
+  } catch {
+    return new Map()
+  }
 }
 
-type FetchResult = { status: number; finalUrl: string; body: string | null }
-
-// Segue redirects manualmente preservando Authorization header
-async function fetchAuth(url: string, token: string): Promise<FetchResult> {
+// Segue redirects manualmente para preservar Authorization
+async function fetchAuth(url: string, token: string): Promise<{ status: number; body: string | null; finalUrl: string }> {
   let current = url
   for (let hop = 0; hop < 5; hop++) {
     let res: Response
@@ -32,48 +59,41 @@ async function fetchAuth(url: string, token: string): Promise<FetchResult> {
         redirect: 'manual',
       })
     } catch (e) {
-      return { status: -1, finalUrl: current, body: String(e) }
+      return { status: -1, body: String(e), finalUrl: current }
     }
-    if (res.status === 200) {
-      const body = await res.text()
-      return { status: 200, finalUrl: current, body }
-    }
-    if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
+    if (res.status === 200) return { status: 200, body: await res.text(), finalUrl: current }
+    if ([301, 302, 307, 308].includes(res.status)) {
       const loc = res.headers.get('location')
       if (loc) { current = loc; continue }
     }
-    return { status: res.status, finalUrl: current, body: null }
+    return { status: res.status, body: null, finalUrl: current }
   }
-  return { status: 0, finalUrl: current, body: null }
+  return { status: 0, body: null, finalUrl: current }
 }
 
-async function fetchImergDay(
-  date: Date, li: number, lni: number, token: string
-): Promise<{ mm: number | null; debug?: FetchResult }> {
-  const yyyy = date.getFullYear()
-  const ddd = julianDay(date)
-  const ymd = yyyymmdd(date)
+async function fetchPoint(
+  opendapUrl: string, li: number, lni: number, token: string
+): Promise<{ mm: number | null; debugUrl: string; debugStatus: number }> {
   const suffix = `.ascii?precipitationCal[0][${li}][${lni}]`
+  // CMR pode retornar URL com ou sem .nc4 — tentar os dois
+  const bases = opendapUrl.endsWith('.nc4')
+    ? [opendapUrl]
+    : [opendapUrl + '.nc4', opendapUrl]
 
-  const candidates = [
-    `https://disc2.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/GPM_3IMERGDL.07/${yyyy}/${ddd}/3B-DAY-L.MS.MRG.3IMERG.${ymd}-S000000-E235959.V07B.nc4${suffix}`,
-    `https://disc2.gesdisc.eosdis.nasa.gov/opendap/hyrax/GPM_L3/GPM_3IMERGDL.07/${yyyy}/${ddd}/3B-DAY-L.MS.MRG.3IMERG.${ymd}-S000000-E235959.V07B.nc4${suffix}`,
-    `https://disc2.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/GPM_3IMERGDL.07/${yyyy}/${ddd}/3B-DAY-L.MS.MRG.3IMERG.${ymd}-S000000-E235959.0000.V07B.nc4${suffix}`,
-  ]
-
-  let lastDebug: FetchResult | undefined
-  for (const url of candidates) {
-    const result = await fetchAuth(url, token)
-    lastDebug = result
+  for (const base of bases) {
+    const result = await fetchAuth(base + suffix, token)
     if (result.status === 200 && result.body) {
       const lines = result.body.trim().split('\n').filter(l => l.trim())
       const val = parseFloat(lines[lines.length - 1])
-      if (!isNaN(val) && val >= 0) return { mm: Math.round(val * 10) / 10 }
+      if (!isNaN(val) && val >= 0) {
+        return { mm: Math.round(val * 10) / 10, debugUrl: result.finalUrl, debugStatus: 200 }
+      }
     }
-    // Se 404, tentar próximo; qualquer outro erro pior, parar
-    if (result.status !== 404 && result.status !== 0) break
+    if (result.status !== 404 && result.status !== 0 && result.status !== -1) {
+      return { mm: null, debugUrl: result.finalUrl, debugStatus: result.status }
+    }
   }
-  return { mm: null, debug: lastDebug }
+  return { mm: null, debugUrl: bases[0] + suffix, debugStatus: 0 }
 }
 
 export async function GET() {
@@ -103,17 +123,27 @@ export async function GET() {
     return d
   })
 
-  const results = await Promise.all(dates.map(d => fetchImergDay(d, li, lni, token)))
+  // 1) Buscar URLs via CMR (1 request, sem auth)
+  const cmrUrls = await getCmrUrls(dates)
+
+  // 2) Buscar dado de precipitação para cada dia (paralelo)
+  const results = await Promise.all(
+    dates.map(async (d) => {
+      const ymd = yyyymmdd(d)
+      const opendapUrl = cmrUrls.get(ymd)
+      if (!opendapUrl) return { mm: null, debugUrl: `NO_CMR:${ymd}`, debugStatus: 0 }
+      return fetchPoint(opendapUrl, li, lni, token)
+    })
+  )
+
   const days = dates.map((d, i) => ({ date: ddmm(d), mm: results[i].mm })).reverse()
   const valid = days.filter(d => d.mm !== null)
   const total10d = Math.round(valid.reduce((s, d) => s + (d.mm ?? 0), 0) * 10) / 10
-  const maxDay = valid.length ? valid.reduce((max, d) => (d.mm ?? 0) > (max.mm ?? 0) ? d : max) : null
-
-  // Debug: info da última tentativa no dia mais recente
-  const debugInfo = results[0].debug
-    ? { url: results[0].debug.finalUrl, status: results[0].debug.status, bodyPreview: results[0].debug.body?.slice(0, 200) }
+  const maxDay = valid.length
+    ? valid.reduce((max, d) => (d.mm ?? 0) > (max.mm ?? 0) ? d : max)
     : null
 
+  const first = results[0]
   return NextResponse.json({
     property: property.name, lat, lng,
     resolution: '0.1° (~11 km)',
@@ -121,7 +151,7 @@ export async function GET() {
     days,
     summary: { total10d, maxDay, validDays: valid.length },
     hasKey: true,
-    debug: debugInfo,
+    debug: { cmrFound: cmrUrls.size, firstUrl: first.debugUrl, firstStatus: first.debugStatus },
     updatedAt: new Date().toISOString(),
   })
 }
