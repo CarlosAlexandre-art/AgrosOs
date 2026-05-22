@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
 // IMERG grid: 0.1° resolution
-// lat index: 0 = -89.95, 1799 = 89.95
-// lon index: 0 = -179.95, 3599 = 179.95
+// lat index 0 = -89.95 (sul), 1799 = 89.95 (norte)
+// lon index 0 = -179.95 (oeste), 3599 = 179.95 (leste)
 function latIdx(lat: number): number {
   return Math.min(1799, Math.max(0, Math.round((lat + 89.95) / 0.1)))
 }
@@ -25,6 +25,25 @@ function ddmm(d: Date): string {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
+// Follow redirects manually to preserve Authorization header
+// (GES DISC redireciona para outro servidor e fetch padrão dropa o header)
+async function fetchAuth(url: string, token: string): Promise<Response | null> {
+  let current = url
+  for (let hop = 0; hop < 5; hop++) {
+    const res = await fetch(current, {
+      headers: { Authorization: `Bearer ${token}` },
+      redirect: 'manual',
+    })
+    if (res.status === 200) return res
+    if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
+      const loc = res.headers.get('location')
+      if (loc) { current = loc; continue }
+    }
+    return null
+  }
+  return null
+}
+
 async function fetchImergDay(
   date: Date,
   li: number,
@@ -35,26 +54,26 @@ async function fetchImergDay(
   const ddd = julianDay(date)
   const ymd = yyyymmdd(date)
 
-  // IMERG Late Daily Run V07B — OPeNDAP ASCII single-point subset
-  const url =
-    `https://disc2.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/GPM_3IMERGDL.07` +
-    `/${yyyy}/${ddd}/3B-DAY-L.MS.MRG.3IMERG.${ymd}-S000000-E235959.0000.V07B.nc4` +
-    `.ascii?precipitationCal[0][${li}][${lni}]`
+  // V07B daily: sem o segmento MMMM no nome do arquivo
+  // Tentativas: servidor principal GES DISC + formato alternativo com 0000
+  const base = `https://disc2.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/GPM_3IMERGDL.07/${yyyy}/${ddd}`
+  const suffix = `.ascii?precipitationCal[0][${li}][${lni}]`
+  const filenames = [
+    `3B-DAY-L.MS.MRG.3IMERG.${ymd}-S000000-E235959.V07B.nc4`,
+    `3B-DAY-L.MS.MRG.3IMERG.${ymd}-S000000-E235959.0000.V07B.nc4`,
+  ]
 
-  try {
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 86400 },
-    })
-    if (!res.ok) return null
-    const text = await res.text()
-    // ASCII response ends with the float value on its own line
-    const lines = text.trim().split('\n').filter(l => l.trim())
-    const val = parseFloat(lines[lines.length - 1])
-    return isNaN(val) || val < 0 ? null : Math.round(val * 10) / 10
-  } catch {
-    return null
+  for (const fn of filenames) {
+    try {
+      const res = await fetchAuth(`${base}/${fn}${suffix}`, token)
+      if (!res) continue
+      const text = await res.text()
+      const lines = text.trim().split('\n').filter(l => l.trim())
+      const val = parseFloat(lines[lines.length - 1])
+      if (!isNaN(val) && val >= 0) return Math.round(val * 10) / 10
+    } catch { continue }
   }
+  return null
 }
 
 export async function GET() {
@@ -86,7 +105,7 @@ export async function GET() {
   const li = latIdx(lat)
   const lni = lonIdx(lng)
 
-  // IMERG Late Run has ~12h latency → start from 2 days ago
+  // IMERG Late Run tem ~12h de latência → começa 2 dias atrás
   const today = new Date()
   const dates: Date[] = Array.from({ length: 10 }, (_, i) => {
     const d = new Date(today)
@@ -94,14 +113,13 @@ export async function GET() {
     return d
   })
 
-  // Fetch all 10 days in parallel
   const values = await Promise.all(
     dates.map(d => fetchImergDay(d, li, lni, token))
   )
 
   const days = dates
     .map((d, i) => ({ date: ddmm(d), mm: values[i] }))
-    .reverse() // chronological order
+    .reverse()
 
   const valid = days.filter(d => d.mm !== null)
   const total10d = Math.round(valid.reduce((s, d) => s + (d.mm ?? 0), 0) * 10) / 10
@@ -116,11 +134,7 @@ export async function GET() {
     resolution: '0.1° (~11 km)',
     source: 'NASA GPM IMERG Late Daily Run V07B',
     days,
-    summary: {
-      total10d,
-      maxDay,
-      validDays: valid.length,
-    },
+    summary: { total10d, maxDay, validDays: valid.length },
     hasKey: true,
     updatedAt: new Date().toISOString(),
   })
