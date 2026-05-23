@@ -71,7 +71,7 @@ export default async function SuportePage() {
 
         {/* E-mail */}
         <a
-          href="mailto:alexandre@parceirosdeproposito.com"
+          href="mailto:suporte@oryonag.com.br"
           className="bg-white rounded-2xl border border-slate-200 p-6 hover:border-blue-300 hover:shadow-md transition-all group"
         >
           <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
@@ -81,7 +81,7 @@ export default async function SuportePage() {
           </div>
           <div className="font-bold text-slate-900 mb-1">E-mail</div>
           <div className="text-sm text-slate-500 mb-3">Para dúvidas e solicitações detalhadas</div>
-          <div className="text-sm font-semibold text-blue-700 break-all">alexandre@parceirosdeproposito.com</div>
+          <div className="text-sm font-semibold text-blue-700 break-all">suporte@oryonag.com.br</div>
         </a>
       </div>
 

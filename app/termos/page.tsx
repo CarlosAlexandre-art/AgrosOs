@@ -45,7 +45,7 @@ export default function TermosPage() {
           <p>
             O SmartAgroOS e o AgroToken são produtos da <strong>OryonAG</strong>, plataforma digital do agronegócio brasileiro.
             Para suporte e questões legais, entre em contato pelo e-mail:{' '}
-            <a href="mailto:contato@oryon.ag" className="text-[#16a34a] underline">contato@oryon.ag</a>.
+            <a href="mailto:suporte@oryonag.com.br" className="text-[#16a34a] underline">suporte@oryonag.com.br</a>.
           </p>
           <p>
             O acesso à plataforma implica a aceitação integral destes Termos de Serviço. Caso não concorde com qualquer
@@ -206,7 +206,7 @@ export default function TermosPage() {
             Para dúvidas sobre estes Termos ou sua privacidade:
           </p>
           <ul className="list-none space-y-1">
-            <li>📧 <a href="mailto:contato@oryon.ag" className="text-[#16a34a] underline">contato@oryon.ag</a></li>
+            <li>📧 <a href="mailto:suporte@oryonag.com.br" className="text-[#16a34a] underline">suporte@oryonag.com.br</a></li>
             <li>🔒 <a href="mailto:privacidade@oryon.ag" className="text-[#16a34a] underline">privacidade@oryon.ag</a> (assuntos LGPD)</li>
           </ul>
         </Section>
