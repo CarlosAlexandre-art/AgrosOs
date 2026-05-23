@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import AgroOSLogo from '@/components/AgroOSLogo'
+import GoogleButton from '@/components/GoogleButton'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -75,16 +76,32 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full bg-[#16a34a] text-white font-bold py-3 rounded-xl hover:bg-[#15803d] shadow-sm shadow-green-200 hover:shadow-green-300/50 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Entrando...' : 'Entrar'}
-            </button>
+            <div className="flex items-center justify-between">
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full bg-[#16a34a] text-white font-bold py-3 rounded-xl hover:bg-[#15803d] shadow-sm shadow-green-200 hover:shadow-green-300/50 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
+            </div>
+
+            <div className="text-right">
+              <Link href="/esqueci-senha" className="text-xs text-[#64748b] hover:text-[#16a34a] transition-colors">
+                Esqueci minha senha
+              </Link>
+            </div>
           </form>
 
-          <div className="mt-6 text-center text-sm text-[#64748b]">
+          <div className="my-5 flex items-center gap-3">
+            <div className="flex-1 h-px bg-[#e2e8f0]" />
+            <span className="text-xs text-[#94a3b8]">ou</span>
+            <div className="flex-1 h-px bg-[#e2e8f0]" />
+          </div>
+
+          <GoogleButton />
+
+          <div className="mt-5 text-center text-sm text-[#64748b]">
             Não tem conta?{' '}
             <Link href="/cadastro" className="text-[#16a34a] font-semibold hover:underline">
               Cadastre-se grátis

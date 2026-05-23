@@ -11,6 +11,11 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     await supabase.auth.exchangeCodeForSession(code)
 
+    // Recovery de senha — vai direto para atualizar-senha
+    if (next === '/atualizar-senha') {
+      return NextResponse.redirect(`${origin}/atualizar-senha`)
+    }
+
     // Se o destino é o onboarding, vai direto
     if (next === '/onboarding') {
       return NextResponse.redirect(`${origin}/onboarding`)

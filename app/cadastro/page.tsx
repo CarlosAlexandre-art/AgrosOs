@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import AgroOSLogo from '@/components/AgroOSLogo'
+import GoogleButton from '@/components/GoogleButton'
 
 export default function CadastroPage() {
   const router = useRouter()
@@ -125,7 +126,15 @@ export default function CadastroPage() {
                 </button>
               </form>
 
-              <div className="mt-6 text-center text-sm text-[#64748b]">
+              <div className="flex items-center gap-3 my-1">
+                <div className="flex-1 h-px bg-[#e2e8f0]" />
+                <span className="text-xs text-[#94a3b8]">ou</span>
+                <div className="flex-1 h-px bg-[#e2e8f0]" />
+              </div>
+
+              <GoogleButton label="Cadastrar com Google" next="/onboarding" />
+
+              <div className="mt-4 text-center text-sm text-[#64748b]">
                 Já tem conta?{' '}
                 <Link href="/login" className="text-[#16a34a] font-semibold hover:underline">
                   Entrar
