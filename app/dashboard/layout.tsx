@@ -11,6 +11,7 @@ import DiagnosticoAnimal from '@/components/DiagnosticoAnimal'
 import MonitorClimaIA from '@/components/MonitorClimaIA'
 import AnalisePastagem from '@/components/AnalisePastagem'
 import AgroOSLogo from '@/components/AgroOSLogo'
+import TourOnboarding from '@/components/TourOnboarding'
 
 // ── TIERS ─────────────────────────────────────────────
 // GRATUITO (starter): Visão Geral, Operacional, Financeiro, Clima, BovTrace, Carteira Animal
@@ -628,6 +629,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Assistente IA flutuante */}
       <AIAssistant />
+
+      {/* Tour de boas-vindas — exibe apenas na primeira visita */}
+      <TourOnboarding />
 
       {/* Speed dial — mobile only: abre/fecha os FABs acima do AgroGPT */}
       {!fabOpen && (
