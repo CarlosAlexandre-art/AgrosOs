@@ -625,15 +625,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
-      {/* Assistente IA flutuante — no mobile só AgroGPT; os demais ficam no desktop */}
+      {/* Assistente IA flutuante */}
       <AIAssistant />
-      <div className="hidden md:contents">
-        <VozParaAtividade />
-        <AnalisarDocumento />
-        <DiagnosticoAnimal />
-        <MonitorClimaIA />
-        <AnalisePastagem />
-      </div>
+      <VozParaAtividade />
+      <AnalisarDocumento />
+      <DiagnosticoAnimal />
+      <MonitorClimaIA />
+      <AnalisePastagem />
     </div>
   )
 }
