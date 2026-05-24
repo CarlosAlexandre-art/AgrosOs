@@ -1,5 +1,6 @@
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
@@ -7,32 +8,46 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
 
-  if (code) {
-    const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+  if (!code) return NextResponse.redirect(`${origin}${next}`)
 
-    // Recovery de senha — vai direto para atualizar-senha
-    if (next === '/atualizar-senha') {
-      return NextResponse.redirect(`${origin}/atualizar-senha`)
+  const cookieStore = await cookies()
+  const response = NextResponse.redirect(`${origin}${next}`)
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
     }
+  )
 
-    // Se o destino é o onboarding, vai direto
-    if (next === '/onboarding') {
-      return NextResponse.redirect(`${origin}/onboarding`)
-    }
+  await supabase.auth.exchangeCodeForSession(code)
 
-    // Verificar se o usuário já tem propriedade cadastrada
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const dbUser = await prisma.user.findUnique({
-        where: { supabaseId: user.id },
-        select: { _count: { select: { properties: true } } },
-      })
-      if (!dbUser || dbUser._count.properties === 0) {
-        return NextResponse.redirect(`${origin}/onboarding`)
-      }
+  // Recovery de senha — vai direto para atualizar-senha
+  if (next === '/atualizar-senha') return response
+
+  // Onboarding explícito
+  if (next === '/onboarding') return response
+
+  // Verifica se o usuário já tem propriedade cadastrada
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      select: { _count: { select: { properties: true } } },
+    })
+    if (!dbUser || dbUser._count.properties === 0) {
+      response.headers.set('Location', `${origin}/onboarding`)
+      return response
     }
   }
 
-  return NextResponse.redirect(`${origin}${next}`)
+  return response
 }
