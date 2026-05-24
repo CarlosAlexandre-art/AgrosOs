@@ -25,21 +25,31 @@ export default async function DashboardPage() {
     })
 
     if (!dbUser) {
-      dbUser = await prisma.user.create({
-        data: {
-          supabaseId: user.id,
-          name: user.user_metadata?.name || user.email!.split('@')[0],
-          email: user.email!,
-        },
-        include: { properties: { include } },
-      })
+      // Email pode já existir na tabela com outro supabaseId (ex: conta criada via outro provedor)
+      const byEmail = await prisma.user.findUnique({ where: { email: user.email! } })
+      if (byEmail) {
+        dbUser = await prisma.user.update({
+          where: { email: user.email! },
+          data: { supabaseId: user.id },
+          include: { properties: { include } },
+        })
+      } else {
+        dbUser = await prisma.user.create({
+          data: {
+            supabaseId: user.id,
+            name: user.user_metadata?.name || user.email!.split('@')[0],
+            email: user.email!,
+          },
+          include: { properties: { include } },
+        })
+      }
     }
   } catch (err) {
     console.error('[Dashboard] DB error:', err)
-    // Tenta sem alerts (caso tabela ainda não exista)
+    // Fallback: tenta encontrar por supabaseId ou email sem alerts
     try {
-      dbUser = await prisma.user.findUnique({
-        where: { supabaseId: user.id },
+      dbUser = await prisma.user.findFirst({
+        where: { OR: [{ supabaseId: user.id }, { email: user.email! }] },
         include: {
           properties: {
             include: {
