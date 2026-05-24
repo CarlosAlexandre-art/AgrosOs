@@ -1,7 +1,7 @@
 {
-  "name": "SmartAgroOS — OryonAG",
+  "name": "SmartAgroOS",
   "short_name": "AgroOS",
-  "description": "Sistema operacional da fazenda + painel admin do ecossistema OryonAG.",
+  "description": "Sistema operacional da fazenda moderna. Planeje, execute e controle toda a operação agrícola.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#020c05",
@@ -25,7 +25,7 @@
     {
       "name": "Admin Hub",
       "url": "/dashboard/admin",
-      "description": "Painel administrativo do ecossistema OryonAG"
+      "description": "Painel administrativo do SmartAgroOS"
     },
     {
       "name": "Tokens — Aprovações",
