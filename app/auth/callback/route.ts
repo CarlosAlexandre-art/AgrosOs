@@ -30,6 +30,9 @@ export async function GET(request: Request) {
 
   await supabase.auth.exchangeCodeForSession(code)
 
+  // Fluxo de recuperação de senha — não redirecionar para onboarding
+  if (next === '/atualizar-senha') return response
+
   if (next === '/onboarding') return response
 
   const { data: { user } } = await supabase.auth.getUser()
