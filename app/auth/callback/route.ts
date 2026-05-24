@@ -10,6 +10,11 @@ export async function GET(request: Request) {
 
   if (!code) return NextResponse.redirect(`${origin}${next}`)
 
+  // Recovery: passa o code para a página cliente fazer o exchange
+  if (next === '/atualizar-senha') {
+    return NextResponse.redirect(`${origin}/atualizar-senha?code=${code}`)
+  }
+
   const cookieStore = await cookies()
   const response = NextResponse.redirect(`${origin}${next}`)
 
@@ -30,13 +35,8 @@ export async function GET(request: Request) {
 
   await supabase.auth.exchangeCodeForSession(code)
 
-  // Recovery de senha — vai direto para atualizar-senha
-  if (next === '/atualizar-senha') return response
-
-  // Onboarding explícito
   if (next === '/onboarding') return response
 
-  // Verifica se o usuário já tem propriedade cadastrada
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
     const dbUser = await prisma.user.findUnique({
