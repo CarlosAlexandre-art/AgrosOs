@@ -20,7 +20,7 @@ const PLANS = [
       { text: 'Mapa interativo', ok: true },
       { text: 'Inventário florestal e bovinos', ok: true },
       { text: 'Blog e aprendizado', ok: true },
-      { text: 'Grade UTM, GPX, LiDAR, Satélite', ok: false },
+      { text: 'Grade UTM, LiDAR, Satélite', ok: false },
       { text: 'Análise de Solo (Embrapa IA)', ok: false },
       { text: 'AgroToken + metas', ok: false },
       { text: 'Suporte', ok: false },
@@ -38,7 +38,6 @@ const PLANS = [
     features: [
       { text: 'Tudo do Starter', ok: true },
       { text: 'Grade UTM georreferenciada', ok: true },
-      { text: 'GPX Velocidade + Trajetória', ok: true },
       { text: 'Imagens Satélite + Perfil Elevação', ok: true },
       { text: 'LiDAR / Nuvem de Pontos', ok: true },
       { text: 'Índice Vegetal (NDVI)', ok: true },
