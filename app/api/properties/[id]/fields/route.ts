@@ -5,6 +5,16 @@ import { getUserPlan, planoBloqueado } from '@/lib/planos'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const owned = await prisma.property.findFirst({
+    where: { id, user: { supabaseId: user.id } },
+    select: { id: true }
+  })
+  if (!owned) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
   const fields = await prisma.field.findMany({ where: { propertyId: id }, include: { crop: true } })
   return NextResponse.json(fields)
 }

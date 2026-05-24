@@ -117,6 +117,6 @@ Formato: recomendações numeradas em texto corrido, em português.`
 
     return NextResponse.json({ analise: text })
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

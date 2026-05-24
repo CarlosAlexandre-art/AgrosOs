@@ -154,6 +154,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Tipo inválido. Use _type: protocolo | evento' }, { status: 400 })
   } catch (e: any) {
     console.error('[saude-reproducao POST]', e.message)
-    return NextResponse.json({ error: e.message || 'Erro ao salvar' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao salvar' }, { status: 500 })
   }
 }

@@ -42,7 +42,7 @@ export async function GET() {
     return NextResponse.json({ transacoes, ultimoValuation, kpis: { receitas, custos, margem, totalAnimais: animais.length } })
   } catch (e: any) {
     console.error('[financeiro-pecuario GET]', e.message)
-    return NextResponse.json({ error: e.message || 'Erro ao carregar dados financeiros' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao carregar dados financeiros' }, { status: 500 })
   }
 }
 
@@ -101,6 +101,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(transacao, { status: 201 })
   } catch (e: any) {
     console.error('[financeiro-pecuario POST]', e.message)
-    return NextResponse.json({ error: e.message || 'Erro ao salvar' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao salvar' }, { status: 500 })
   }
 }

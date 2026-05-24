@@ -28,6 +28,6 @@ Responda EXATAMENTE neste JSON (sem markdown):
     const clean = text.replace(/```json\n?|\n?```/g, '').trim()
     return NextResponse.json(JSON.parse(clean))
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

@@ -141,6 +141,6 @@ Responda EXATAMENTE neste JSON (sem markdown):
     })
   } catch (e: any) {
     console.error('[nutribov-analise]', e.message)
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

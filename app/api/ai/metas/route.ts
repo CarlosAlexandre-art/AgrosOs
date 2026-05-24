@@ -47,6 +47,6 @@ Contexto financeiro atual:
 
     return NextResponse.json({ conselho: text })
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
   }
 }

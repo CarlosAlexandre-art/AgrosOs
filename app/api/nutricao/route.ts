@@ -43,7 +43,7 @@ export async function GET() {
     return NextResponse.json({ planos, lotes, kpis: { custoTotal } })
   } catch (e: any) {
     console.error('[nutricao GET]', e.message)
-    return NextResponse.json({ error: e.message || 'Erro ao carregar planos' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao carregar planos' }, { status: 500 })
   }
 }
 
@@ -75,6 +75,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(plano, { status: 201 })
   } catch (e: any) {
     console.error('[nutricao POST]', e.message)
-    return NextResponse.json({ error: e.message || 'Erro ao salvar plano' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao salvar plano' }, { status: 500 })
   }
 }
