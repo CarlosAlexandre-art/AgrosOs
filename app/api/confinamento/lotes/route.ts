@@ -40,7 +40,7 @@ export async function GET() {
       where: { propertyId: property.id },
       include: {
         registrosDiarios: { orderBy: { data: 'desc' }, take: 1 },
-        _count: { select: { animais: true, registrosDiarios: true } },
+        _count: { select: { registrosDiarios: true } },
       },
       orderBy: { createdAt: 'desc' },
     })
