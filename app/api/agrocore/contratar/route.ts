@@ -36,28 +36,30 @@ export async function POST(req: NextRequest) {
     const serviceType = TIPO_MAP[activity.type] || 'OUTROS'
     const location = activity.property.location || activity.property.name
 
-    const agrocoreRes = await fetch(
-      `${process.env.AGROCORE_API_URL}/api/internal/servicos`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-internal-secret': process.env.AGROLINK_INTERNAL_SECRET!,
-        },
-        body: JSON.stringify({
-          userEmail: user.email,
-          serviceType,
-          description: activity.description || activity.type,
-          location,
-        }),
-      }
-    )
+    const agrocoreUrl = `${process.env.AGROCORE_API_URL}/api/internal/servicos`
+    const secretConfigured = !!process.env.AGROLINK_INTERNAL_SECRET
+    console.log('[contratar] url:', agrocoreUrl, '| secret ok:', secretConfigured, '| plan:', plan, '| agrocore:', limites.agrocore)
+
+    const agrocoreRes = await fetch(agrocoreUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.AGROLINK_INTERNAL_SECRET!,
+      },
+      body: JSON.stringify({
+        userEmail: user.email,
+        serviceType,
+        description: activity.description || activity.type,
+        location,
+      }),
+    })
 
     const result = await agrocoreRes.json()
+    console.log('[contratar] agrocore status:', agrocoreRes.status, '| result:', JSON.stringify(result))
 
     if (!agrocoreRes.ok) {
       return NextResponse.json(
-        { error: result.error || 'Erro ao criar pedido no AgroCore' },
+        { error: result.error || 'Erro ao criar pedido no AgroCore', _debug: { agrocoreStatus: agrocoreRes.status, agrocoreUrl, secretConfigured } },
         { status: agrocoreRes.status }
       )
     }
