@@ -50,6 +50,7 @@ model User {
   pushSubscriptions PushSubscription[]
   tokenTransactions TokenTransaction[]
   agentConfigs      AgentConfig[]
+  fieldOperations   FieldOperation[]
   createdAt         DateTime           @default(now())
 }
 
@@ -132,8 +133,9 @@ model Field {
   sizeHectares Decimal    @default(0)
   lat          Float?
   lng          Float?
-  geoJson      String?
-  activities   Activity[]
+  geoJson         String?
+  activities      Activity[]
+  fieldOperations FieldOperation[]
 }
 
 model Activity {
@@ -853,5 +855,30 @@ model AgentRun {
   erro       String?
 
   @@index([agentId])
+  @@index([userId])
+}
+
+model FieldOperation {
+  id             String    @id @default(uuid())
+  fieldId        String
+  field          Field     @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tipo           String
+  larguraM       Float
+  anguloGraus    Float
+  velocidadeKmh  Float
+  areaHa         Float
+  passadas       Int
+  comprimentoKm  Float
+  tempoEstHoras  Float
+  tempoRealMin   Float?
+  combustivelL   Float?
+  modoGps        Boolean   @default(false)
+  serviceId      String?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([fieldId])
   @@index([userId])
 }

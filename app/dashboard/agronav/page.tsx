@@ -5,6 +5,15 @@ export const metadata: Metadata = {
   title: 'AgroNav — Planejamento de Campo',
 }
 
-export default function AgroNavPage() {
-  return <AgroNavClient />
+export default function AgroNavPage({
+  searchParams,
+}: {
+  searchParams: { fieldId?: string; serviceId?: string }
+}) {
+  return (
+    <AgroNavClient
+      initialFieldId={searchParams.fieldId}
+      initialServiceId={searchParams.serviceId}
+    />
+  )
 }
