@@ -2,18 +2,35 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
+async function getOrCreateProperty(supabaseId: string, userEmail?: string) {
+  let dbUser = await prisma.user.findUnique({
+    where: { supabaseId },
+    include: { properties: { take: 1 } },
+  })
+  if (!dbUser && userEmail) {
+    dbUser = await prisma.user.findUnique({
+      where: { email: userEmail },
+      include: { properties: { take: 1 } },
+    })
+    if (dbUser) await prisma.user.update({ where: { id: dbUser.id }, data: { supabaseId } })
+  }
+  if (!dbUser) {
+    dbUser = await prisma.user.create({
+      data: { supabaseId, email: userEmail ?? supabaseId, name: userEmail?.split('@')[0] ?? 'Usuário' },
+      include: { properties: { take: 1 } },
+    })
+  }
+  if (dbUser.properties.length > 0) return dbUser.properties[0]
+  return prisma.property.create({ data: { userId: dbUser.id, name: 'Minha Propriedade' } })
+}
+
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    const dbUser = await prisma.user.findUnique({
-      where: { supabaseId: session.user.id },
-      include: { properties: { take: 1 } },
-    })
-    const property = dbUser?.properties[0]
-    if (!property) return NextResponse.json({ error: 'Propriedade não encontrada. Complete o cadastro da fazenda.' }, { status: 404 })
+    const property = await getOrCreateProperty(user.id, user.email ?? undefined)
 
     const { animais } = await req.json()
     if (!Array.isArray(animais) || animais.length === 0)
