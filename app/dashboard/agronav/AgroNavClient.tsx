@@ -59,6 +59,35 @@ interface SavedOperation {
   field?: { name: string }
 }
 
+// ─── Tutorial ────────────────────────────────────────────────────────────────
+const TUTORIAL_STEPS = [
+  {
+    icon: '🏡',
+    title: 'Bem-vindo ao AgroNav',
+    desc: 'Planeje cada operação de campo com precisão. Selecione a propriedade e o talhão onde o serviço será realizado.',
+  },
+  {
+    icon: '✏️',
+    title: 'Mapeie o Polígono',
+    desc: 'Desenhe o contorno exato da área no mapa satélite. Quanto mais preciso o polígono, mais eficiente o planejamento das passadas.',
+  },
+  {
+    icon: '⚙️',
+    title: 'Configure a Operação',
+    desc: 'Escolha o tipo de serviço (pulverização, plantio, colheita...), a largura do implemento e o ângulo das linhas de guiamento.',
+  },
+  {
+    icon: '🚜',
+    title: 'Visão 3D do Terreno',
+    desc: 'Visualize o trajeto do maquinário em 3D sobre o terreno real da fazenda. Use a câmera livre para explorar laterais e arredores.',
+  },
+  {
+    icon: '📋',
+    title: 'Histórico e Relatórios',
+    desc: 'Cada operação concluída é salva automaticamente. Exporte relatórios em CSV ou PDF para controle e documentação da propriedade.',
+  },
+]
+
 // ─── Constantes ──────────────────────────────────────────────────────────────
 const ATIVIDADES = [
   { value: 'Pulverização', largura: 18, icon: '🌿' },
@@ -172,6 +201,29 @@ export default function AgroNavClient({
   const [desenhando, setDesenhando] = useState(false)
   const [msg,        setMsg]        = useState('')
   const [show3D,     setShow3D]     = useState(false)
+
+  // ── Tutorial primeira visita (aparece só uma vez, só ao abrir AgroNav)
+  const [tutorialStep, setTutorialStep] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('agronav-tutorial-v1')) {
+      setTutorialStep(0)
+    }
+  }, [])
+
+  function avancarTutorial() {
+    if (tutorialStep === null) return
+    if (tutorialStep < TUTORIAL_STEPS.length - 1) {
+      setTutorialStep(tutorialStep + 1)
+    } else {
+      fecharTutorial()
+    }
+  }
+
+  function fecharTutorial() {
+    if (typeof window !== 'undefined') localStorage.setItem('agronav-tutorial-v1', '1')
+    setTutorialStep(null)
+  }
 
   // ── Opção A: Histórico
   const [historico,        setHistorico]        = useState<SavedOperation[]>([])
@@ -621,6 +673,72 @@ export default function AgroNavClient({
 
   return (
     <div className="flex bg-slate-100" style={{ height: 'calc(100vh - 64px)' }}>
+
+      {/* ── Tutorial primeira visita ──────────────────────────────────────── */}
+      {tutorialStep !== null && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,10,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div style={{
+            background: 'linear-gradient(160deg, #0a1a0a 0%, #0f2010 100%)',
+            border: '1px solid rgba(34,197,94,0.3)',
+            borderRadius: 24,
+            padding: '36px 40px',
+            maxWidth: 420,
+            width: '100%',
+            boxShadow: '0 0 80px rgba(34,197,94,0.12), 0 24px 64px rgba(0,0,0,0.6)',
+            position: 'relative',
+          }}>
+            {/* Fechar */}
+            <button onClick={fecharTutorial} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 8, width: 30, height: 30, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+
+            {/* Indicadores de passo */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 28, justifyContent: 'center' }}>
+              {TUTORIAL_STEPS.map((_, i) => (
+                <div key={i} style={{
+                  height: 4, borderRadius: 999,
+                  width: i === tutorialStep ? 24 : 8,
+                  background: i <= tutorialStep ? '#22c55e' : 'rgba(255,255,255,0.15)',
+                  transition: 'all 0.3s',
+                }} />
+              ))}
+            </div>
+
+            {/* Ícone */}
+            <div style={{ fontSize: 52, textAlign: 'center', marginBottom: 16 }}>
+              {TUTORIAL_STEPS[tutorialStep].icon}
+            </div>
+
+            {/* Conteúdo */}
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+              <div style={{ color: '#fff', fontSize: 20, fontWeight: 800, marginBottom: 10 }}>
+                {TUTORIAL_STEPS[tutorialStep].title}
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.62)', fontSize: 14, lineHeight: 1.65 }}>
+                {TUTORIAL_STEPS[tutorialStep].desc}
+              </div>
+            </div>
+
+            {/* Botões */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              {tutorialStep > 0 && (
+                <button onClick={() => setTutorialStep(t => (t ?? 1) - 1)} style={{ flex: 1, padding: '12px 0', borderRadius: 14, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+                  ← Anterior
+                </button>
+              )}
+              <button onClick={avancarTutorial} style={{ flex: 2, padding: '12px 0', borderRadius: 14, background: tutorialStep === TUTORIAL_STEPS.length - 1 ? '#15803d' : '#22c55e', border: 'none', color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 20px rgba(34,197,94,0.3)' }}>
+                {tutorialStep === TUTORIAL_STEPS.length - 1 ? '🚀 Começar' : 'Próximo →'}
+              </button>
+            </div>
+
+            {/* Pular */}
+            {tutorialStep < TUTORIAL_STEPS.length - 1 && (
+              <button onClick={fecharTutorial} style={{ display: 'block', margin: '14px auto 0', background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' }}>
+                Pular tutorial
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Painel esquerdo ─────────────────────────────────────────────── */}
       <div className="w-80 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden shadow-sm">
