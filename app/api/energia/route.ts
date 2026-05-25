@@ -2,12 +2,32 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
-async function getPropertyId(supabaseId: string) {
-  const user = await prisma.user.findUnique({
+async function getOrCreatePropertyId(supabaseId: string, userEmail?: string) {
+  let dbUser = await prisma.user.findUnique({
     where: { supabaseId },
     include: { properties: { take: 1, select: { id: true } } },
   })
-  return user?.properties[0]?.id ?? null
+  if (!dbUser && userEmail) {
+    dbUser = await prisma.user.findUnique({
+      where: { email: userEmail },
+      include: { properties: { take: 1, select: { id: true } } },
+    })
+    if (dbUser) {
+      await prisma.user.update({ where: { id: dbUser.id }, data: { supabaseId } })
+    }
+  }
+  if (!dbUser) {
+    dbUser = await prisma.user.create({
+      data: { supabaseId, email: userEmail ?? supabaseId, name: userEmail?.split('@')[0] ?? 'Usuário' },
+      include: { properties: { take: 1, select: { id: true } } },
+    })
+  }
+  if (dbUser.properties.length > 0) return dbUser.properties[0].id
+  const prop = await prisma.property.create({
+    data: { userId: dbUser.id, name: 'Minha Propriedade' },
+    select: { id: true },
+  })
+  return prop.id
 }
 
 export async function GET() {
@@ -15,8 +35,7 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const propertyId = await getPropertyId(user.id)
-  if (!propertyId) return NextResponse.json([])
+  const propertyId = await getOrCreatePropertyId(user.id, user.email ?? undefined)
 
   try {
     const records = await prisma.energyRecord.findMany({
@@ -34,8 +53,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const propertyId = await getPropertyId(user.id)
-  if (!propertyId) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
+  const propertyId = await getOrCreatePropertyId(user.id, user.email ?? undefined)
 
   const body = await req.json()
   const { month, year, source, consumption, production, cost, notes } = body
