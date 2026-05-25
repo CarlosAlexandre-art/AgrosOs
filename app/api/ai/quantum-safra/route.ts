@@ -67,7 +67,12 @@ Responda EXATAMENTE neste JSON (sem markdown):
     }], 1500)
 
     const clean = llmText.replace(/```json\n?|\n?```/g, '').trim()
-    const safra = JSON.parse(clean)
+    let safra: any
+    try {
+      safra = JSON.parse(clean)
+    } catch {
+      return NextResponse.json({ error: 'A IA não retornou um cronograma válido. Tente novamente.' }, { status: 502 })
+    }
 
     // Prepara fases para o solver QUBO
     const phases: Phase[] = (safra.fases as any[]).map((f: any, i: number) => ({

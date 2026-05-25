@@ -13,22 +13,24 @@ export async function POST(req: NextRequest) {
     const { descricao } = await req.json()
     if (!descricao?.trim()) return NextResponse.json({ error: 'Descrição obrigatória' }, { status: 400 })
 
-    const prompt = `Você é um assistente de gestão pecuária brasileiro. O produtor vai descrever um lote de animais em linguagem natural. Extraia e retorne APENAS um JSON array com os animais para cadastro.
+    const anoAtual = new Date().getFullYear()
+    const prompt = `Você é um assistente de gestão pecuária brasileiro. O produtor descreve um ou mais lotes de animais. Cada lote pode ter várias cabeças. Gere UM registro por lote (não por animal individual), usando a identificação do lote como "identificacao".
 
-Campos disponíveis por animal:
-- identificacao (string, obrigatório — gere sequencial como "#0001", "#0002" se não informado)
-- sexo ("MACHO" | "FEMEA", obrigatório)
-- raca (string, ex: "Nelore", "Angus", "Girolando" — null se não informado)
-- dataNascimento (formato "YYYY-MM-DD" — null se não informado)
-- pesoAtual (número em kg — null se não informado)
+Campos por lote:
+- identificacao (string, obrigatório — use o nome/número do lote, ex: "Lote 01", "Lote A")
+- sexo ("MACHO" | "FEMEA" — use "MACHO" se não informado)
+- raca (string, ex: "Nelore" — null se não informado)
+- dataNascimento (formato "YYYY-MM-DD" — calcule a partir da idade em meses se informada, usando ${anoAtual} como referência; null se não der para calcular)
+- pesoAtual (número em kg — use o peso de entrada se informado; null se não informado)
 - origemFazenda (string — null se não informado)
 
-Descrição do produtor: "${descricao}"
+Descrição do produtor:
+${descricao}
 
 Responda SOMENTE com o JSON array, sem markdown, sem explicação. Exemplo:
-[{"identificacao":"#0001","sexo":"FEMEA","raca":"Nelore","dataNascimento":"2024-03-01","pesoAtual":280,"origemFazenda":null}]`
+[{"identificacao":"Lote 01","sexo":"MACHO","raca":"Nelore","dataNascimento":"2024-02-01","pesoAtual":314,"origemFazenda":null}]`
 
-    const text = await groq([{ role: 'user', content: prompt }], 800)
+    const text = await groq([{ role: 'user', content: prompt }], 1200)
     const clean = text.replace(/```json\n?|\n?```/g, '').trim()
     const animais = JSON.parse(clean)
 

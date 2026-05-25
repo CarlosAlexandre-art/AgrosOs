@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
               select: { title: true, type: true, targetValue: true, currentValue: true },
             },
             alerts: {
-              where: { read: false },
+              where: { isRead: false },
               orderBy: { createdAt: 'desc' },
               take: 10,
               select: { message: true, type: true, createdAt: true },
@@ -127,7 +127,7 @@ Responda APENAS com JSON válido, sem markdown:
           propertyId: p.id,
           type: a.tipo || 'OPERACIONAL',
           message: a.mensagem || a.titulo || 'Alerta gerado por IA',
-          read: false,
+          isRead: false,
         })),
         skipDuplicates: true,
       })

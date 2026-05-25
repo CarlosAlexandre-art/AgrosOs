@@ -165,15 +165,18 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        // ── AGROTRADE: Sem valuation há 30 dias ──
-        const ultimoValuation = await (prisma as any).valuationRebanho.findFirst({
-          where: { propertyId: pid },
-          orderBy: { data: 'desc' },
-        })
-        if (!ultimoValuation || Date.now() - new Date(ultimoValuation.data).getTime() > 30 * 86400000) {
-          if (!(await alertaJaExiste(pid, 'AGROTRADE', 'valoração'))) {
-            await criarAlerta(pid, uid, 'AGROTRADE', 'Valoração do rebanho desatualizada — faça o valuation para ter o patrimônio real', false, plan)
-            totalAlertas++
+        // ── AGROTRADE: Sem valuation há 30 dias (só se houver animais) ──
+        const temAnimais = await (prisma as any).animal.count({ where: { propertyId: pid, ativo: true } })
+        if (temAnimais > 0) {
+          const ultimoValuation = await (prisma as any).valuationRebanho.findFirst({
+            where: { propertyId: pid },
+            orderBy: { data: 'desc' },
+          })
+          if (!ultimoValuation || Date.now() - new Date(ultimoValuation.data).getTime() > 30 * 86400000) {
+            if (!(await alertaJaExiste(pid, 'AGROTRADE', 'valoração'))) {
+              await criarAlerta(pid, uid, 'AGROTRADE', 'Valoração do rebanho desatualizada — faça o valuation para ter o patrimônio real', false, plan)
+              totalAlertas++
+            }
           }
         }
 
