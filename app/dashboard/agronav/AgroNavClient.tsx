@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import AgroNav3D from './AgroNav3D'
+import dynamic from 'next/dynamic'
+
+const AgroNav3D = dynamic(() => import('./AgroNav3D'), { ssr: false })
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
