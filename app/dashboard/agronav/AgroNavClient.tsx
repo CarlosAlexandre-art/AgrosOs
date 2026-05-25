@@ -207,7 +207,6 @@ export default function AgroNavClient({
 
   function irParaMapa() {
     setMobileView('mapa')
-    setTimeout(() => mapInst.current?.invalidateSize?.(), 80)
   }
 
   // ── Tutorial primeira visita (aparece só uma vez, só ao abrir AgroNav)
@@ -748,8 +747,8 @@ export default function AgroNavClient({
         </div>
       )}
 
-      {/* ── Painel esquerdo ─────────────────────────────────────────────── */}
-      <div className={`flex-shrink-0 bg-white border-r border-slate-200 flex-col overflow-hidden shadow-sm pb-14 md:pb-0 md:w-80 ${mobileView === 'painel' ? 'flex w-full' : 'hidden md:flex'}`}>
+      {/* ── Painel esquerdo — no mobile é overlay absoluto sobre o mapa ── */}
+      <div className={`bg-white border-r border-slate-200 flex-col overflow-hidden shadow-sm pb-14 md:pb-0 md:w-80 md:flex-shrink-0 md:static md:z-auto z-[500] ${mobileView === 'painel' ? 'flex absolute inset-0' : 'hidden md:flex'}`}>
 
         {/* Header */}
         <div className="px-4 py-3 bg-gradient-to-r from-green-800 to-green-600 flex items-center gap-3">
@@ -1175,8 +1174,8 @@ export default function AgroNavClient({
         )}
       </div>
 
-      {/* ── Mapa ────────────────────────────────────────────────────────── */}
-      <div className={`flex-1 relative pb-14 md:pb-0 ${mobileView === 'mapa' ? 'block' : 'hidden md:block'}`}>
+      {/* ── Mapa — sempre visível para Leaflet ter dimensões reais ─────── */}
+      <div className="flex-1 relative pb-14 md:pb-0">
         <div ref={mapRef} className="w-full h-full" />
 
         {desenhando && (
