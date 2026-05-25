@@ -33,18 +33,24 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const property = await getOrCreateProperty(user.id, user.email ?? undefined)
+  try {
+    const property = await getOrCreateProperty(user.id, user.email ?? undefined)
 
-  const lotes = await prisma.lote.findMany({
-    where: { propertyId: property.id },
-    include: {
-      registrosDiarios: { orderBy: { data: 'desc' }, take: 1 },
-      _count: { select: { animais: true, registrosDiarios: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+    const lotes = await prisma.lote.findMany({
+      where: { propertyId: property.id },
+      include: {
+        registrosDiarios: { orderBy: { data: 'desc' }, take: 1 },
+        _count: { select: { animais: true, registrosDiarios: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
 
-  return NextResponse.json(lotes)
+    return NextResponse.json(lotes)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erro interno'
+    console.error('[confinamento/lotes GET]', msg)
+    return NextResponse.json({ error: 'Tabela de confinamento ainda não foi criada no banco. Aplique a migration todos_modulos_pecuaria.sql no Supabase.' }, { status: 503 })
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -52,27 +58,33 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const property = await getOrCreateProperty(user.id, user.email ?? undefined)
+  try {
+    const property = await getOrCreateProperty(user.id, user.email ?? undefined)
 
-  const body = await req.json()
-  const { nome, cabecas, racaPredominante, idadeMediaMeses, pesoMedioEntrada, objetivo, pesoMetaAbate, dataSaidaPrevista } = body
+    const body = await req.json()
+    const { nome, cabecas, racaPredominante, idadeMediaMeses, pesoMedioEntrada, objetivo, pesoMetaAbate, dataSaidaPrevista } = body
 
-  if (!nome || !cabecas || !pesoMedioEntrada)
-    return NextResponse.json({ error: 'nome, cabecas e pesoMedioEntrada são obrigatórios' }, { status: 400 })
+    if (!nome || !cabecas || !pesoMedioEntrada)
+      return NextResponse.json({ error: 'nome, cabecas e pesoMedioEntrada são obrigatórios' }, { status: 400 })
 
-  const lote = await prisma.lote.create({
-    data: {
-      propertyId: property.id,
-      nome,
-      cabecas: Number(cabecas),
-      racaPredominante: racaPredominante || null,
-      idadeMediaMeses: idadeMediaMeses ? Number(idadeMediaMeses) : null,
-      pesoMedioEntrada: Number(pesoMedioEntrada),
-      objetivo: objetivo || 'ABATE',
-      pesoMetaAbate: pesoMetaAbate ? Number(pesoMetaAbate) : null,
-      dataSaidaPrevista: dataSaidaPrevista ? new Date(dataSaidaPrevista) : null,
-    },
-  })
+    const lote = await prisma.lote.create({
+      data: {
+        propertyId: property.id,
+        nome,
+        cabecas: Number(cabecas),
+        racaPredominante: racaPredominante || null,
+        idadeMediaMeses: idadeMediaMeses ? Number(idadeMediaMeses) : null,
+        pesoMedioEntrada: Number(pesoMedioEntrada),
+        objetivo: objetivo || 'ABATE',
+        pesoMetaAbate: pesoMetaAbate ? Number(pesoMetaAbate) : null,
+        dataSaidaPrevista: dataSaidaPrevista ? new Date(dataSaidaPrevista) : null,
+      },
+    })
 
-  return NextResponse.json(lote, { status: 201 })
+    return NextResponse.json(lote, { status: 201 })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erro interno'
+    console.error('[confinamento/lotes POST]', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 }
