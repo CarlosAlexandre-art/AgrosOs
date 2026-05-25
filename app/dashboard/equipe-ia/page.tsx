@@ -648,6 +648,7 @@ export default function EquipeIaPage() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [execAgent, setExecAgent] = useState<Agent | null>(null)
   const [tab, setTab] = useState<'especialistas' | 'personalizados'>('especialistas')
+  const [prontoError, setProntoError] = useState('')
 
   const fetchAgents = useCallback(async () => {
     try {
@@ -670,6 +671,7 @@ export default function EquipeIaPage() {
   }
 
   async function criarPronto(tpl: typeof TEMPLATES[number]) {
+    setProntoError('')
     try {
       const res = await fetch('/api/agents', {
         method: 'POST',
@@ -679,8 +681,15 @@ export default function EquipeIaPage() {
           tipo: 'PRONTO', tools: tpl.tools, trigger: tpl.trigger,
         }),
       })
-      if (res.ok) fetchAgents()
-    } catch {}
+      if (res.ok) {
+        fetchAgents()
+      } else {
+        const d = await res.json()
+        setProntoError(d.error ?? 'Erro ao ativar agente')
+      }
+    } catch (e: any) {
+      setProntoError(e.message ?? 'Erro de rede')
+    }
   }
 
   const prontos = agents.filter(a => a.tipo === 'PRONTO')
@@ -797,6 +806,12 @@ export default function EquipeIaPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {prontoError && (
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '10px 16px', marginBottom: 16, fontSize: 12, color: '#fca5a5' }}>
+                {prontoError}
               </div>
             )}
 
