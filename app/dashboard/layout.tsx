@@ -622,19 +622,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Tour de boas-vindas — exibe apenas na primeira visita */}
       <TourOnboarding />
 
-      {/* Speed dial — mobile only: abre/fecha os FABs acima do AgroGPT */}
-      {!fabOpen && (
+      {/* Speed dial — oculto no AgroNav (tem tab bar próprio) */}
+      {!pathname.startsWith('/dashboard/agronav') && !fabOpen && (
         <button
           onClick={() => setFabOpen(true)}
-          className="fixed md:hidden bottom-24 right-6 z-[1100] w-12 h-12 rounded-2xl bg-green-600 shadow-lg flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95"
+          className="fixed md:hidden bottom-6 right-6 z-[1100] w-12 h-12 rounded-2xl bg-green-600 shadow-lg flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95"
           aria-label="Abrir ferramentas IA"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
         </button>
       )}
 
-      {/* Botão fechar — aparece acima de todos os FABs quando aberto */}
-      {fabOpen && (
+      {/* Botão fechar */}
+      {!pathname.startsWith('/dashboard/agronav') && fabOpen && (
         <button
           onClick={() => setFabOpen(false)}
           className="fixed md:hidden z-[1200] w-10 h-10 rounded-full bg-slate-600 shadow-lg flex items-center justify-center text-white transition-all hover:scale-105 active:scale-95"
@@ -645,14 +645,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
       )}
 
-      {/* FABs — sempre visíveis no desktop, controlados pelo toggle no mobile */}
-      <div className={fabOpen ? 'contents' : 'hidden md:contents'}>
-        <VozParaAtividade />
-        <AnalisarDocumento />
-        <DiagnosticoAnimal />
-        <MonitorClimaIA />
-        <AnalisePastagem />
-      </div>
+      {/* FABs — ocultos no AgroNav, sempre visíveis no desktop */}
+      {!pathname.startsWith('/dashboard/agronav') && (
+        <div className={fabOpen ? 'contents' : 'hidden md:contents'}>
+          <VozParaAtividade />
+          <AnalisarDocumento />
+          <DiagnosticoAnimal />
+          <MonitorClimaIA />
+          <AnalisePastagem />
+        </div>
+      )}
     </div>
   )
 }

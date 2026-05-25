@@ -748,7 +748,7 @@ export default function AgroNavClient({
       )}
 
       {/* ── Painel esquerdo — no mobile é overlay absoluto sobre o mapa ── */}
-      <div className={`bg-white border-r border-slate-200 flex-col overflow-hidden shadow-sm pb-14 md:pb-0 md:w-80 md:flex-shrink-0 md:static md:z-auto z-[500] ${mobileView === 'painel' ? 'flex absolute inset-0' : 'hidden md:flex'}`}>
+      <div className={`bg-white border-r border-slate-200 flex-col overflow-hidden shadow-sm pb-16 md:pb-0 md:w-80 md:flex-shrink-0 md:static md:z-auto z-[1150] ${mobileView === 'painel' ? 'flex absolute inset-0' : 'hidden md:flex'}`}>
 
         {/* Header */}
         <div className="px-4 py-3 bg-gradient-to-r from-green-800 to-green-600 flex items-center gap-3">
@@ -1221,7 +1221,7 @@ export default function AgroNavClient({
       </div>
 
       {/* ── Tabs mobile ─────────────────────────────────────────────────── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[1001] bg-white border-t border-slate-200 flex">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[1300] bg-white border-t border-slate-200 flex shadow-[0_-2px_12px_rgba(0,0,0,0.08)]">
         <button
           onClick={() => setMobileView('painel')}
           className={`flex-1 py-3.5 text-sm font-bold flex items-center justify-center gap-1.5 transition-colors ${
