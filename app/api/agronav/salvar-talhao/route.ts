@@ -13,9 +13,12 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'fieldId e geoJson são obrigatórios' }, { status: 400 })
     }
 
+    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id }, select: { id: true } })
+    if (!dbUser) return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+
     // Verifica que o talhão pertence ao usuário
     const field = await prisma.field.findFirst({
-      where: { id: fieldId, property: { userId: user.id } },
+      where: { id: fieldId, property: { userId: dbUser.id } },
     })
     if (!field) return NextResponse.json({ error: 'Talhão não encontrado' }, { status: 404 })
 

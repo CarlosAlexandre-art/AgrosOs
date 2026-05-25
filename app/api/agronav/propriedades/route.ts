@@ -8,8 +8,11 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
+    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id }, select: { id: true } })
+    if (!dbUser) return NextResponse.json({ properties: [] })
+
     const properties = await prisma.property.findMany({
-      where: { userId: user.id },
+      where: { userId: dbUser.id },
       select: {
         id: true,
         name: true,
