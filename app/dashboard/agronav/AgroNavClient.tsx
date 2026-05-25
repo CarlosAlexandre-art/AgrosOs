@@ -201,6 +201,12 @@ export default function AgroNavClient({
   const [desenhando, setDesenhando] = useState(false)
   const [msg,        setMsg]        = useState('')
   const [show3D,     setShow3D]     = useState(false)
+  const [mobileView, setMobileView] = useState<'painel' | 'mapa'>('painel')
+
+  function irParaMapa() {
+    setMobileView('mapa')
+    setTimeout(() => mapInst.current?.invalidateSize?.(), 80)
+  }
 
   // ── Tutorial primeira visita (aparece só uma vez, só ao abrir AgroNav)
   const [tutorialStep, setTutorialStep] = useState<number | null>(null)
@@ -672,7 +678,7 @@ export default function AgroNavClient({
   const activeCoordsFor3D = coords
 
   return (
-    <div className="flex bg-slate-100" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="flex bg-slate-100 relative" style={{ height: 'calc(100vh - 64px)' }}>
 
       {/* ── Tutorial primeira visita ──────────────────────────────────────── */}
       {tutorialStep !== null && (
@@ -741,7 +747,7 @@ export default function AgroNavClient({
       )}
 
       {/* ── Painel esquerdo ─────────────────────────────────────────────── */}
-      <div className="w-80 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden shadow-sm">
+      <div className={`flex-shrink-0 bg-white border-r border-slate-200 flex-col overflow-hidden shadow-sm pb-14 md:pb-0 md:w-80 ${mobileView === 'painel' ? 'flex w-full' : 'hidden md:flex'}`}>
 
         {/* Header */}
         <div className="px-4 py-3 bg-gradient-to-r from-green-800 to-green-600 flex items-center gap-3">
@@ -1168,7 +1174,7 @@ export default function AgroNavClient({
       </div>
 
       {/* ── Mapa ────────────────────────────────────────────────────────── */}
-      <div className="flex-1 relative">
+      <div className={`flex-1 relative pb-14 md:pb-0 ${mobileView === 'mapa' ? 'block' : 'hidden md:block'}`}>
         <div ref={mapRef} className="w-full h-full" />
 
         {desenhando && (
@@ -1211,6 +1217,26 @@ export default function AgroNavClient({
             <div className="flex items-center gap-2"><div className="w-5 h-2 bg-green-400/30 border border-green-500 rounded" /><span className="text-slate-500">Talhão</span></div>
           </div>
         )}
+      </div>
+
+      {/* ── Tabs mobile ─────────────────────────────────────────────────── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[1001] bg-white border-t border-slate-200 flex">
+        <button
+          onClick={() => setMobileView('painel')}
+          className={`flex-1 py-3.5 text-sm font-bold flex items-center justify-center gap-1.5 transition-colors ${
+            mobileView === 'painel' ? 'text-green-700 bg-green-50 border-t-2 border-green-600' : 'text-slate-500'
+          }`}
+        >
+          📋 Planejamento
+        </button>
+        <button
+          onClick={irParaMapa}
+          className={`flex-1 py-3.5 text-sm font-bold flex items-center justify-center gap-1.5 transition-colors ${
+            mobileView === 'mapa' ? 'text-green-700 bg-green-50 border-t-2 border-green-600' : 'text-slate-500'
+          }`}
+        >
+          🗺️ Mapa
+        </button>
       </div>
 
       {/* ── Vista 3D (portal no body) */}
