@@ -12,10 +12,10 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const dbUser = await prisma.user.findUnique({ where: { supabaseId: user.id }, include: { properties: true } })
-    if (!['pro', 'enterprise', 'admin'].includes(dbUser?.plan ?? '')) {
-      return NextResponse.json({ error: 'UPGRADE_REQUIRED', plan: 'pro', mensagem: 'Análise com IA disponível no plano Pro ou superior' }, { status: 403 })
-    }
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      include: { properties: { take: 1 } },
+    })
     const property = dbUser?.properties[0]
     if (!property) return NextResponse.json({ error: 'Sem propriedade' }, { status: 404 })
 
@@ -23,7 +23,7 @@ export async function GET() {
     const [protocolos, eventos, animais, statusRepro] = await Promise.all([
       (prisma as any).protocoloVacinal.findMany({
         where: { propertyId: property.id },
-        orderBy: { proximaAplicacao: 'asc' },
+        orderBy: { createdAt: 'asc' },
         take: 20,
       }),
       (prisma as any).eventoReprodutivo.findMany({
@@ -45,11 +45,7 @@ export async function GET() {
     ])
 
     const prenhas = statusRepro.filter((s: any) => s.status === 'PRENHA').length
-    const vacinasPendentes = protocolos.filter((p: any) => {
-      if (!p.proximaAplicacao) return false
-      const dias = Math.ceil((new Date(p.proximaAplicacao).getTime() - Date.now()) / 86400000)
-      return dias <= 14
-    }).length
+    const vacinasPendentes = protocolos.filter((p: any) => p.ativo).length
 
     const totalAnimais = animais.length
     const femeas = animais.filter((a: any) => a.sexo === 'FEMEA').length
@@ -85,18 +81,13 @@ Responda EXATAMENTE neste JSON (sem markdown):
     // QUBO: otimizar agendamento de protocolos vacinais
     // Fases = protocolos ordenados por urgência
     // Membros = grupos de animais (lotes)
-    const fasesVacina: Phase[] = protocolos.slice(0, 10).map((p: any, i: number) => {
-      const diasAteVenc = p.proximaAplicacao
-        ? Math.max(0, Math.ceil((new Date(p.proximaAplicacao).getTime() - Date.now()) / 86400000))
-        : 30
-      return {
-        index: i,
-        tipo: p.doenca || 'vacina',
-        inicio_dia: diasAteVenc,
-        duracao_dias: 1,
-        prioridade: diasAteVenc <= 3 ? 'alta' : diasAteVenc <= 10 ? 'media' : 'baixa',
-      }
-    })
+    const fasesVacina: Phase[] = protocolos.slice(0, 10).map((p: any, i: number) => ({
+      index: i,
+      tipo: p.doenca || 'vacina',
+      inicio_dia: 7,
+      duracao_dias: 1,
+      prioridade: 'media' as const,
+    }))
 
     // Grupos de animais como "membros" disponíveis para receber vacinas
     const gruposAnimais: Member[] = [
