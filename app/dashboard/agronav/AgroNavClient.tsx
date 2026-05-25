@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import AgroNav3D from './AgroNav3D'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,6 +138,7 @@ export default function AgroNavClient() {
   const [gerando,    setGerando]    = useState(false)
   const [desenhando, setDesenhando] = useState(false)
   const [msg,        setMsg]        = useState('')
+  const [show3D,     setShow3D]     = useState(false)
 
   // ── Carrega propriedades
   useEffect(() => {
@@ -586,6 +588,13 @@ export default function AgroNavClient() {
                       </div>
 
                       <button
+                        onClick={() => setShow3D(true)}
+                        className="w-full py-3 rounded-xl text-sm font-bold bg-slate-900 text-white hover:bg-slate-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        🚜 Abrir visão 3D
+                      </button>
+
+                      <button
                         onClick={() => setTab('operacao')}
                         className="w-full py-2 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
                       >
@@ -643,6 +652,17 @@ export default function AgroNavClient() {
           </div>
         )}
       </div>
+
+      {/* ── Vista 3D (overlay full-screen) */}
+      {show3D && linhas && coords && (
+        <AgroNav3D
+          lines={linhas}
+          polygonCoords={coords}
+          fieldName={field?.name ?? ''}
+          config={config}
+          onClose={() => setShow3D(false)}
+        />
+      )}
     </div>
   )
 }
