@@ -45,6 +45,7 @@ export default function AgroCoreButton({
 }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [debug, setDebug] = useState<any>(null)
   const [serviceId, setServiceId] = useState(agrolinkServiceId)
   const [currentStatus, setCurrentStatus] = useState(agrocoreStatus || (agrolinkServiceId ? 'PROCURANDO' : null))
 
@@ -61,7 +62,10 @@ export default function AgroCoreButton({
         body: JSON.stringify({ activityId }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erro ao contratar')
+      if (!res.ok) {
+        setDebug(data._debug ?? null)
+        throw new Error(data.error || 'Erro ao contratar')
+      }
       setServiceId(data.serviceId)
       setCurrentStatus('PROCURANDO')
     } catch (err: unknown) {
@@ -93,7 +97,10 @@ export default function AgroCoreButton({
           Publique este serviço e receba propostas de prestadores qualificados na sua região.
         </p>
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+          <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg space-y-1">
+            <p>{error}</p>
+            {debug && <p className="text-xs font-mono text-red-400">{JSON.stringify(debug)}</p>}
+          </div>
         )}
         <button
           onClick={handleContratar}
