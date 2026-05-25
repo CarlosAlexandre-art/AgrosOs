@@ -801,7 +801,7 @@ export default function EquipeIaPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
                   {prontos.map((agent, i) => (
                     <div key={agent.id} className="agent-card" style={{ animationDelay: `${i * 60}ms` }}
-                      onClick={() => agent.runs.length > 0 && setSelectedAgent(agent)} >
+                      onClick={() => agent.runs.length > 0 ? setSelectedAgent(agent) : handleRun(agent.id)} >
                       <AgentCard agent={agent} onRun={handleRun} running={!!running[agent.id]} />
                     </div>
                   ))}
@@ -889,7 +889,7 @@ export default function EquipeIaPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
                 {personalizados.map((agent, i) => (
                   <div key={agent.id} className="agent-card" style={{ animationDelay: `${i * 60}ms` }}
-                    onClick={() => agent.runs.length > 0 && setSelectedAgent(agent)}>
+                    onClick={() => agent.runs.length > 0 ? setSelectedAgent(agent) : handleRun(agent.id)}>
                     <AgentCard agent={agent} onRun={handleRun} running={!!running[agent.id]} />
                   </div>
                 ))}
