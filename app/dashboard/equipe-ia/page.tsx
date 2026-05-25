@@ -135,7 +135,7 @@ function timeAgo(dateStr: string) {
 
 // ── Componentes ───────────────────────────────────────────────────────────────
 
-function AgentCard({ agent, onRun, running }: { agent: Agent; onRun: (id: string) => void; running: boolean }) {
+function AgentCard({ agent, onRun, running, onDelete }: { agent: Agent; onRun: (id: string) => void; running: boolean; onDelete?: (id: string) => void }) {
   const lastRun = agent.runs[0]
   const tpl = TEMPLATES.find(t => t.nome === agent.nome)
   const border = tpl?.border ?? 'rgba(255,255,255,0.12)'
@@ -162,16 +162,32 @@ function AgentCard({ agent, onRun, running }: { agent: Agent; onRun: (id: string
         ;(e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 32px ${glow}, inset 0 1px 0 rgba(255,255,255,0.05)`
       }}
     >
-      {/* Pulse indicator */}
-      {agent.ativo && (
-        <span style={{
-          position: 'absolute', top: 16, right: 16,
-          width: 8, height: 8, borderRadius: '50%',
-          background: '#10b981',
-          boxShadow: '0 0 8px #10b981',
-          animation: 'pulse 2s infinite',
-        }} />
-      )}
+      {/* Pulse indicator + Delete */}
+      <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+        {agent.ativo && (
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%',
+            background: '#10b981', boxShadow: '0 0 8px #10b981',
+            animation: 'pulse 2s infinite', display: 'inline-block',
+          }} />
+        )}
+        {onDelete && (
+          <button
+            onClick={e => { e.stopPropagation(); onDelete(agent.id) }}
+            title="Excluir agente"
+            style={{
+              width: 26, height: 26, borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: 'rgba(239,68,68,0.08)', color: '#f87171',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.2)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+          >
+            🗑
+          </button>
+        )}
+      </div>
 
       {/* Icon + Nome */}
       <div className="flex items-start gap-3 mb-3">
@@ -670,6 +686,14 @@ export default function EquipeIaPage() {
     setExecAgent(agent)
   }
 
+  async function handleDelete(agentId: string) {
+    if (!confirm('Excluir este agente? Esta ação não pode ser desfeita.')) return
+    try {
+      await fetch(`/api/agents/${agentId}`, { method: 'DELETE' })
+      fetchAgents()
+    } catch {}
+  }
+
   async function criarPronto(tpl: typeof TEMPLATES[number]) {
     setProntoError('')
     try {
@@ -802,7 +826,7 @@ export default function EquipeIaPage() {
                   {prontos.map((agent, i) => (
                     <div key={agent.id} className="agent-card" style={{ animationDelay: `${i * 60}ms` }}
                       onClick={() => agent.runs.length > 0 ? setSelectedAgent(agent) : handleRun(agent.id)} >
-                      <AgentCard agent={agent} onRun={handleRun} running={!!running[agent.id]} />
+                      <AgentCard agent={agent} onRun={handleRun} running={!!running[agent.id]} onDelete={handleDelete} />
                     </div>
                   ))}
                 </div>
@@ -890,7 +914,7 @@ export default function EquipeIaPage() {
                 {personalizados.map((agent, i) => (
                   <div key={agent.id} className="agent-card" style={{ animationDelay: `${i * 60}ms` }}
                     onClick={() => agent.runs.length > 0 ? setSelectedAgent(agent) : handleRun(agent.id)}>
-                    <AgentCard agent={agent} onRun={handleRun} running={!!running[agent.id]} />
+                    <AgentCard agent={agent} onRun={handleRun} running={!!running[agent.id]} onDelete={handleDelete} />
                   </div>
                 ))}
               </div>
