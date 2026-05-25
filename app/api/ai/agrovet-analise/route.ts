@@ -122,6 +122,7 @@ Responda EXATAMENTE neste JSON (sem markdown):
       } : null,
     })
   } catch (e: any) {
-    return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+    console.error('[agrovet-analise]', e?.message)
+    return NextResponse.json({ error: e?.message ?? 'Erro interno do servidor' }, { status: 500 })
   }
 }
