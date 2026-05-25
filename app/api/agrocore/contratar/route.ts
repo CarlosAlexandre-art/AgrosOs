@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     if (!agrocoreRes.ok) {
       return NextResponse.json(
-        { error: result.error || 'Erro ao criar pedido no AgroCore', _debug: { agrocoreStatus: agrocoreRes.status, agrocoreUrl, secretConfigured } },
+        { error: result.error || 'Erro ao criar pedido no AgroCore', _debug: { agrocoreStatus: agrocoreRes.status, agrocoreUrl, secretConfigured, agrocoreDebug: result._debug } },
         { status: agrocoreRes.status }
       )
     }
