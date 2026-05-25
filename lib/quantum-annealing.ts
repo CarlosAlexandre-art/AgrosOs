@@ -139,7 +139,7 @@ export function solveQUBO(phases: Phase[], members: Member[]): QUBOResult {
       phaseIndex: phase.index,
       memberId: m.id,
       memberName: m.name,
-      energyContribution: Math.round(calcEnergy([best[i]], [phase], [m]) * 100) / 100,
+      energyContribution: Math.round(calcEnergy([0], [phase], [m]) * 100) / 100,
     }
   })
 
