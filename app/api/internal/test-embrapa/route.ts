@@ -27,17 +27,38 @@ export async function GET() {
     return NextResponse.json({ ok: false, etapa: 'token', erro: e.message })
   }
 
-  // Etapa 2: testar BovTrace (listar raças)
+  // Etapa 2: testar AGROFIT /health
+  let agrofitHealth: any = null
+  try {
+    const res = await fetch('https://api.cnptia.embrapa.br/agrofit/v1/health', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    agrofitHealth = { status: res.status, ok: res.ok, body: await res.text() }
+  } catch (e: any) {
+    agrofitHealth = { erro: e.message }
+  }
+
+  // Etapa 3: testar AGROFIT /versao
+  let agrofitVersao: any = null
+  try {
+    const res = await fetch('https://api.cnptia.embrapa.br/agrofit/v1/versao', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    agrofitVersao = { status: res.status, ok: res.ok, body: await res.text() }
+  } catch (e: any) {
+    agrofitVersao = { erro: e.message }
+  }
+
+  // Etapa 4: testar BovTrace (confirmar token geral)
+  let bovtrace: any = null
   try {
     const res = await fetch('https://api.cnptia.embrapa.br/bovtrace/v1/racas', {
       headers: { Authorization: `Bearer ${token}` },
     })
-    const body = await res.text()
-    if (!res.ok) {
-      return NextResponse.json({ ok: false, etapa: 'bovtrace', status: res.status, erro: body, tokenOk: true })
-    }
-    return NextResponse.json({ ok: true, etapa: 'bovtrace', status: res.status, tokenOk: true, amostra: JSON.parse(body) })
+    bovtrace = { status: res.status, ok: res.ok }
   } catch (e: any) {
-    return NextResponse.json({ ok: false, etapa: 'bovtrace', erro: e.message, tokenOk: true })
+    bovtrace = { erro: e.message }
   }
+
+  return NextResponse.json({ tokenOk: true, agrofitHealth, agrofitVersao, bovtrace })
 }
