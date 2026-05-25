@@ -19,10 +19,10 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Sessão expirada — faça login novamente' }, { status: 401 })
 
     const { plan, limites } = await getUserPlan(user.id)
-    if (!limites.agrocore) return planoBloqueado('agrocore', plan)
+    if (!limites.agrocore) return NextResponse.json({ error: `Plano ${plan} não tem acesso ao AgroCore` }, { status: 403 })
 
     const { activityId } = await req.json()
     if (!activityId) return NextResponse.json({ error: 'activityId obrigatório' }, { status: 400 })
