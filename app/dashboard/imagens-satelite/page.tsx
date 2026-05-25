@@ -159,9 +159,9 @@ function ImagensSateliteContent() {
     const map = mapInstance.current; if (!map) return
     const bounds = map.getBounds()
     const svc = activeService
-    // Build ESRI REST export URL
     const bbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`
-    const url = `https://server.arcgisonline.com/ArcGIS/rest/services/${svc.id.includes('world') ? svc.url.split('/services/')[1].split('/MapServer')[0] : 'World_Imagery/MapServer'}/export?bbox=${bbox}&bboxSR=4326&size=2048,2048&imageSR=4326&format=png&transparent=false&f=image`
+    const baseUrl = svc.url.split('/tile/')[0]
+    const url = `${baseUrl}/export?bbox=${bbox}&bboxSR=4326&size=2048,2048&imageSR=4326&format=png&transparent=false&f=image`
     window.open(url, '_blank')
   }, [activeService])
 
