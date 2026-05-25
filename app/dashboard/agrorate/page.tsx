@@ -178,7 +178,7 @@ export default function AgroRateDashboard() {
             </h1>
             <p className="text-slate-500 text-sm mt-1">Score de crédito baseado em dados reais da sua fazenda</p>
           </div>
-          <a href="https://agrorate.vercel.app" target="_blank" rel="noopener noreferrer"
+          <a href="https://agrorate.app" target="_blank" rel="noopener noreferrer"
             style={{display:'flex',alignItems:'center',gap:8,background:'linear-gradient(135deg,#065f46,#059669)',color:'#fff',fontWeight:700,fontSize:13,padding:'10px 18px',borderRadius:12,textDecoration:'none',boxShadow:'0 0 24px rgba(6,95,70,.5)'}}>
             Abrir AgroRate
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
