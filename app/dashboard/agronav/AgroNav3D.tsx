@@ -359,7 +359,7 @@ export default function AgroNav3D({ lines, polygonCoords, fieldName, config, onC
   const currentPass = (uiState.pass % lines.length) + 1
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div className="fixed inset-0 bg-black" style={{ zIndex: 9999 }}>
       {/* Canvas 3D */}
       <div ref={containerRef} className="w-full h-full" />
 

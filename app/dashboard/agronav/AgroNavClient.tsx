@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import AgroNav3D from './AgroNav3D'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -653,15 +654,16 @@ export default function AgroNavClient() {
         )}
       </div>
 
-      {/* ── Vista 3D (overlay full-screen) */}
-      {show3D && linhas && coords && (
+      {/* ── Vista 3D (portal no body para escapar de overflow e z-index do layout) */}
+      {show3D && linhas && coords && typeof document !== 'undefined' && createPortal(
         <AgroNav3D
           lines={linhas}
           polygonCoords={coords}
           fieldName={field?.name ?? ''}
           config={config}
           onClose={() => setShow3D(false)}
-        />
+        />,
+        document.body
       )}
     </div>
   )
