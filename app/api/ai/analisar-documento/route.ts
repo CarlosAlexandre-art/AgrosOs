@@ -38,7 +38,7 @@ async function analisarImagem(base64: string, mimeType: string, prompt: string):
 }
 
 async function extrairTextoPDF(buffer: Buffer): Promise<string> {
-  // Polyfills para APIs de browser que pdfjs-dist usa mesmo em extração de texto
+  // Polyfills mínimos para pdfjs-dist no Node.js
   if (typeof globalThis.DOMMatrix === 'undefined') {
     ;(globalThis as any).DOMMatrix = class {
       a=1;b=0;c=0;d=1;e=0;f=0;is2D=true;isIdentity=true
@@ -49,37 +49,47 @@ async function extrairTextoPDF(buffer: Buffer): Promise<string> {
   }
   if (typeof globalThis.Path2D === 'undefined') {
     ;(globalThis as any).Path2D = class {
-      constructor(_?: string) {}
+      constructor(_?: string){}
       addPath(){}; arc(){}; arcTo(){}; bezierCurveTo(){}; closePath(){}
       ellipse(){}; lineTo(){}; moveTo(){}; quadraticCurveTo(){}; rect(){}
     }
   }
 
-  // Usar pdfjs-dist diretamente (sem pdf-parse) para evitar o setup de teste
+  const { resolve } = await import('path')
+  const { Worker } = await import('worker_threads')
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs' as any)
-  pdfjs.GlobalWorkerOptions.workerSrc = ''
 
-  const loadingTask = pdfjs.getDocument({
-    data: new Uint8Array(buffer),
-    useWorkerFetch: false,
-    isEvalSupported: false,
-    disableFontFace: true,
-  })
-  const doc = await loadingTask.promise
-  const paginas = doc.numPages
-  const textos: string[] = []
+  // pdfjs-dist v5 em serverless: workerSrc file:// não funciona após bundle do Vercel.
+  // Usar workerPort com worker_threads.Worker bypass o problema de resolução de URL.
+  const workerPath = resolve(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs')
+  const worker = new Worker(workerPath)
+  pdfjs.GlobalWorkerOptions.workerPort = worker
 
-  for (let i = 1; i <= Math.min(paginas, 20); i++) {
-    const page = await doc.getPage(i)
-    const content = await page.getTextContent()
-    const linha = (content.items as any[])
-      .filter((item: any) => item.str)
-      .map((item: any) => item.str)
-      .join(' ')
-    textos.push(linha)
+  try {
+    const loadingTask = pdfjs.getDocument({
+      data: new Uint8Array(buffer),
+      useWorkerFetch: false,
+      isEvalSupported: false,
+      disableFontFace: true,
+    })
+    const doc = await loadingTask.promise
+    const textos: string[] = []
+
+    for (let i = 1; i <= Math.min(doc.numPages, 20); i++) {
+      const page = await doc.getPage(i)
+      const content = await page.getTextContent()
+      textos.push(
+        (content.items as any[])
+          .filter((item: any) => item.str)
+          .map((item: any) => item.str)
+          .join(' ')
+      )
+    }
+
+    return textos.join('\n').trim()
+  } finally {
+    worker.terminate()
   }
-
-  return textos.join('\n').trim()
 }
 
 export async function POST(req: NextRequest) {
