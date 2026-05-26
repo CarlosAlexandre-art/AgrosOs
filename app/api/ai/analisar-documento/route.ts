@@ -37,59 +37,68 @@ async function analisarImagem(base64: string, mimeType: string, prompt: string):
   return data.choices[0].message.content as string
 }
 
+function decodePDFString(s: string): string {
+  return s
+    .replace(/\\(\d{3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)))
+    .replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t')
+    .replace(/\\\(/g, '(').replace(/\\\)/g, ')').replace(/\\\\/g, '\\')
+}
+
+// Extração pura em Node.js via zlib — sem pdfjs-dist, sem workers, sem browser APIs.
+// Funciona para PDFs com texto embutido (gerados por computador), não PDFs escaneados.
 async function extrairTextoPDF(buffer: Buffer): Promise<string> {
-  // Polyfills mínimos para pdfjs-dist no Node.js
-  if (typeof globalThis.DOMMatrix === 'undefined') {
-    ;(globalThis as any).DOMMatrix = class {
-      a=1;b=0;c=0;d=1;e=0;f=0;is2D=true;isIdentity=true
-      multiply(){return this};translate(){return this};scale(){return this}
-      rotate(){return this};inverse(){return this};transformPoint(){return{x:0,y:0,z:0,w:1}}
-      toFloat32Array(){return new Float32Array(16)};toFloat64Array(){return new Float64Array(16)}
-    }
-  }
-  if (typeof globalThis.Path2D === 'undefined') {
-    ;(globalThis as any).Path2D = class {
-      constructor(_?: string){}
-      addPath(){}; arc(){}; arcTo(){}; bezierCurveTo(){}; closePath(){}
-      ellipse(){}; lineTo(){}; moveTo(){}; quadraticCurveTo(){}; rect(){}
-    }
-  }
+  const { inflate, inflateRaw } = await import('zlib')
+  const { promisify } = await import('util')
+  const tryInflate = promisify(inflate)
+  const tryInflateRaw = promisify(inflateRaw)
 
-  const { resolve } = await import('path')
-  const { Worker } = await import('worker_threads')
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs' as any)
+  const pdfStr = buffer.toString('binary')
+  const texts: string[] = []
 
-  // pdfjs-dist v5 em serverless: workerSrc file:// não funciona após bundle do Vercel.
-  // Usar workerPort com worker_threads.Worker bypass o problema de resolução de URL.
-  const workerPath = resolve(process.cwd(), 'node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs')
-  const worker = new Worker(workerPath)
-  pdfjs.GlobalWorkerOptions.workerPort = worker
+  const streamRe = /stream\r?\n([\s\S]*?)\r?\nendstream/g
+  let m: RegExpExecArray | null
 
-  try {
-    const loadingTask = pdfjs.getDocument({
-      data: new Uint8Array(buffer),
-      useWorkerFetch: false,
-      isEvalSupported: false,
-      disableFontFace: true,
-    })
-    const doc = await loadingTask.promise
-    const textos: string[] = []
+  while ((m = streamRe.exec(pdfStr)) !== null) {
+    const raw = Buffer.from(m[1], 'binary')
+    let content = m[1]
 
-    for (let i = 1; i <= Math.min(doc.numPages, 20); i++) {
-      const page = await doc.getPage(i)
-      const content = await page.getTextContent()
-      textos.push(
-        (content.items as any[])
-          .filter((item: any) => item.str)
-          .map((item: any) => item.str)
-          .join(' ')
-      )
+    // Tenta FlateDecode (compressão padrão em PDFs modernos)
+    for (const fn of [
+      () => tryInflate(raw),
+      () => tryInflateRaw(raw),
+      () => tryInflate(raw.slice(2)),
+      () => tryInflateRaw(raw.slice(2)),
+    ]) {
+      try { content = (await fn()).toString('binary'); break } catch { /* tenta próximo */ }
     }
 
-    return textos.join('\n').trim()
-  } finally {
-    worker.terminate()
+    // Extrai texto dos blocos BT...ET (Text Object)
+    const btEtRe = /BT\b([\s\S]*?)\bET\b/g
+    let bt: RegExpExecArray | null
+    while ((bt = btEtRe.exec(content)) !== null) {
+      const block = bt[1]
+      const parts: string[] = []
+
+      // (string) Tj  ou  (string) '
+      const tjRe = /\(([^)\\]*(?:\\.[^)\\]*)*)\)\s*(?:Tj|'|")/g
+      let tj: RegExpExecArray | null
+      while ((tj = tjRe.exec(block)) !== null) parts.push(decodePDFString(tj[1]))
+
+      // [(chunk) -kern (chunk)] TJ
+      const TJRe = /\[([\s\S]*?)\]\s*TJ/g
+      let TJ: RegExpExecArray | null
+      while ((TJ = TJRe.exec(block)) !== null) {
+        const chunkRe = /\(([^)\\]*(?:\\.[^)\\]*)*)\)/g
+        let ch: RegExpExecArray | null
+        while ((ch = chunkRe.exec(TJ[1])) !== null) parts.push(decodePDFString(ch[1]))
+      }
+
+      const line = parts.join('').trim()
+      if (line) texts.push(line)
+    }
   }
+
+  return texts.join('\n').trim()
 }
 
 export async function POST(req: NextRequest) {
