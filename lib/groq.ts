@@ -13,12 +13,13 @@ function provider() {
 
 export type Msg = { role: 'system' | 'user' | 'assistant'; content: string }
 
-export async function groq(messages: Msg[], maxTokens = 1024): Promise<string> {
+export async function groq(messages: Msg[], maxTokens = 1024, modelOverride?: string): Promise<string> {
   const p = provider()
+  const model = modelOverride ?? p.model
   const res = await fetch(p.url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
-    body: JSON.stringify({ model: p.model, messages, temperature: 0.7, max_tokens: maxTokens }),
+    body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: maxTokens }),
   })
   if (!res.ok) {
     const txt = await res.text()

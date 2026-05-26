@@ -106,7 +106,7 @@ Atividades em andamento: ${atividades || 'Nenhuma'}
 
 {"resumoClimatico":"...","riscosIdentificados":[{"tipo":"...","nivel":"baixo|medio|alto","descricao":"...","janela":"..."}],"impactoAtividades":[{"atividade":"...","impacto":"favoravel|desfavoravel|critico","recomendacao":"..."}],"janelaIdeal":"...","alertas":["..."],"recomendacoesPraticas":["..."],"condicaoGeral":"otima|boa|atencao|critica"}`
 
-  const resultado = await groq([{ role: 'user', content: prompt }], 700)
+  const resultado = await groq([{ role: 'user', content: prompt }], 500, 'llama-3.1-8b-instant')
 
   let analise: Record<string, unknown>
   try {
