@@ -5,35 +5,59 @@ import { groq } from '@/lib/groq'
 
 export const maxDuration = 60
 
-async function buscarClimaOpenWeather(lat: number, lon: number): Promise<Record<string, unknown> | null> {
+// Coleta todos os dados externos com timeout único de 3.5s
+async function coletarDadosExternos(location: string | null): Promise<{ contextoClima: string; temOpenWeather: boolean; temNasa: boolean }> {
   const key = process.env.OPENWEATHER_API_KEY
-  if (!key) return null
-  try {
-    const [currentRes, forecastRes] = await Promise.all([
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=pt_br`),
-      fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=pt_br&cnt=16`),
-    ])
-    const current = currentRes.ok ? await currentRes.json() : null
-    const forecast = forecastRes.ok ? await forecastRes.json() : null
-    return { current, forecast }
-  } catch {
-    return null
-  }
-}
+  const vazio = { contextoClima: 'Dados climáticos não disponíveis.', temOpenWeather: false, temNasa: false }
 
-async function buscarNasaPower(lat: number, lon: number): Promise<Record<string, unknown> | null> {
-  try {
-    const today = new Date()
-    const start = new Date(today); start.setDate(today.getDate() - 30)
-    const fmt = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '')
-    const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR,T2M_MAX,T2M_MIN,ALLSKY_SFC_SW_DWN&community=AG&longitude=${lon}&latitude=${lat}&start=${fmt(start)}&end=${fmt(today)}&format=JSON`
-    const res = await fetch(url, { signal: AbortSignal.timeout(3000) })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data?.properties?.parameter ?? null
-  } catch {
-    return null
+  if (!key || !location) return vazio
+
+  const trabalho = async () => {
+    // Geocodifica
+    const geoRes = await fetch(
+      `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(location)},BR&limit=1&appid=${key}`,
+      { signal: AbortSignal.timeout(2000) }
+    ).catch(() => null)
+    const geo = geoRes?.ok ? await geoRes.json().catch(() => []) : []
+    if (!geo[0]) return vazio
+    const { lat, lon } = geo[0]
+
+    // OpenWeather + NASA em paralelo
+    const [owRes, nasaRes] = await Promise.all([
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}&units=metric&lang=pt_br`)
+        .catch(() => null),
+      (async () => {
+        const today = new Date()
+        const s = new Date(today); s.setDate(today.getDate() - 7)
+        const fmt = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '')
+        const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR&community=AG&longitude=${lon}&latitude=${lat}&start=${fmt(s)}&end=${fmt(today)}&format=JSON`
+        return fetch(url, { signal: AbortSignal.timeout(2000) }).catch(() => null)
+      })(),
+    ])
+
+    const ow = owRes?.ok ? await owRes.json().catch(() => null) : null
+    const nasaData = nasaRes?.ok ? await nasaRes.json().catch(() => null) : null
+
+    let ctx = vazio.contextoClima
+    let temOw = false, temNasa = false
+    if (ow?.main) {
+      temOw = true
+      ctx = `Clima atual em ${location}: ${ow.weather?.[0]?.description ?? ''}, ${Math.round(ow.main.temp)}°C, umidade ${ow.main.humidity}%, vento ${Math.round((ow.wind?.speed ?? 0) * 3.6)} km/h`
+    }
+    if (nasaData?.properties?.parameter?.PRECTOTCORR) {
+      temNasa = true
+      const chuvas = Object.values(nasaData.properties.parameter.PRECTOTCORR as Record<string, number>)
+      const total = chuvas.reduce((s, v) => s + v, 0)
+      ctx += `\nChuva acumulada 7d (NASA): ${total.toFixed(1)} mm`
+    }
+    return { contextoClima: ctx, temOpenWeather: temOw, temNasa }
   }
+
+  // Timeout global de 3.5s para toda a coleta de dados externos
+  return Promise.race([
+    trabalho().catch(() => vazio),
+    new Promise<typeof vazio>(r => setTimeout(() => r(vazio), 3500)),
+  ])
 }
 
 async function processarClima(req: NextRequest): Promise<NextResponse> {
@@ -55,67 +79,30 @@ async function processarClima(req: NextRequest): Promise<NextResponse> {
   const property = dbUser?.properties[0]
   if (!property) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
 
-  // Atividades são opcionais
-  let atividades = ''
-  try {
-    const acts = await (prisma as any).activity.findMany({
-      where: { propertyId: property.id, status: { in: ['PENDING', 'IN_PROGRESS'] } },
-      orderBy: { startDate: 'asc' },
-      take: 10,
-      select: { type: true, description: true, status: true, startDate: true },
-    })
-    atividades = acts.map((a: any) =>
-      `${a.type} — ${a.description || ''} (${a.status}, início: ${new Date(a.startDate).toLocaleDateString('pt-BR')})`
-    ).join('\n')
-  } catch {}
-
-  // Geocodificação + dados climáticos
-  let lat: number | null = null
-  let lon: number | null = null
-  if (property.location && process.env.OPENWEATHER_API_KEY) {
-    try {
-      const geoRes = await fetch(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(property.location)},BR&limit=1&appid=${process.env.OPENWEATHER_API_KEY}`,
-        { signal: AbortSignal.timeout(3000) }
-      )
-      const geo = geoRes.ok ? await geoRes.json() : []
-      if (geo[0]) { lat = geo[0].lat; lon = geo[0].lon }
-    } catch {}
-  }
-
-  const [clima, nasa] = await Promise.all([
-    lat && lon ? buscarClimaOpenWeather(lat, lon) : Promise.resolve(null),
-    lat && lon ? buscarNasaPower(lat, lon) : Promise.resolve(null),
+  // Dados externos e atividades em paralelo, com limite total de 3.5s
+  const [dadosExternos, atividades] = await Promise.all([
+    coletarDadosExternos(property.location ?? null),
+    (async () => {
+      try {
+        const acts = await (prisma as any).activity.findMany({
+          where: { propertyId: property.id, status: { in: ['PENDING', 'IN_PROGRESS'] } },
+          orderBy: { startDate: 'asc' },
+          take: 8,
+          select: { type: true, description: true, status: true, startDate: true },
+        })
+        return acts.map((a: any) => `${a.type}: ${a.description || a.status}`).join(', ')
+      } catch { return '' }
+    })(),
   ])
 
   const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  let contextoClima = 'Dados climáticos não disponíveis para esta localidade.'
-  if (clima?.current) {
-    const c = clima.current as any
-    contextoClima = `Clima atual: ${c.weather?.[0]?.description}, ${Math.round(c.main?.temp)}°C, umidade ${c.main?.humidity}%, vento ${Math.round((c.wind?.speed ?? 0) * 3.6)} km/h`
-    if (clima.forecast) {
-      const f = clima.forecast as any
-      const proximo = f.list?.slice(0, 6).map((item: any) =>
-        `${new Date(item.dt * 1000).toLocaleString('pt-BR', { weekday: 'short', hour: '2-digit' })}: ${Math.round(item.main.temp)}°C, chuva ${item.pop ? Math.round(item.pop * 100) : 0}%`
-      ).join(' | ')
-      contextoClima += `\nPrevisão: ${proximo}`
-    }
-  }
-
-  if (nasa) {
-    const n = nasa as any
-    const chuvas = Object.values(n.PRECTOTCORR || {}).slice(-7).map(Number)
-    const totalChuva = chuvas.reduce((s: number, v) => s + v, 0)
-    contextoClima += `\nNASA POWER — chuva acumulada 7d: ${totalChuva.toFixed(1)} mm`
-  }
-
-  const prompt = `Agrometeorologista especializado no Brasil. Analise e responda APENAS em JSON válido sem markdown.
+  const prompt = `Agrometeorologista especializado no Brasil. Responda APENAS com JSON válido, sem markdown.
 
 Fazenda: ${property.name}${property.location ? ` — ${property.location}` : ''}
 Hoje: ${hoje}
-${contextoClima}
-Atividades: ${atividades || 'Nenhuma'}
+${dadosExternos.contextoClima}
+Atividades em andamento: ${atividades || 'Nenhuma'}
 
 {"resumoClimatico":"...","riscosIdentificados":[{"tipo":"...","nivel":"baixo|medio|alto","descricao":"...","janela":"..."}],"impactoAtividades":[{"atividade":"...","impacto":"favoravel|desfavoravel|critico","recomendacao":"..."}],"janelaIdeal":"...","alertas":["..."],"recomendacoesPraticas":["..."],"condicaoGeral":"otima|boa|atencao|critica"}`
 
@@ -133,7 +120,7 @@ Atividades: ${atividades || 'Nenhuma'}
   return NextResponse.json({
     ok: true,
     localidade: property.location || property.name,
-    dadosBrutos: { openweather: !!clima, nasa: !!nasa },
+    dadosBrutos: { openweather: dadosExternos.temOpenWeather, nasa: dadosExternos.temNasa },
     analise,
   })
 }
