@@ -15,10 +15,13 @@ export type Msg = { role: 'system' | 'user' | 'assistant'; content: string }
 
 export async function groq(messages: Msg[], maxTokens = 1024, modelOverride?: string): Promise<string> {
   const p = provider()
+  // modelOverride usa sempre Groq (nomes de modelo são Groq-específicos, não NVIDIA NIM)
+  const url = modelOverride ? GROQ_URL : p.url
+  const key = modelOverride ? process.env.GROQ_API_KEY : p.key
   const model = modelOverride ?? p.model
-  const res = await fetch(p.url, {
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
     body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: maxTokens }),
   })
   if (!res.ok) {
