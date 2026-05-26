@@ -97,23 +97,38 @@ async function processarClima(req: NextRequest): Promise<NextResponse> {
 
   const hoje = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  const prompt = `Agrometeorologista especializado no Brasil. Responda APENAS com JSON válido, sem markdown.
+  const prompt = `Você é um agrometeorologista brasileiro. Analise os dados abaixo e retorne SOMENTE um objeto JSON, sem texto adicional, sem markdown, sem explicações.
 
-Fazenda: ${property.name}${property.location ? ` — ${property.location}` : ''}
-Hoje: ${hoje}
-${dadosExternos.contextoClima}
-Atividades em andamento: ${atividades || 'Nenhuma'}
+Fazenda: ${property.name}${property.location ? ` (${property.location})` : ''}
+Data: ${hoje}
+Clima: ${dadosExternos.contextoClima}
+Atividades: ${atividades || 'Nenhuma cadastrada'}
 
-{"resumoClimatico":"...","riscosIdentificados":[{"tipo":"...","nivel":"baixo|medio|alto","descricao":"...","janela":"..."}],"impactoAtividades":[{"atividade":"...","impacto":"favoravel|desfavoravel|critico","recomendacao":"..."}],"janelaIdeal":"...","alertas":["..."],"recomendacoesPraticas":["..."],"condicaoGeral":"otima|boa|atencao|critica"}`
+Retorne exatamente neste formato JSON:
+{
+  "resumoClimatico": "string",
+  "riscosIdentificados": [{"tipo": "string", "nivel": "baixo", "descricao": "string", "janela": "string"}],
+  "impactoAtividades": [{"atividade": "string", "impacto": "favoravel", "recomendacao": "string"}],
+  "janelaIdeal": "string",
+  "alertas": ["string"],
+  "recomendacoesPraticas": ["string"],
+  "condicaoGeral": "boa"
+}`
 
-  const resultado = await groq([{ role: 'user', content: prompt }], 500, 'llama-3.1-8b-instant')
+  const resultado = await groq([{ role: 'user', content: prompt }], 600, 'llama-3.1-8b-instant')
 
   let analise: Record<string, unknown>
   try {
-    const jsonMatch = resultado.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) throw new Error()
+    // Remove markdown code fences e extrai o JSON
+    const limpo = resultado
+      .replace(/```(?:json)?/gi, '')
+      .replace(/```/g, '')
+      .trim()
+    const jsonMatch = limpo.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) throw new Error(`Sem JSON na resposta: ${limpo.slice(0, 100)}`)
     analise = JSON.parse(jsonMatch[0])
-  } catch {
+  } catch (parseErr: any) {
+    console.error('[ClimaInteligente] parse falhou:', parseErr?.message)
     return NextResponse.json({ error: 'Não foi possível estruturar a análise climática' })
   }
 
