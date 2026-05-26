@@ -27,7 +27,7 @@ async function buscarNasaPower(lat: number, lon: number): Promise<Record<string,
     const start = new Date(today); start.setDate(today.getDate() - 30)
     const fmt = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '')
     const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR,T2M_MAX,T2M_MIN,ALLSKY_SFC_SW_DWN&community=AG&longitude=${lon}&latitude=${lat}&start=${fmt(start)}&end=${fmt(today)}&format=JSON`
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) })
+    const res = await fetch(url, { signal: AbortSignal.timeout(3000) })
     if (!res.ok) return null
     const data = await res.json()
     return data?.properties?.parameter ?? null
@@ -136,7 +136,7 @@ Com base nos dados climáticos e nas atividades planejadas, responda em JSON:
 
 Responda APENAS com JSON válido, sem markdown.`
 
-    const resultado = await groq([{ role: 'user', content: prompt }], 1500)
+    const resultado = await groq([{ role: 'user', content: prompt }], 700)
 
     let analise: Record<string, unknown>
     try {

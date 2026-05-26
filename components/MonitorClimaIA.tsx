@@ -59,7 +59,10 @@ export default function MonitorClimaIA() {
     setErro('')
     try {
       const res = await fetch('/api/ai/clima-inteligente', { method: 'POST' })
-      const data = await res.json()
+      let data: any
+      try { data = await res.json() } catch {
+        throw new Error('Serviço indisponível. Tente novamente em instantes.')
+      }
       if (!res.ok || !data.ok) throw new Error(data.error || 'Erro na análise')
       setAnalise(data.analise)
       setLocalidade(data.localidade || '')
