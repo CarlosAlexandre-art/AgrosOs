@@ -38,32 +38,48 @@ async function analisarImagem(base64: string, mimeType: string, prompt: string):
 }
 
 async function extrairTextoPDF(buffer: Buffer): Promise<string> {
-  // pdfjs-dist (usado por pdf-parse) chama DOMMatrix que não existe no Node.js
+  // Polyfills para APIs de browser que pdfjs-dist usa mesmo em extração de texto
   if (typeof globalThis.DOMMatrix === 'undefined') {
-    ;(globalThis as any).DOMMatrix = class DOMMatrix {
-      a=1;b=0;c=0;d=1;e=0;f=0
-      m11=1;m12=0;m13=0;m14=0;m21=0;m22=1;m23=0;m24=0
-      m31=0;m32=0;m33=1;m34=0;m41=0;m42=0;m43=0;m44=1
-      is2D=true;isIdentity=true
-      multiply() { return this }
-      translate() { return this }
-      scale() { return this }
-      rotate() { return this }
-      rotateAxisAngle() { return this }
-      skewX() { return this }
-      skewY() { return this }
-      flipX() { return this }
-      flipY() { return this }
-      inverse() { return this }
-      transformPoint() { return { x: 0, y: 0, z: 0, w: 1 } }
-      toFloat32Array() { return new Float32Array(16) }
-      toFloat64Array() { return new Float64Array(16) }
-      toString() { return 'matrix(1, 0, 0, 1, 0, 0)' }
+    ;(globalThis as any).DOMMatrix = class {
+      a=1;b=0;c=0;d=1;e=0;f=0;is2D=true;isIdentity=true
+      multiply(){return this};translate(){return this};scale(){return this}
+      rotate(){return this};inverse(){return this};transformPoint(){return{x:0,y:0,z:0,w:1}}
+      toFloat32Array(){return new Float32Array(16)};toFloat64Array(){return new Float64Array(16)}
     }
   }
-  const pdfParse = (await import('pdf-parse')).default
-  const result = await pdfParse(buffer)
-  return result.text
+  if (typeof globalThis.Path2D === 'undefined') {
+    ;(globalThis as any).Path2D = class {
+      constructor(_?: string) {}
+      addPath(){}; arc(){}; arcTo(){}; bezierCurveTo(){}; closePath(){}
+      ellipse(){}; lineTo(){}; moveTo(){}; quadraticCurveTo(){}; rect(){}
+    }
+  }
+
+  // Usar pdfjs-dist diretamente (sem pdf-parse) para evitar o setup de teste
+  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs' as any)
+  pdfjs.GlobalWorkerOptions.workerSrc = ''
+
+  const loadingTask = pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    useWorkerFetch: false,
+    isEvalSupported: false,
+    disableFontFace: true,
+  })
+  const doc = await loadingTask.promise
+  const paginas = doc.numPages
+  const textos: string[] = []
+
+  for (let i = 1; i <= Math.min(paginas, 20); i++) {
+    const page = await doc.getPage(i)
+    const content = await page.getTextContent()
+    const linha = (content.items as any[])
+      .filter((item: any) => item.str)
+      .map((item: any) => item.str)
+      .join(' ')
+    textos.push(linha)
+  }
+
+  return textos.join('\n').trim()
 }
 
 export async function POST(req: NextRequest) {
