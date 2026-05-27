@@ -33,7 +33,46 @@ export default function VozParaAtividade() {
   const [textoManual, setTextoManual] = useState('')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  // Captura nativa via sistema operacional (Android/iOS) — bypass total das permissões do browser
+  function usarCapturaArquivo() {
+    fileInputRef.current?.click()
+  }
+
+  async function onAudioFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // reset para permitir selecionar o mesmo arquivo novamente
+    if (!file) return
+    setErro('')
+    setTranscricao('')
+    setAtividade(null)
+    setEstado('processando')
+    await processarAudioFile(file)
+  }
+
+  async function processarAudioFile(file: File) {
+    try {
+      const form = new FormData()
+      form.append('audio', file, file.name)
+      const res = await fetch('/api/ai/voz-para-atividade', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro no servidor')
+      if (data.erro || !data.atividade) {
+        setTranscricao(data.transcricao || '')
+        setErro(data.erro || 'Não foi possível extrair dados da fala')
+        setEstado('erro')
+        return
+      }
+      setTranscricao(data.transcricao)
+      setAtividade(data.atividade)
+      setEstado('confirmando')
+    } catch (e: any) {
+      setErro(e.message || 'Erro ao processar áudio')
+      setEstado('erro')
+    }
+  }
 
   const iniciarGravacao = useCallback(async () => {
     setErro('')
@@ -41,7 +80,8 @@ export default function VozParaAtividade() {
     setAtividade(null)
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      setEstado('digitando')
+      // API não disponível — usa captura nativa do SO
+      usarCapturaArquivo()
       return
     }
 
@@ -57,8 +97,8 @@ export default function VozParaAtividade() {
         setErro('Microfone em uso por outro aplicativo.')
         setEstado('erro')
       } else {
-        // Qualquer outro erro de permissão — abre direto o fallback de texto
-        setEstado('digitando')
+        // Permissão bloqueada no browser — tenta captura nativa do SO (Android/iOS)
+        usarCapturaArquivo()
       }
       return
     }
@@ -182,6 +222,16 @@ export default function VozParaAtividade() {
 
   return (
     <>
+      {/* Input hidden para captura nativa de áudio (Android/iOS) — bypass da permissão WebRTC */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*"
+        capture="microphone"
+        className="hidden"
+        onChange={onAudioFile}
+      />
+
       {/* Botão microfone flutuante */}
       <button
         onClick={estado === 'gravando' ? pararGravacao : estado === 'idle' ? iniciarGravacao : undefined}
@@ -326,11 +376,11 @@ export default function VozParaAtividade() {
                 {estado === 'erro' && (
                   <>
                     <button
-                      onClick={() => { setEstado('idle'); iniciarGravacao() }}
+                      onClick={() => { setEstado('idle'); usarCapturaArquivo() }}
                       className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
                       style={{ background: 'linear-gradient(135deg,#0369a1,#0284c7)' }}
                     >
-                      🎤 Tentar novamente
+                      🎤 Gravar áudio
                     </button>
                     <button
                       onClick={() => { setErro(''); setEstado('digitando') }}
