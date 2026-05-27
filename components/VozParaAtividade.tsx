@@ -39,7 +39,28 @@ export default function VozParaAtividade() {
     setTranscricao('')
     setAtividade(null)
 
-    // 1) Pede permissão — erros aqui são de microfone/permissão
+    // 0) Verifica se a API está disponível (pode faltar em WebViews ou HTTP)
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setErro(
+        window.isSecureContext === false
+          ? 'Microfone requer HTTPS. Acesse o site pelo endereço seguro (https://).'
+          : 'Microfone não suportado neste navegador. Use Chrome, Firefox ou Safari.'
+      )
+      setEstado('erro')
+      return
+    }
+
+    // 1) Verifica estado atual da permissão — se já foi negada, o browser NÃO mostra diálogo
+    try {
+      const perm = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+      if (perm.state === 'denied') {
+        setErro('Microfone bloqueado pelo navegador. Para desbloquear: clique no ícone 🔒 na barra de endereço → "Microfone" → "Permitir" → recarregue a página.')
+        setEstado('erro')
+        return
+      }
+    } catch { /* navigator.permissions indisponível em alguns browsers — continua */ }
+
+    // 2) Pede permissão ao usuário
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -49,10 +70,10 @@ export default function VozParaAtividade() {
         setErro('Nenhum microfone encontrado neste dispositivo.')
       } else if (nome === 'NotReadableError' || nome === 'TrackStartError') {
         setErro('Microfone em uso por outro aplicativo. Feche-o e tente novamente.')
-      } else if (nome === 'SecurityError') {
-        setErro('Microfone requer conexão segura (HTTPS).')
+      } else if (nome === 'NotAllowedError' || nome === 'PermissionDeniedError') {
+        setErro('Permissão negada. Clique em "Permitir" quando o navegador pedir acesso ao microfone.')
       } else {
-        setErro('Permissão de microfone negada. Permita o acesso nas configurações do navegador.')
+        setErro('Não foi possível acessar o microfone. Verifique as permissões do navegador.')
       }
       setEstado('erro')
       return
