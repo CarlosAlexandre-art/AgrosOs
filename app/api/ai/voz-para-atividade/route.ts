@@ -16,8 +16,9 @@ export async function POST(req: NextRequest) {
     if (!audioFile) return NextResponse.json({ error: 'Arquivo de áudio obrigatório' }, { status: 400 })
 
     // Transcrição via Groq Whisper
+    // Usa o nome real do arquivo (audio.mp4, audio.ogg, etc.) para Groq detectar o codec correto
     const whisperForm = new FormData()
-    whisperForm.append('file', audioFile, 'audio.webm')
+    whisperForm.append('file', audioFile, audioFile.name || 'audio.webm')
     whisperForm.append('model', 'whisper-large-v3')
     whisperForm.append('language', 'pt')
     whisperForm.append('response_format', 'json')

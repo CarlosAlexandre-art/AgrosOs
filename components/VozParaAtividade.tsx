@@ -35,24 +35,51 @@ export default function VozParaAtividade() {
   const router = useRouter()
 
   const iniciarGravacao = useCallback(async () => {
+    setErro('')
+    setTranscricao('')
+    setAtividade(null)
+
+    // 1) Pede permissão — erros aqui são de microfone/permissão
+    let stream: MediaStream
     try {
-      setErro('')
-      setTranscricao('')
-      setAtividade(null)
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    } catch (e: any) {
+      const nome = e?.name ?? ''
+      if (nome === 'NotFoundError' || nome === 'DevicesNotFoundError') {
+        setErro('Nenhum microfone encontrado neste dispositivo.')
+      } else if (nome === 'NotReadableError' || nome === 'TrackStartError') {
+        setErro('Microfone em uso por outro aplicativo. Feche-o e tente novamente.')
+      } else if (nome === 'SecurityError') {
+        setErro('Microfone requer conexão segura (HTTPS).')
+      } else {
+        setErro('Permissão de microfone negada. Permita o acesso nas configurações do navegador.')
+      }
+      setEstado('erro')
+      return
+    }
+
+    // 2) Detecta codec suportado (iOS/Safari não suporta audio/webm)
+    const TIPOS = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg', '']
+    const mimeType = TIPOS.find(t => !t || MediaRecorder.isTypeSupported(t)) ?? ''
+    const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
+
+    // 3) Inicia gravação — erros aqui são de codec/dispositivo
+    try {
+      const mrOpts = mimeType ? { mimeType } : {}
+      const mr = new MediaRecorder(stream, mrOpts)
       chunksRef.current = []
       mr.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
       mr.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        await processarAudio(blob)
+        const blob = new Blob(chunksRef.current, { type: mimeType || 'audio/webm' })
+        await processarAudio(blob, ext)
       }
       mediaRecorderRef.current = mr
       mr.start()
       setEstado('gravando')
     } catch {
-      setErro('Permissão de microfone negada ou não disponível.')
+      stream.getTracks().forEach(t => t.stop())
+      setErro('Gravação de áudio não suportada neste navegador/dispositivo.')
       setEstado('erro')
     }
   }, [])
@@ -62,10 +89,10 @@ export default function VozParaAtividade() {
     setEstado('processando')
   }, [])
 
-  async function processarAudio(blob: Blob) {
+  async function processarAudio(blob: Blob, ext = 'webm') {
     try {
       const form = new FormData()
-      form.append('audio', blob, 'audio.webm')
+      form.append('audio', blob, `audio.${ext}`)
       const res = await fetch('/api/ai/voz-para-atividade', { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erro no servidor')
