@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Estado = 'idle' | 'gravando' | 'processando' | 'confirmando' | 'erro'
+type Estado = 'idle' | 'gravando' | 'processando' | 'confirmando' | 'erro' | 'digitando'
 
 type AtividadeExtraida = {
   type: string
@@ -30,6 +30,7 @@ export default function VozParaAtividade() {
   const [atividade, setAtividade] = useState<AtividadeExtraida | null>(null)
   const [erro, setErro] = useState('')
   const [salvando, setSalvando] = useState(false)
+  const [textoManual, setTextoManual] = useState('')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const router = useRouter()
@@ -39,42 +40,33 @@ export default function VozParaAtividade() {
     setTranscricao('')
     setAtividade(null)
 
-    // 1) Verifica disponibilidade da API
     if (!navigator.mediaDevices?.getUserMedia) {
-      setErro(
-        window.isSecureContext === false
-          ? 'Microfone requer HTTPS. Acesse o site pelo endereço seguro (https://).'
-          : 'Microfone não suportado neste navegador. Use Chrome, Firefox ou Safari.'
-      )
-      setEstado('erro')
+      setEstado('digitando')
       return
     }
 
-    // 2) Tenta obter microfone — deixa o browser decidir mostrar ou não o diálogo
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch (e: any) {
       const nome = e?.name ?? ''
       if (nome === 'NotFoundError' || nome === 'DevicesNotFoundError') {
-        setErro('Nenhum microfone encontrado neste dispositivo.')
+        setErro('Nenhum microfone encontrado.')
+        setEstado('erro')
       } else if (nome === 'NotReadableError' || nome === 'TrackStartError') {
-        setErro('Microfone em uso por outro aplicativo. Feche-o e tente novamente.')
-      } else if (nome === 'NotAllowedError' || nome === 'PermissionDeniedError') {
-        setErro('Microfone bloqueado. Toque nos 3 pontinhos (⋮) do navegador → "Configurações do site" → "Microfone" → "Permitir" → recarregue o app.')
+        setErro('Microfone em uso por outro aplicativo.')
+        setEstado('erro')
       } else {
-        setErro('Não foi possível acessar o microfone. Verifique as permissões do navegador.')
+        // Qualquer outro erro de permissão — abre direto o fallback de texto
+        setEstado('digitando')
       }
-      setEstado('erro')
       return
     }
 
-    // 2) Detecta codec suportado (iOS/Safari não suporta audio/webm)
     const TIPOS = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg', '']
     const mimeType = TIPOS.find(t => !t || MediaRecorder.isTypeSupported(t)) ?? ''
     const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
 
-    // 3) Inicia gravação — erros aqui são de codec/dispositivo
     try {
       const mrOpts = mimeType ? { mimeType } : {}
       const mr = new MediaRecorder(stream, mrOpts)
@@ -90,8 +82,7 @@ export default function VozParaAtividade() {
       setEstado('gravando')
     } catch {
       stream.getTracks().forEach(t => t.stop())
-      setErro('Gravação de áudio não suportada neste navegador/dispositivo.')
-      setEstado('erro')
+      setEstado('digitando')
     }
   }, [])
 
@@ -122,6 +113,31 @@ export default function VozParaAtividade() {
     }
   }
 
+  async function processarTexto() {
+    const txt = textoManual.trim()
+    if (!txt) return
+    setEstado('processando')
+    try {
+      const form = new FormData()
+      form.append('texto', txt)
+      const res = await fetch('/api/ai/voz-para-atividade', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro no servidor')
+      if (data.erro || !data.atividade) {
+        setTranscricao(txt)
+        setErro(data.erro || 'Não foi possível extrair dados')
+        setEstado('erro')
+        return
+      }
+      setTranscricao(txt)
+      setAtividade(data.atividade)
+      setEstado('confirmando')
+    } catch (e: any) {
+      setErro(e.message || 'Erro ao processar')
+      setEstado('erro')
+    }
+  }
+
   async function confirmarAtividade() {
     if (!atividade) return
     setSalvando(true)
@@ -144,6 +160,7 @@ export default function VozParaAtividade() {
       setEstado('idle')
       setAtividade(null)
       setTranscricao('')
+      setTextoManual('')
       router.refresh()
     } catch (e: any) {
       setErro(e.message || 'Erro ao salvar')
@@ -158,25 +175,28 @@ export default function VozParaAtividade() {
     setAtividade(null)
     setTranscricao('')
     setErro('')
+    setTextoManual('')
   }
+
+  const modalAberto = estado === 'confirmando' || estado === 'erro' || estado === 'digitando'
 
   return (
     <>
-      {/* Botão microfone flutuante — posicionado acima do AgroGPT */}
+      {/* Botão microfone flutuante */}
       <button
         onClick={estado === 'gravando' ? pararGravacao : estado === 'idle' ? iniciarGravacao : undefined}
         disabled={estado === 'processando'}
-        className="flex fixed bottom-24 right-6 z-[1100] w-12 h-12 rounded-2xl items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
+        className="flex fixed z-[1100] w-12 h-12 rounded-2xl items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
         style={{
+          bottom: '6.5rem', right: '1.5rem',
           background: estado === 'gravando'
             ? 'linear-gradient(135deg,#dc2626,#b91c1c)'
             : 'linear-gradient(135deg,#0369a1,#0284c7)',
           boxShadow: estado === 'gravando'
             ? '0 0 20px rgba(220,38,38,.5)'
             : '0 0 16px rgba(3,105,161,.4)',
-          bottom: '6.5rem',
         }}
-        title={estado === 'gravando' ? 'Parar gravação' : 'Registrar atividade por voz'}
+        title={estado === 'gravando' ? 'Parar gravação' : 'Registrar atividade por voz ou texto'}
       >
         {estado === 'processando' ? (
           <svg className="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
@@ -190,14 +210,13 @@ export default function VozParaAtividade() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
           </svg>
         )}
-        {/* Pulse enquanto grava */}
         {estado === 'gravando' && (
           <span className="absolute inset-0 rounded-2xl bg-red-500 animate-ping opacity-30" />
         )}
       </button>
 
-      {/* Modal de confirmação / erro */}
-      {(estado === 'confirmando' || estado === 'erro') && (
+      {/* Modal */}
+      {modalAberto && (
         <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/60">
           <div
             className="w-full max-w-md rounded-2xl overflow-hidden"
@@ -216,6 +235,10 @@ export default function VozParaAtividade() {
                   <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
+                ) : estado === 'digitando' ? (
+                  <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
                 ) : (
                   <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -224,7 +247,7 @@ export default function VozParaAtividade() {
               </div>
               <div>
                 <div className="text-sm font-bold text-white">
-                  {estado === 'erro' ? 'Erro na transcrição' : 'Confirmar atividade por voz'}
+                  {estado === 'erro' ? 'Erro na transcrição' : estado === 'digitando' ? 'Descrever atividade por texto' : 'Confirmar atividade por voz'}
                 </div>
                 <div className="text-[10px] text-slate-500 font-mono">AgroGPT Whisper · LLaMA 3.3 70B</div>
               </div>
@@ -239,16 +262,36 @@ export default function VozParaAtividade() {
                 </div>
               )}
 
+              {/* Erro */}
               {estado === 'erro' && (
                 <div className="rounded-xl p-3 bg-red-500/10 border border-red-500/20">
                   <p className="text-sm text-red-300">{erro}</p>
                 </div>
               )}
 
+              {/* Input de texto (fallback quando mic não funciona) */}
+              {estado === 'digitando' && (
+                <div className="space-y-2">
+                  <p className="text-[12px] text-slate-400">
+                    Descreva a atividade como se estivesse falando. Ex: <span className="text-slate-300 italic">"Plantei soja no talhão 2 hoje de manhã"</span>
+                  </p>
+                  <textarea
+                    autoFocus
+                    value={textoManual}
+                    onChange={e => setTextoManual(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) processarTexto() }}
+                    placeholder="Ex: Fiz adubação no talhão norte com 50kg de ureia..."
+                    rows={3}
+                    className="w-full rounded-xl px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600 resize-none outline-none"
+                    style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }}
+                  />
+                </div>
+              )}
+
+              {/* Atividade confirmando */}
               {estado === 'confirmando' && atividade && (
                 <div className="space-y-2">
                   <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Atividade identificada</div>
-
                   <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,.08)' }}>
                     {[
                       { label: 'Tipo', value: TIPO_LABELS[atividade.type] || atividade.type },
@@ -264,11 +307,8 @@ export default function VozParaAtividade() {
                       </div>
                     ))}
                   </div>
-
                   {atividade.confianca === 'baixa' && (
-                    <p className="text-[11px] text-amber-400/80">
-                      ⚠️ Confiança baixa — revise os dados antes de confirmar.
-                    </p>
+                    <p className="text-[11px] text-amber-400/80">⚠️ Confiança baixa — revise os dados antes de confirmar.</p>
                   )}
                 </div>
               )}
@@ -280,8 +320,39 @@ export default function VozParaAtividade() {
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-slate-400 hover:text-white transition-colors"
                   style={{ background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)' }}
                 >
-                  {estado === 'erro' ? 'Fechar' : 'Cancelar'}
+                  {estado === 'confirmando' ? 'Cancelar' : 'Fechar'}
                 </button>
+
+                {estado === 'erro' && (
+                  <>
+                    <button
+                      onClick={() => { setEstado('idle'); iniciarGravacao() }}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
+                      style={{ background: 'linear-gradient(135deg,#0369a1,#0284c7)' }}
+                    >
+                      🎤 Tentar novamente
+                    </button>
+                    <button
+                      onClick={() => { setErro(''); setEstado('digitando') }}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
+                      style={{ background: 'linear-gradient(135deg,#1d4ed8,#2563eb)' }}
+                    >
+                      ✏️ Digitar
+                    </button>
+                  </>
+                )}
+
+                {estado === 'digitando' && (
+                  <button
+                    onClick={processarTexto}
+                    disabled={!textoManual.trim()}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-40 transition-all"
+                    style={{ background: 'linear-gradient(135deg,#0369a1,#0284c7)' }}
+                  >
+                    Analisar com IA
+                  </button>
+                )}
+
                 {estado === 'confirmando' && (
                   <button
                     onClick={confirmarAtividade}
@@ -290,15 +361,6 @@ export default function VozParaAtividade() {
                     style={{ background: 'linear-gradient(135deg,#16a34a,#059669)' }}
                   >
                     {salvando ? 'Salvando...' : 'Criar atividade'}
-                  </button>
-                )}
-                {estado === 'erro' && (
-                  <button
-                    onClick={() => { setEstado('idle'); iniciarGravacao() }}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
-                    style={{ background: 'linear-gradient(135deg,#0369a1,#0284c7)' }}
-                  >
-                    Tentar novamente
                   </button>
                 )}
               </div>

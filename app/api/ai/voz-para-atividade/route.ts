@@ -13,31 +13,42 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData()
     const audioFile = formData.get('audio') as File | null
-    if (!audioFile) return NextResponse.json({ error: 'Arquivo de áudio obrigatório' }, { status: 400 })
+    const textoManual = (formData.get('texto') as string | null)?.trim()
 
-    // Transcrição via Groq Whisper
-    // Usa o nome real do arquivo (audio.mp4, audio.ogg, etc.) para Groq detectar o codec correto
-    const whisperForm = new FormData()
-    whisperForm.append('file', audioFile, audioFile.name || 'audio.webm')
-    whisperForm.append('model', 'whisper-large-v3')
-    whisperForm.append('language', 'pt')
-    whisperForm.append('response_format', 'json')
-
-    const whisperRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
-      body: whisperForm,
-    })
-
-    if (!whisperRes.ok) {
-      const err = await whisperRes.text()
-      console.error('[Whisper Error]', err)
-      return NextResponse.json({ error: 'Erro na transcrição de áudio' }, { status: 500 })
+    if (!audioFile && !textoManual) {
+      return NextResponse.json({ error: 'Áudio ou texto obrigatório' }, { status: 400 })
     }
 
-    const { text: transcricao } = await whisperRes.json()
-    if (!transcricao?.trim()) {
-      return NextResponse.json({ error: 'Nenhuma fala detectada' }, { status: 400 })
+    let transcricao: string
+
+    if (textoManual) {
+      // Fallback de texto — pula Whisper, usa o texto direto
+      transcricao = textoManual
+    } else {
+      // Transcrição via Groq Whisper
+      const whisperForm = new FormData()
+      whisperForm.append('file', audioFile!, audioFile!.name || 'audio.webm')
+      whisperForm.append('model', 'whisper-large-v3')
+      whisperForm.append('language', 'pt')
+      whisperForm.append('response_format', 'json')
+
+      const whisperRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+        body: whisperForm,
+      })
+
+      if (!whisperRes.ok) {
+        const err = await whisperRes.text()
+        console.error('[Whisper Error]', err)
+        return NextResponse.json({ error: 'Erro na transcrição de áudio' }, { status: 500 })
+      }
+
+      const { text } = await whisperRes.json()
+      if (!text?.trim()) {
+        return NextResponse.json({ error: 'Nenhuma fala detectada' }, { status: 400 })
+      }
+      transcricao = text
     }
 
     // Extrai dados estruturados da transcrição via LLM
