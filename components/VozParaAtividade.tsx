@@ -61,18 +61,7 @@ export default function VozParaAtividade() {
       } else if (nome === 'NotReadableError' || nome === 'TrackStartError') {
         setErro('Microfone em uso por outro aplicativo. Feche-o e tente novamente.')
       } else if (nome === 'NotAllowedError' || nome === 'PermissionDeniedError') {
-        // Consulta o estado real para dar a mensagem certa
-        let bloqueadoPermanente = false
-        try {
-          const perm = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-          bloqueadoPermanente = perm.state === 'denied'
-        } catch { /* sem suporte à API de permissões */ }
-
-        setErro(
-          bloqueadoPermanente
-            ? 'Microfone bloqueado. Para desbloquear: clique no 🔒 na barra de endereço → "Microfone" → "Permitir" → recarregue a página.'
-            : 'Permissão negada. Clique em "Permitir" quando o navegador pedir acesso ao microfone.'
-        )
+        setErro('Microfone bloqueado. Toque nos 3 pontinhos (⋮) do navegador → "Configurações do site" → "Microfone" → "Permitir" → recarregue o app.')
       } else {
         setErro('Não foi possível acessar o microfone. Verifique as permissões do navegador.')
       }
