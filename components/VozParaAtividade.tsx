@@ -40,11 +40,17 @@ export default function VozParaAtividade() {
     setTranscricao('')
     setAtividade(null)
 
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setErro('API de áudio não disponível neste navegador. Tente abrir pelo Chrome.')
+      setEstado('erro')
+      return
+    }
+
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    } catch {
-      setErro('Não foi possível acessar o microfone. Verifique as permissões do navegador.')
+    } catch (e: any) {
+      setErro(`Erro: ${e?.name ?? 'desconhecido'} — ${e?.message ?? 'sem detalhes'}`)
       setEstado('erro')
       return
     }
