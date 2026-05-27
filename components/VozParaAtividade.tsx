@@ -39,7 +39,7 @@ export default function VozParaAtividade() {
     setTranscricao('')
     setAtividade(null)
 
-    // 0) Verifica se a API está disponível (pode faltar em WebViews ou HTTP)
+    // 1) Verifica disponibilidade da API
     if (!navigator.mediaDevices?.getUserMedia) {
       setErro(
         window.isSecureContext === false
@@ -50,17 +50,7 @@ export default function VozParaAtividade() {
       return
     }
 
-    // 1) Verifica estado atual da permissão — se já foi negada, o browser NÃO mostra diálogo
-    try {
-      const perm = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-      if (perm.state === 'denied') {
-        setErro('Microfone bloqueado pelo navegador. Para desbloquear: clique no ícone 🔒 na barra de endereço → "Microfone" → "Permitir" → recarregue a página.')
-        setEstado('erro')
-        return
-      }
-    } catch { /* navigator.permissions indisponível em alguns browsers — continua */ }
-
-    // 2) Pede permissão ao usuário
+    // 2) Tenta obter microfone — deixa o browser decidir mostrar ou não o diálogo
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -71,7 +61,18 @@ export default function VozParaAtividade() {
       } else if (nome === 'NotReadableError' || nome === 'TrackStartError') {
         setErro('Microfone em uso por outro aplicativo. Feche-o e tente novamente.')
       } else if (nome === 'NotAllowedError' || nome === 'PermissionDeniedError') {
-        setErro('Permissão negada. Clique em "Permitir" quando o navegador pedir acesso ao microfone.')
+        // Consulta o estado real para dar a mensagem certa
+        let bloqueadoPermanente = false
+        try {
+          const perm = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+          bloqueadoPermanente = perm.state === 'denied'
+        } catch { /* sem suporte à API de permissões */ }
+
+        setErro(
+          bloqueadoPermanente
+            ? 'Microfone bloqueado. Para desbloquear: clique no 🔒 na barra de endereço → "Microfone" → "Permitir" → recarregue a página.'
+            : 'Permissão negada. Clique em "Permitir" quando o navegador pedir acesso ao microfone.'
+        )
       } else {
         setErro('Não foi possível acessar o microfone. Verifique as permissões do navegador.')
       }
