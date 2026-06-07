@@ -275,6 +275,14 @@ export default function SplashScreen() {
   })
 
   useEffect(() => {
+    try {
+      // Só mostra uma vez por sessão do navegador (não a cada refresh)
+      if (sessionStorage.getItem('agroos_splash_done')) {
+        setGone(true)
+        return
+      }
+      sessionStorage.setItem('agroos_splash_done', '1')
+    } catch {}
     const t1 = setTimeout(() => setShow(true), 200)
     const t2 = setTimeout(() => setExit(true), 4200)
     const t3 = setTimeout(() => setGone(true), 5100)

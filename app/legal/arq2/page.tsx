@@ -162,13 +162,13 @@ export default function Arq2Page() {
             </div>
           </div>
           {gcalUrl && (
-            <a href={gcalUrl} target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'linear-gradient(135deg,#92400e,#d97706,#fbbf24)', color:'white', fontWeight:800, borderRadius:'14px', textDecoration:'none', marginBottom:'10px', boxShadow:'0 4px 20px rgba(217,119,6,0.5)', textAlign:'center', animation:'shimmer 2s ease-in-out infinite' }}>
+            <a href={gcalUrl} target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'linear-gradient(135deg,#92400e,#d97706,#fbbf24)', color:'white', fontWeight:800, borderRadius:'14px', textDecoration:'none', marginBottom:'10px', boxShadow:'0 4px 20px rgba(217,119,6,0.5)', textAlign:'center' }}>
               📅 Adicionar ao Google Calendar ✨
             </a>
           )}
-          <a href={`https://wa.me/5585986027333?text=Olá!%20Acabei%20de%20solicitar%20minha%20reunião%20pelo%20ORYON%20Legal.`} target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'#25d366', color:'white', fontWeight:800, borderRadius:'14px', textDecoration:'none' }}>
-            💬 Falar pelo WhatsApp
-          </a>
+          <button onClick={() => setEtapa('landing')} style={{ width:'100%', padding:'14px', background:'white', color:'#374151', fontWeight:600, fontSize:'14px', border:'1.5px solid #e5e7eb', borderRadius:'14px', cursor:'pointer', marginTop:'4px' }}>
+            ← Voltar ao início
+          </button>
         </div>
       </div>
     )
@@ -304,13 +304,12 @@ export default function Arq2Page() {
             <button onClick={() => setEtapa('agendar')} style={{ padding:'16px', background:`linear-gradient(135deg,${cor1},${cor2})`, color:'white', fontWeight:800, fontSize:'16px', border:'none', borderRadius:'14px', cursor:'pointer', boxShadow:'0 4px 16px rgba(217,119,6,0.3)' }}>
               📅 Agendar Reunião com a Especialista
             </button>
-            <a href={`https://wa.me/5585986027333?text=Olá!%20Acabei%20de%20fazer%20o%20diagnóstico%20jurídico%20ORYON%20Legal%20e%20gostaria%20de%20conversar.%20Meu%20score%20foi%20${d.score}/100.`}
-               target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'#25d366', color:'white', fontWeight:700, textAlign:'center', borderRadius:'14px', textDecoration:'none' }}>
-              💬 Falar agora pelo WhatsApp
-            </a>
             <a href="https://talitamartinsadv.com.br" target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'white', color:cor1, fontWeight:700, textAlign:'center', borderRadius:'14px', textDecoration:'none', border:`1.5px solid ${cor1}` }}>
               ⚖️ Conhecer a especialista
             </a>
+            <button onClick={() => setEtapa('landing')} style={{ padding:'12px', background:'none', color:'#9ca3af', fontWeight:500, fontSize:'14px', border:'none', cursor:'pointer' }}>
+              ← Voltar ao início
+            </button>
           </div>
         </div>
       </div>
@@ -410,45 +409,13 @@ export default function Arq2Page() {
     </div>
   )
 
-  // ── AGENDAR RÁPIDO ──
-  if (etapa === 'agendar-rapido') return (
-    <div style={{ minHeight:'100vh', background:'#f8f9fa', fontFamily:'system-ui,sans-serif' }}>
-      <div style={{ background:`linear-gradient(135deg,${cor1},${cor2})`, padding:'20px 24px' }}>
-        <button onClick={() => setEtapa('landing')} style={{ background:'rgba(255,255,255,0.2)', border:'none', color:'white', width:'36px', height:'36px', borderRadius:'10px', cursor:'pointer', fontSize:'16px', marginBottom:'12px' }}>←</button>
-        <h2 style={{ color:'white', fontWeight:900, fontSize:'22px', margin:0 }}>Agendar Reunião</h2>
-        <p style={{ color:'rgba(255,255,255,0.75)', fontSize:'13px', marginTop:'4px' }}>Preencha seus dados para prosseguir</p>
-      </div>
-      <div style={{ maxWidth:'480px', margin:'0 auto', padding:'28px 20px' }}>
-        <div style={{ background:'white', borderRadius:'20px', padding:'28px', boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
-          <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
-            <div>
-              <label style={{ fontSize:'12px', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:'8px' }}>
-                Nome completo <span style={{ color:'#ef4444' }}>*</span>
-              </label>
-              <input type="text" value={rapidoNome} onChange={e => setRapidoNome(e.target.value)} placeholder="Seu nome"
-                style={{ width:'100%', padding:'14px 16px', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontSize:'15px', outline:'none', boxSizing:'border-box' }}
-                onFocus={e => e.target.style.borderColor=cor2} onBlur={e => e.target.style.borderColor='#e5e7eb'} />
-            </div>
-            <div>
-              <label style={{ fontSize:'12px', fontWeight:700, color:'#374151', textTransform:'uppercase', letterSpacing:'0.05em', display:'block', marginBottom:'8px' }}>
-                WhatsApp <span style={{ color:'#ef4444' }}>*</span>
-              </label>
-              <input type="tel" value={rapidoTel} onChange={e => setRapidoTel(e.target.value)} placeholder="(85) 9 0000-0000"
-                style={{ width:'100%', padding:'14px 16px', border:'1.5px solid #e5e7eb', borderRadius:'12px', fontSize:'15px', outline:'none', boxSizing:'border-box' }}
-                onFocus={e => e.target.style.borderColor=cor2} onBlur={e => e.target.style.borderColor='#e5e7eb'} />
-            </div>
-            <button onClick={criarLeadRapido} disabled={criandoLead || !rapidoNome || !rapidoTel} style={{
-              padding:'16px', background: rapidoNome && rapidoTel ? `linear-gradient(135deg,${cor1},${cor2})` : '#d1d5db',
-              color:'white', fontWeight:800, fontSize:'16px', border:'none', borderRadius:'14px',
-              cursor: rapidoNome && rapidoTel ? 'pointer' : 'not-allowed',
-            }}>
-              {criandoLead ? '⏳ Preparando...' : 'Ver horários disponíveis →'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+  // ── AGENDAR RÁPIDO — vai direto para slots sem criar lead novo ──
+  if (etapa === 'agendar-rapido') {
+    setLeadId('direto')
+    setDiagnostico({ score: 50, nivel: 'MODERADO', vulnerabilidades: [], recomendacao: 'Agendamento direto', prioridade: 'MEDIA' })
+    setEtapa('agendar')
+    return null
+  }
 
   // ── LANDING ──
   return (

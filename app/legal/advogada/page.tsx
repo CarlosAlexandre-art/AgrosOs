@@ -180,6 +180,18 @@ export default function AdvogadaPage() {
                       <textarea value={patchForm.observacoes} onChange={e => setPatchForm(p => ({ ...p, observacoes: e.target.value }))} placeholder="Notas internas..." rows={2}
                         style={{ ...inp, resize: 'vertical' }} />
                     </div>
+                    {/* Google Calendar — aparece quando confirmar */}
+                    {patchForm.status === 'CONFIRMADA' && r.slot && (() => {
+                      const gcalStart = new Date(r.slot.data).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'
+                      const gcalEnd = new Date(new Date(r.slot.data).getTime() + (r.slot.durMinutos * 60000)).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'
+                      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Consultoria ORYON Legal — '+r.lead.nome)}&dates=${gcalStart}/${gcalEnd}&details=${encodeURIComponent(`Cliente: ${r.lead.nome}\nWhatsApp: ${r.lead.telefone}\n${patchForm.linkOnline ? 'Link: '+patchForm.linkOnline : ''}`)}`
+                      return (
+                        <a href={gcalUrl} target="_blank" rel="noopener noreferrer"
+                          style={{ display:'block', padding:'10px', background:'linear-gradient(135deg,#92400e,#d97706,#fbbf24)', color:'white', fontWeight:700, textAlign:'center', borderRadius:'8px', textDecoration:'none', marginBottom:'8px', fontSize:'13px' }}>
+                          📅 Adicionar ao meu Google Calendar ✨
+                        </a>
+                      )
+                    })()}
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => atualizarReuniao(r.id)} style={{ flex: 1, padding: '10px', background: '#22c55e', color: 'white', fontWeight: 700, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Salvar e notificar cliente</button>
                       <button onClick={() => setEditando(null)} style={{ padding: '10px 16px', background: '#f3f4f6', color: '#374151', fontWeight: 600, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancelar</button>
