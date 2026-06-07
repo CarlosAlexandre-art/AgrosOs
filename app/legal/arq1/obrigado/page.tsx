@@ -51,19 +51,19 @@ export default function ObrigadoPage() {
           ))}
         </div>
 
-        {/* WhatsApp direto */}
+        {/* Link para o site da advogada */}
         <a
-          href="https://wa.me/5585986027333?text=Olá!%20Acabei%20de%20solicitar%20uma%20consultoria%20jurídica%20pelo%20ORYON%20Legal."
+          href="https://talitamartinsadv.com.br"
           target="_blank"
           rel="noopener noreferrer"
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            background: '#25d366', color: 'white', fontWeight: 800, fontSize: '15px',
+            background: 'linear-gradient(135deg, #15803d, #16a34a)', color: 'white', fontWeight: 800, fontSize: '15px',
             padding: '14px 24px', borderRadius: '14px', textDecoration: 'none',
-            marginBottom: '12px', boxShadow: '0 4px 12px rgba(37,211,102,0.3)',
+            marginBottom: '12px', boxShadow: '0 4px 12px rgba(21,128,61,0.25)',
           }}
         >
-          💬 Falar agora pelo WhatsApp
+          ⚖️ Conhecer a especialista
         </a>
 
         <Link

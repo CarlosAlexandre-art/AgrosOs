@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     // Envia e-mail para a advogada via Resend
     if (RESEND_KEY) {
-      await fetch('https://api.resend.com/emails', {
+      const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${RESEND_KEY}`,
@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
           `,
         }),
       })
+      const resendData = await resendRes.json()
+      console.log('Resend response:', JSON.stringify(resendData))
     }
 
     return NextResponse.json({ ok: true })
