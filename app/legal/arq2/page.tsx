@@ -167,7 +167,10 @@ export default function Arq2Page() {
               📅 Adicionar ao Google Calendar ✨
             </a>
           )}
-          <button onClick={() => setEtapa('landing')} style={{ width:'100%', padding:'14px', background:'white', color:'#374151', fontWeight:600, fontSize:'14px', border:'1.5px solid #e5e7eb', borderRadius:'14px', cursor:'pointer', marginTop:'4px' }}>
+          <a href="/legal/minha-agenda" style={{ display:'block', padding:'14px', background:`linear-gradient(135deg,${cor1},${cor2})`, color:'white', fontWeight:700, textAlign:'center', borderRadius:'14px', textDecoration:'none', marginTop:'4px' }}>
+            📅 Ver Minha Agenda
+          </a>
+          <button onClick={() => setEtapa('landing')} style={{ width:'100%', padding:'12px', background:'none', color:'#9ca3af', fontWeight:500, fontSize:'14px', border:'none', cursor:'pointer', marginTop:'4px' }}>
             ← Voltar ao início
           </button>
         </div>
@@ -434,6 +437,10 @@ export default function Arq2Page() {
             Fazer Diagnóstico Gratuito →
           </button>
           <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'13px', marginTop:'12px' }}>7 perguntas · IA jurídica · Score personalizado · Gratuito</p>
+          <a href="/legal/minha-agenda"
+            style={{ marginTop:'16px', display:'inline-block', padding:'12px 28px', background:'rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.8)', fontWeight:600, fontSize:'14px', border:'1px solid rgba(255,255,255,0.25)', borderRadius:'12px', textDecoration:'none' }}>
+            📅 Minha Agenda
+          </a>
         </div>
         <div style={{ position:'absolute', bottom:'32px', left:'50%', transform:'translateX(-50%)', opacity:scrollY>50?0:1, transition:'opacity 0.3s', display:'flex', flexDirection:'column', alignItems:'center', gap:'6px' }}>
           <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.4)', letterSpacing:'0.1em', textTransform:'uppercase' }}>scroll</span>
