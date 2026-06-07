@@ -100,8 +100,8 @@ export default function Arq2Page() {
     } catch { setEtapa('agendado') }
   }
 
-  const cor1 = '#b45309'
-  const cor2 = '#f59e0b'
+  const cor1 = '#ca8a04'
+  const cor2 = '#fbbf24'
 
   const inputStyle: CSSProperties = { width: '100%', padding: '14px 16px', border: '1.5px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }
   const labelStyle: CSSProperties = { fontSize: '12px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }
@@ -388,7 +388,7 @@ export default function Arq2Page() {
   return (
     <div style={{ fontFamily:'system-ui,sans-serif', background:'white', overflowX:'hidden' }}>
       {/* HERO */}
-      <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,#1c0a00 0%,#92400e 40%,#d97706 100%)`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'80px 24px', textAlign:'center', position:'relative', overflow:'hidden' }}>
+      <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,#1c0700 0%,#78350f 35%,#ca8a04 70%,#fbbf24 100%)`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'80px 24px', textAlign:'center', position:'relative', overflow:'hidden' }}>
         {[500,700,900].map((size,i) => (
           <div key={size} style={{ position:'absolute', width:`${size}px`, height:`${size}px`, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.05)', top:'50%', left:'50%', transform:`translate(-50%,-50%) scale(${1+scrollY*0.0004*(i+1)})` }} />
         ))}
@@ -407,6 +407,10 @@ export default function Arq2Page() {
             Fazer Diagnóstico Gratuito →
           </button>
           <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'13px', marginTop:'12px' }}>7 perguntas · IA jurídica · Score personalizado · Gratuito</p>
+          <button onClick={() => { setLeadId('teste-direto'); setDiagnostico({ score:45, nivel:'ALTO', vulnerabilidades:[{tipo:'🔴',descricao:'Análise pendente'}], recomendacao:'Consultoria recomendada', prioridade:'ALTA' }); setEtapa('agendar') }}
+            style={{ marginTop:'16px', padding:'12px 28px', background:'rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.8)', fontWeight:600, fontSize:'14px', border:'1px solid rgba(255,255,255,0.25)', borderRadius:'12px', cursor:'pointer' }}>
+            📅 Já fiz o diagnóstico — Agendar reunião
+          </button>
         </div>
         <div style={{ position:'absolute', bottom:'32px', left:'50%', transform:'translateX(-50%)', opacity:scrollY>50?0:1, transition:'opacity 0.3s', display:'flex', flexDirection:'column', alignItems:'center', gap:'6px' }}>
           <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.4)', letterSpacing:'0.1em', textTransform:'uppercase' }}>scroll</span>

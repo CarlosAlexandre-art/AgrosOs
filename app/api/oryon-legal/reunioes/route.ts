@@ -40,11 +40,15 @@ export async function GET(req: NextRequest) {
   if (senha !== ADVOGADA_SENHA) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
-  const reunioes = await prisma.reuniaoLegal.findMany({
-    include: { lead: true, slot: true },
-    orderBy: { createdAt: 'desc' },
-  })
-  return NextResponse.json(reunioes)
+  try {
+    const reunioes = await prisma.reuniaoLegal.findMany({
+      include: { lead: true, slot: true },
+      orderBy: { createdAt: 'desc' },
+    })
+    return NextResponse.json(reunioes)
+  } catch {
+    return NextResponse.json([])
+  }
 }
 
 // POST — cliente solicita reunião após diagnóstico

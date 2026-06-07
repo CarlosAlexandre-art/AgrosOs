@@ -34,15 +34,24 @@ export default function AdvogadaPage() {
 
   async function login() {
     setLoading(true)
-    const res = await fetch(`/api/oryon-legal/reunioes?senha=${encodeURIComponent(senha)}`)
+    const res = await fetch('/api/oryon-legal/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senha }),
+    })
     if (res.ok) { sessionStorage.setItem(SENHA_KEY, senha); setAutenticado(true) }
     else alert('Senha incorreta')
     setLoading(false)
   }
 
   async function carregarReunioes() {
-    const res = await fetch(`/api/oryon-legal/reunioes?senha=${encodeURIComponent(senha)}`)
-    if (res.ok) setReunioes(await res.json())
+    try {
+      const res = await fetch(`/api/oryon-legal/reunioes?senha=${encodeURIComponent(senha)}`)
+      if (res.ok) {
+        const data = await res.json()
+        setReunioes(Array.isArray(data) ? data : [])
+      }
+    } catch { setReunioes([]) }
   }
 
   async function carregarSlots() {
