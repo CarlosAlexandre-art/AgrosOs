@@ -60,7 +60,10 @@ export default function Arq2Page() {
 
   useEffect(() => {
     if (etapa === 'agendar') {
-      fetch('/api/oryon-legal/slots').then(r => r.json()).then(setSlots).catch(() => {})
+      fetch('/api/oryon-legal/slots')
+        .then(r => r.json())
+        .then(data => setSlots(Array.isArray(data) ? data : []))
+        .catch(() => setSlots([]))
     }
   }, [etapa])
 
@@ -97,8 +100,8 @@ export default function Arq2Page() {
     } catch { setEtapa('agendado') }
   }
 
-  const cor1 = '#1e3a5f'
-  const cor2 = '#1d4ed8'
+  const cor1 = '#78350f'
+  const cor2 = '#b45309'
 
   const inputStyle: CSSProperties = { width: '100%', padding: '14px 16px', border: '1.5px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }
   const labelStyle: CSSProperties = { fontSize: '12px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }
@@ -133,8 +136,8 @@ export default function Arq2Page() {
             </div>
           </div>
           {gcalUrl && (
-            <a href={gcalUrl} target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:`linear-gradient(135deg,${cor1},${cor2})`, color:'white', fontWeight:800, borderRadius:'14px', textDecoration:'none', marginBottom:'10px' }}>
-              📅 Adicionar ao Google Calendar
+            <a href={gcalUrl} target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'linear-gradient(135deg,#92400e,#d97706,#fbbf24)', color:'white', fontWeight:800, borderRadius:'14px', textDecoration:'none', marginBottom:'10px', boxShadow:'0 4px 20px rgba(217,119,6,0.5)', textAlign:'center', animation:'shimmer 2s ease-in-out infinite' }}>
+              📅 Adicionar ao Google Calendar ✨
             </a>
           )}
           <a href={`https://wa.me/5585986027333?text=Olá!%20Acabei%20de%20solicitar%20minha%20reunião%20pelo%20ORYON%20Legal.`} target="_blank" rel="noopener noreferrer" style={{ display:'block', padding:'14px', background:'#25d366', color:'white', fontWeight:800, borderRadius:'14px', textDecoration:'none' }}>
@@ -453,7 +456,11 @@ export default function Arq2Page() {
           </div>
         </Fade>
       </div>
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}} *{box-sizing:border-box}`}</style>
+      <style>{`
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  @keyframes shimmer{0%,100%{box-shadow:0 4px 20px rgba(217,119,6,0.4)}50%{box-shadow:0 4px 32px rgba(251,191,36,0.8)}}
+  *{box-sizing:border-box}
+`}</style>
     </div>
   )
 }
