@@ -882,3 +882,66 @@ model FieldOperation {
   @@index([fieldId])
   @@index([userId])
 }
+
+// ─── ORYON LEGAL ────────────────────────────────────────────────────────────
+
+enum StatusReuniaoLegal {
+  PENDENTE
+  CONFIRMADA
+  REAGENDADA
+  CANCELADA
+  CONCLUIDA
+}
+
+enum ModalidadeReuniao {
+  ONLINE
+  PRESENCIAL
+}
+
+model OryonLegalLead {
+  id             String    @id @default(uuid())
+  nome           String
+  telefone       String
+  email          String?
+  cidade         String?
+  estado         String?
+  objetivo       String?
+  origem         String    @default("arq2")
+  score          Int?
+  nivel          String?
+  vulnerabilidades String?
+  recomendacao   String?
+  prioridade     String?
+  resumo         String?
+  respostas      String?
+  createdAt      DateTime  @default(now())
+  reunioes       ReuniaoLegal[]
+}
+
+model SlotDisponivel {
+  id          String             @id @default(uuid())
+  data        DateTime
+  durMinutos  Int                @default(60)
+  modalidade  ModalidadeReuniao  @default(ONLINE)
+  ocupado     Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  reunioes    ReuniaoLegal[]
+}
+
+model ReuniaoLegal {
+  id          String                @id @default(uuid())
+  leadId      String
+  lead        OryonLegalLead        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  slotId      String?
+  slot        SlotDisponivel?       @relation(fields: [slotId], references: [id])
+  status      StatusReuniaoLegal    @default(PENDENTE)
+  modalidade  ModalidadeReuniao     @default(ONLINE)
+  linkOnline  String?
+  observacoes String?
+  googleEventId String?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([leadId])
+  @@index([slotId])
+}
