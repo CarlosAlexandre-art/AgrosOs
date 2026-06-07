@@ -1,98 +1,72 @@
+import Link from 'next/link'
+
 export default function OryonLegalPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fa', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', fontFamily: 'system-ui, sans-serif' }}>
-      <div style={{ maxWidth: '560px', width: '100%', textAlign: 'center' }}>
+      <div style={{ maxWidth: '640px', width: '100%' }}>
 
-        {/* Ícone animado */}
-        <div style={{
-          width: '80px', height: '80px', borderRadius: '24px',
-          background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 24px', boxShadow: '0 8px 32px rgba(21,128,61,0.25)',
-          fontSize: '36px',
-        }}>
-          ⚖️
-        </div>
-
-        {/* Badge */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '6px',
-          background: '#f0fdf4', border: '1px solid #bbf7d0',
-          color: '#15803d', fontSize: '11px', fontWeight: 700,
-          letterSpacing: '0.08em', textTransform: 'uppercase',
-          padding: '6px 14px', borderRadius: '999px', marginBottom: '20px',
-        }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-          Em breve
-        </div>
-
-        <h1 style={{ fontSize: '32px', fontWeight: 900, color: '#111827', lineHeight: 1.2, margin: '0 0 12px' }}>
-          ORYON Legal
-        </h1>
-        <p style={{ fontSize: '17px', fontWeight: 700, color: '#15803d', margin: '0 0 16px' }}>
-          Proteção Jurídica, Patrimonial e Empresarial para o Agro
-        </p>
-        <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.6, margin: '0 0 40px' }}>
-          Estamos construindo uma solução completa de assessoria jurídica integrada ao ecossistema OryonAG. Em breve você terá acesso a diagnóstico inteligente, score jurídico e consultorias especializadas.
-        </p>
-
-        {/* Cards de serviços */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '40px', textAlign: 'left' }}>
-          {[
-            { icon: '🏡', label: 'Regularização Rural' },
-            { icon: '📄', label: 'Contratos Agrícolas' },
-            { icon: '🏛️', label: 'Holding Familiar' },
-            { icon: '🔒', label: 'Blindagem Patrimonial' },
-            { icon: '👨‍👩‍👧', label: 'Planejamento Sucessório' },
-            { icon: '💳', label: 'Recuperação de Crédito' },
-          ].map(s => (
-            <div key={s.label} style={{
-              background: 'white', border: '1px solid #e5e7eb', borderRadius: '12px',
-              padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-            }}>
-              <span style={{ fontSize: '18px' }}>{s.icon}</span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{s.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Notificação de interesse */}
-        <div style={{
-          background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)',
-          borderRadius: '16px', padding: '24px',
-          boxShadow: '0 8px 24px rgba(21,128,61,0.2)',
-        }}>
-          <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px', margin: '0 0 16px' }}>
-            Quer ser avisado assim que lançar?
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div style={{ width: '72px', height: '72px', borderRadius: '20px', background: 'linear-gradient(135deg, #15803d, #16a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', margin: '0 auto 20px', boxShadow: '0 8px 32px rgba(21,128,61,0.25)' }}>⚖️</div>
+          <h1 style={{ fontSize: '30px', fontWeight: 900, color: '#111827', marginBottom: '8px' }}>ORYON Legal</h1>
+          <p style={{ fontSize: '15px', color: '#6b7280', lineHeight: 1.6 }}>
+            Proteção Jurídica, Patrimonial e Empresarial para o Agro.<br />
+            <strong style={{ color: '#374151' }}>Escolha uma arquitetura abaixo para testar:</strong>
           </p>
-          <a
-            href="https://wa.me/5585986027333?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20ORYON%20Legal"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '8px',
-              background: 'white', color: '#15803d',
-              fontWeight: 800, fontSize: '14px',
-              padding: '12px 24px', borderRadius: '12px',
-              textDecoration: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            }}
-          >
-            💬 Falar com nossa equipe
-          </a>
         </div>
 
-        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '24px' }}>
-          ORYON Legal · Ecossistema OryonAG
-        </p>
-      </div>
+        {/* Arquitetura 01 */}
+        <Link href="/dashboard/oryon-legal/arquitetura-1" style={{ textDecoration: 'none', display: 'block', marginBottom: '16px' }}>
+          <div style={{ background: 'white', border: '2px solid #fde68a', borderRadius: '20px', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', transition: 'all 0.2s', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>⚡</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>Arquitetura 01</span>
+                  <span style={{ background: '#fef3c7', color: '#92400e', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '999px' }}>Acesso Direto</span>
+                </div>
+                <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.5, marginBottom: '14px' }}>Formulário simples → alertas contextuais → lead entregue imediatamente para a advogada. Menor atrito, maior volume.</p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {['✅ Alertas automáticos', '📋 Formulário rápido', '📬 Lead entregue em segundos'].map(t => (
+                    <span key={t} style={{ background: '#f0fdf4', color: '#166534', fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '8px' }}>{t}</span>
+                  ))}
+                </div>
+              </div>
+              <span style={{ fontSize: '20px', color: '#9ca3af', flexShrink: 0 }}>→</span>
+            </div>
+          </div>
+        </Link>
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
+        {/* Arquitetura 02 */}
+        <Link href="/dashboard/oryon-legal/arquitetura-2" style={{ textDecoration: 'none', display: 'block', marginBottom: '32px' }}>
+          <div style={{ background: 'white', border: '2px solid #bfdbfe', borderRadius: '20px', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>⭐</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>Arquitetura 02</span>
+                  <span style={{ background: '#eff6ff', color: '#1e40af', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '999px' }}>Diagnóstico Inteligente</span>
+                </div>
+                <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.5, marginBottom: '14px' }}>Quiz de 7 perguntas → IA Groq analisa → Score Jurídico → relatório completo entregue para a advogada. Lead pré-qualificado, maior ticket.</p>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {['🤖 IA Groq real', '📊 Score Jurídico', '📋 Relatório completo', '👩‍⚖️ Lead qualificado'].map(t => (
+                    <span key={t} style={{ background: '#eff6ff', color: '#1e40af', fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '8px' }}>{t}</span>
+                  ))}
+                </div>
+              </div>
+              <span style={{ fontSize: '20px', color: '#9ca3af', flexShrink: 0 }}>→</span>
+            </div>
+          </div>
+        </Link>
+
+        {/* Rodapé */}
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '14px', padding: '16px 20px', textAlign: 'center' }}>
+          <p style={{ fontSize: '13px', color: '#166534', fontWeight: 600, margin: 0 }}>
+            Teste as duas, escolha uma e ela vira a versão oficial da plataforma.
+          </p>
+        </div>
+
+      </div>
     </div>
   )
 }
