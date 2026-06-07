@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const ADVOGADA_EMAIL = process.env.ORYON_LEGAL_EMAIL ?? 'contato@oryon.ag'
+// Em teste: onboarding@resend.dev só envia para o email do dono da conta Resend.
+// Para produção: verificar domínio em resend.com/domains e trocar o `from` para noreply@oryonag.com.br
+const ADVOGADA_EMAIL = process.env.ORYON_LEGAL_EMAIL ?? 'alexandre@parceirosdeproposito.com'
 const RESEND_KEY = process.env.RESEND_API_KEY
 
 export async function POST(req: NextRequest) {
