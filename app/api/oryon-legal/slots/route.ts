@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-const ADVOGADA_SENHA = ADVOGADA_SENHA ?? 'oryon2026'
+const ADVOGADA_SENHA = process.env.ADVOGADA_SENHA ?? 'oryon2026'
 
 // GET — slots disponíveis (futuros, não ocupados)
 export async function GET() {
