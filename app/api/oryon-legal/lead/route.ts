@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'ORYON Legal <noreply@oryon.ag>',
+          from: 'ORYON Legal <onboarding@resend.dev>',
           to: ADVOGADA_EMAIL,
           subject: `⚖️ Novo lead jurídico — ${nome} (${origem})`,
           html: `
