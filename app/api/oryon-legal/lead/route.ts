@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Em teste: onboarding@resend.dev só envia para o email do dono da conta Resend.
-// Para produção: verificar domínio em resend.com/domains e trocar o `from` para noreply@oryonag.com.br
-const ADVOGADA_EMAIL = process.env.ORYON_LEGAL_EMAIL ?? 'alexandre@parceirosdeproposito.com'
+const ADVOGADA_EMAIL = process.env.ORYON_LEGAL_EMAIL ?? 'alexandre@oryonag.com.br'
 const RESEND_KEY = process.env.RESEND_API_KEY
 
 export async function POST(req: NextRequest) {
@@ -23,7 +21,7 @@ export async function POST(req: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'ORYON Legal <onboarding@resend.dev>',
+          from: 'ORYON Legal <noreply@oryonag.com.br>',
           to: ADVOGADA_EMAIL,
           subject: `⚖️ Novo lead jurídico — ${nome} (${origem})`,
           html: `
