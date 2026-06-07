@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const ALERTAS = [
   { icon: '🏡', texto: 'Identificamos que sua propriedade pode ter pendências documentais que impactam financiamentos futuros.', cta: 'Ver diagnóstico' },
@@ -10,12 +11,13 @@ const ALERTAS = [
 
 const OBJETIVOS = ['Regularização de imóvel rural', 'Contratos com prestadores', 'Proteção patrimonial', 'Planejamento sucessório', 'Holding familiar', 'Recuperação de crédito rural', 'Outro']
 
-type Etapa = 'landing' | 'formulario' | 'enviado'
+type Etapa = 'landing' | 'formulario'
 
 export default function Arquitetura1Page() {
   const [etapa, setEtapa] = useState<Etapa>('landing')
   const [form, setForm] = useState({ nome: '', telefone: '', email: '', cidade: '', estado: '', objetivo: '' })
   const [enviando, setEnviando] = useState(false)
+  const router = useRouter()
 
   async function enviar() {
     if (!form.nome || !form.telefone || !form.objetivo) return
@@ -27,27 +29,8 @@ export default function Arquitetura1Page() {
         body: JSON.stringify({ ...form, origem: 'SmartAgroOS — Arquitetura 01' }),
       })
     } catch {}
-    setEtapa('enviado')
-    setEnviando(false)
+    router.push('/legal/arq1/obrigado')
   }
-
-  if (etapa === 'enviado') return (
-    <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px', fontFamily: 'system-ui,sans-serif' }}>
-      <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
-      <h2 style={{ fontSize: '24px', fontWeight: 900, color: '#111827', marginBottom: '8px' }}>Solicitação enviada!</h2>
-      <p style={{ color: '#6b7280', maxWidth: '360px', marginBottom: '24px', lineHeight: 1.6 }}>Nossa especialista jurídica entrará em contato em até 24 horas com um diagnóstico inicial gratuito.</p>
-      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px 20px', maxWidth: '360px', marginBottom: '24px', textAlign: 'left' }}>
-        <div style={{ fontSize: '13px', color: '#166534', fontWeight: 700, marginBottom: '8px' }}>Dados enviados para a advogada:</div>
-        <div style={{ fontSize: '13px', color: '#374151' }}><strong>Nome:</strong> {form.nome}</div>
-        <div style={{ fontSize: '13px', color: '#374151' }}><strong>WhatsApp:</strong> {form.telefone}</div>
-        <div style={{ fontSize: '13px', color: '#374151' }}><strong>Objetivo:</strong> {form.objetivo}</div>
-      </div>
-      <button onClick={() => { setEtapa('landing'); setForm({ nome: '', telefone: '', email: '', cidade: '', estado: '', objetivo: '' }) }}
-        style={{ padding: '12px 24px', background: '#15803d', color: 'white', fontWeight: 700, border: 'none', borderRadius: '10px', cursor: 'pointer' }}>
-        Voltar ao início
-      </button>
-    </div>
-  )
 
   if (etapa === 'formulario') return (
     <div style={{ maxWidth: '520px', margin: '0 auto', padding: '32px 20px', fontFamily: 'system-ui,sans-serif' }}>
