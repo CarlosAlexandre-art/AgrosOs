@@ -64,7 +64,8 @@ export default function AdvogadaPage() {
       const res = await fetch(`/api/oryon-legal/reunioes?senha=${encodeURIComponent(senha)}`)
       if (res.ok) {
         const data = await res.json()
-        setReunioes(Array.isArray(data) ? data : [])
+        // Filtra reuniões com lead válido para evitar erros de render
+        setReunioes(Array.isArray(data) ? data.filter((r: Reuniao) => r?.lead?.nome) : [])
       }
     } catch { setReunioes([]) }
   }
