@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, CSSProperties } from 'react'
 
 const PERGUNTAS = [
   { id: 1, pergunta: 'Sua propriedade rural possui escritura registrada em cartório?', opcoes: ['Sim, documentação completa', 'Sim, mas com pendências', 'Não possuo escritura', 'Não sei / Preciso verificar'] },
@@ -46,7 +46,7 @@ export default function Arquitetura2Page() {
   const scoreColor = (s: number) => s < 40 ? '#ef4444' : s < 65 ? '#f59e0b' : '#22c55e'
   const progress = ((passo + 1) / PERGUNTAS.length) * 100
 
-  const s: Record<string, React.CSSProperties> = {
+  const s: Record<string, CSSProperties> = {
     wrap: { maxWidth: '620px', margin: '0 auto', padding: '32px 20px', fontFamily: 'system-ui,sans-serif' },
     tag: { background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '10px 16px', marginBottom: '24px', fontSize: '13px', color: '#1d4ed8', fontWeight: 600, display: 'inline-block' },
     card: { background: 'white', border: '1px solid #e5e7eb', borderRadius: '20px', padding: '32px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' },
