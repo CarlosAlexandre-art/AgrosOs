@@ -12,6 +12,21 @@ const COR2 = '#f59e0b'
 const STATUS_LABEL: Record<string, string> = { PENDENTE: '⏳ Pendente', CONFIRMADA: '✅ Confirmada', REAGENDADA: '🔄 Reagendada', CANCELADA: '❌ Cancelada', CONCLUIDA: '🏁 Concluída' }
 const STATUS_COLOR: Record<string, string> = { PENDENTE: '#f59e0b', CONFIRMADA: '#22c55e', REAGENDADA: '#3b82f6', CANCELADA: '#ef4444', CONCLUIDA: '#8b5cf6' }
 
+function BotaoGcal({ status, slot, lead, link }: { status: string; slot?: Slot | null; lead: { nome: string; telefone: string }; link?: string }) {
+  if (status !== 'CONFIRMADA' || !slot) return null
+  try {
+    const start = new Date(slot.data).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+    const end = new Date(new Date(slot.data).getTime() + ((slot.durMinutos || 60) * 60000)).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Consultoria ORYON Legal — ' + lead.nome)}&dates=${start}/${end}&details=${encodeURIComponent('Cliente: ' + lead.nome + '\nWhatsApp: ' + lead.telefone + (link ? '\nLink: ' + link : ''))}`
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer"
+        style={{ display: 'block', padding: '10px', background: 'linear-gradient(135deg,#92400e,#d97706,#fbbf24)', color: 'white', fontWeight: 700, textAlign: 'center', borderRadius: '8px', textDecoration: 'none', marginBottom: '8px', fontSize: '13px' }}>
+        📅 Adicionar ao meu Google Calendar ✨
+      </a>
+    )
+  } catch { return null }
+}
+
 export default function AdvogadaPage() {
   const [senha, setSenha] = useState('')
   const [autenticado, setAutenticado] = useState(false)
@@ -180,18 +195,8 @@ export default function AdvogadaPage() {
                       <textarea value={patchForm.observacoes} onChange={e => setPatchForm(p => ({ ...p, observacoes: e.target.value }))} placeholder="Notas internas..." rows={2}
                         style={{ ...inp, resize: 'vertical' }} />
                     </div>
-                    {/* Google Calendar — aparece quando confirmar */}
-                    {patchForm.status === 'CONFIRMADA' && r.slot && (() => {
-                      const gcalStart = new Date(r.slot.data).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'
-                      const gcalEnd = new Date(new Date(r.slot.data).getTime() + (r.slot.durMinutos * 60000)).toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'
-                      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('Consultoria ORYON Legal — '+r.lead.nome)}&dates=${gcalStart}/${gcalEnd}&details=${encodeURIComponent(`Cliente: ${r.lead.nome}\nWhatsApp: ${r.lead.telefone}\n${patchForm.linkOnline ? 'Link: '+patchForm.linkOnline : ''}`)}`
-                      return (
-                        <a href={gcalUrl} target="_blank" rel="noopener noreferrer"
-                          style={{ display:'block', padding:'10px', background:'linear-gradient(135deg,#92400e,#d97706,#fbbf24)', color:'white', fontWeight:700, textAlign:'center', borderRadius:'8px', textDecoration:'none', marginBottom:'8px', fontSize:'13px' }}>
-                          📅 Adicionar ao meu Google Calendar ✨
-                        </a>
-                      )
-                    })()}
+                    {/* Google Calendar — aparece quando status = CONFIRMADA e tem slot */}
+                    <BotaoGcal status={patchForm.status} slot={r.slot} lead={r.lead} link={patchForm.linkOnline} />
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => atualizarReuniao(r.id)} style={{ flex: 1, padding: '10px', background: '#22c55e', color: 'white', fontWeight: 700, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Salvar e notificar cliente</button>
                       <button onClick={() => setEditando(null)} style={{ padding: '10px 16px', background: '#f3f4f6', color: '#374151', fontWeight: 600, border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Cancelar</button>
