@@ -25,39 +25,31 @@ export async function POST(req: NextRequest) {
           to: ADVOGADA_EMAIL,
           subject: `⚖️ Novo lead jurídico — ${nome} (${origem})`,
           html: `
-            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px">
-              <div style="background:#15803d;color:white;padding:28px 32px;border-radius:12px 12px 0 0">
-                <h2 style="margin:0;font-size:20px">⚖️ Novo Lead — ORYON Legal</h2>
-                <p style="margin:6px 0 0;opacity:0.8;font-size:13px">Origem: ${origem}</p>
+            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:16px">
+              <div style="background:#15803d;color:white;padding:24px 20px;border-radius:12px 12px 0 0">
+                <h2 style="margin:0;font-size:18px">⚖️ Novo Lead — ORYON Legal</h2>
+                <p style="margin:6px 0 0;opacity:0.8;font-size:12px">Origem: ${origem}</p>
               </div>
-              <div style="background:#f9fafb;padding:28px 32px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
-                <table style="width:100%;border-collapse:collapse">
-                  <tr style="border-bottom:1px solid #e5e7eb">
-                    <td style="padding:12px 0;color:#6b7280;font-size:13px;width:130px;vertical-align:top">Nome</td>
-                    <td style="padding:12px 0;font-weight:700;font-size:14px;color:#111827">${nome}</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #e5e7eb">
-                    <td style="padding:12px 0;color:#6b7280;font-size:13px;vertical-align:top">WhatsApp</td>
-                    <td style="padding:12px 0;font-size:14px"><a href="https://wa.me/55${telefone.replace(/\D/g, '')}" style="color:#15803d;font-weight:700;text-decoration:none">${telefone}</a></td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #e5e7eb">
-                    <td style="padding:12px 0;color:#6b7280;font-size:13px;vertical-align:top">E-mail</td>
-                    <td style="padding:12px 0;font-weight:600;font-size:14px;color:#111827">${email || '—'}</td>
-                  </tr>
-                  <tr style="border-bottom:1px solid #e5e7eb">
-                    <td style="padding:12px 0;color:#6b7280;font-size:13px;vertical-align:top">Cidade/Estado</td>
-                    <td style="padding:12px 0;font-weight:600;font-size:14px;color:#111827">${cidade || '—'}${estado ? ` / ${estado}` : ''}</td>
-                  </tr>
-                  <tr>
-                    <td style="padding:12px 0;color:#6b7280;font-size:13px;vertical-align:top">Objetivo</td>
-                    <td style="padding:12px 0;font-weight:700;font-size:14px;color:#15803d">${objetivo}</td>
-                  </tr>
-                </table>
-                <div style="margin-top:24px;padding:16px 20px;background:white;border-radius:10px;border:1px solid #e5e7eb">
-                  <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6">Lead gerado automaticamente pelo ecossistema OryonAG. Os dados foram enriquecidos com informações operacionais da plataforma.</p>
+              <div style="background:#f9fafb;padding:20px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
+
+                ${[
+                  { label: 'Nome', value: nome, color: '#111827' },
+                  { label: 'WhatsApp', value: `<a href="https://wa.me/55${telefone.replace(/\D/g, '')}" style="color:#15803d;font-weight:700;text-decoration:none">${telefone}</a>`, color: null },
+                  { label: 'E-mail', value: email || '—', color: '#111827' },
+                  { label: 'Cidade/Estado', value: `${cidade || '—'}${estado ? ` / ${estado}` : ''}`, color: '#111827' },
+                  { label: 'Objetivo', value: objetivo, color: '#15803d' },
+                ].map(row => `
+                  <div style="padding:12px 0;border-bottom:1px solid #e5e7eb">
+                    <div style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">${row.label}</div>
+                    <div style="font-size:15px;font-weight:600;color:${row.color || 'inherit'}">${row.value}</div>
+                  </div>
+                `).join('')}
+
+                <div style="margin-top:16px;padding:14px 16px;background:white;border-radius:10px;border:1px solid #e5e7eb">
+                  <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.6">Lead gerado automaticamente pelo ecossistema OryonAG.</p>
                 </div>
                 <a href="https://wa.me/55${telefone.replace(/\D/g, '')}?text=Olá%20${encodeURIComponent(nome)}%2C%20sou%20da%20equipe%20ORYON%20Legal%20e%20gostaria%20de%20agendar%20um%20diagnóstico%20jurídico%20gratuito%20para%20você."
-                   style="display:block;margin-top:16px;text-align:center;background:#25d366;color:white;padding:15px;border-radius:10px;text-decoration:none;font-weight:800;font-size:15px">
+                   style="display:block;margin-top:14px;text-align:center;background:#25d366;color:white;padding:14px;border-radius:10px;text-decoration:none;font-weight:800;font-size:15px">
                   💬 Responder via WhatsApp
                 </a>
               </div>
