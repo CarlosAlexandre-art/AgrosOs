@@ -100,8 +100,8 @@ export default function Arq2Page() {
     } catch { setEtapa('agendado') }
   }
 
-  const cor1 = '#78350f'
-  const cor2 = '#b45309'
+  const cor1 = '#92400e'
+  const cor2 = '#d97706'
 
   const inputStyle: CSSProperties = { width: '100%', padding: '14px 16px', border: '1.5px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }
   const labelStyle: CSSProperties = { fontSize: '12px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }
@@ -165,7 +165,7 @@ export default function Arq2Page() {
             <div style={{ fontSize:'13px', fontWeight:700, color:'#374151', marginBottom:'12px' }}>Como prefere a reunião?</div>
             <div style={{ display:'flex', gap:'10px' }}>
               {(['ONLINE','PRESENCIAL'] as const).map(m => (
-                <button key={m} onClick={() => setModalidade(m)} style={{ flex:1, padding:'12px', border:`2px solid ${modalidade===m ? cor2 : '#e5e7eb'}`, borderRadius:'12px', background:modalidade===m ? '#eff6ff' : 'white', color:modalidade===m ? cor2 : '#374151', fontWeight:700, cursor:'pointer', fontSize:'14px' }}>
+                <button key={m} onClick={() => setModalidade(m)} style={{ flex:1, padding:'12px', border:`2px solid ${modalidade===m ? cor2 : '#e5e7eb'}`, borderRadius:'12px', background:modalidade===m ? '#fffbeb' : 'white', color:modalidade===m ? cor2 : '#374151', fontWeight:700, cursor:'pointer', fontSize:'14px' }}>
                   {m === 'ONLINE' ? '💻 Online' : '📍 Presencial'}
                 </button>
               ))}
@@ -190,7 +190,7 @@ export default function Arq2Page() {
                     <button key={s.id} onClick={() => setSlotSelecionado(s.id)} style={{
                       display:'flex', alignItems:'center', justifyContent:'space-between',
                       padding:'14px 16px', border:`2px solid ${sel ? cor2 : '#e5e7eb'}`,
-                      borderRadius:'12px', background:sel ? '#eff6ff' : 'white',
+                      borderRadius:'12px', background:sel ? '#fffbeb' : 'white',
                       cursor:'pointer', textAlign:'left',
                     }}>
                       <div>
@@ -214,7 +214,7 @@ export default function Arq2Page() {
           <button onClick={agendar} disabled={!leadId} style={{
             width:'100%', padding:'16px', background:leadId ? `linear-gradient(135deg,${cor1},${cor2})` : '#d1d5db',
             color:'white', fontWeight:800, fontSize:'16px', border:'none', borderRadius:'14px',
-            cursor:leadId ? 'pointer' : 'not-allowed', boxShadow:leadId ? '0 4px 16px rgba(29,78,216,0.3)' : 'none',
+            cursor:leadId ? 'pointer' : 'not-allowed', boxShadow:leadId ? '0 4px 16px rgba(217,119,6,0.3)' : 'none',
           }}>
             {slotSelecionado ? 'Confirmar Agendamento →' : 'Solicitar Agendamento (sem horário fixo) →'}
           </button>
@@ -275,7 +275,7 @@ export default function Arq2Page() {
 
           {/* Ações */}
           <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-            <button onClick={() => setEtapa('agendar')} style={{ padding:'16px', background:`linear-gradient(135deg,${cor1},${cor2})`, color:'white', fontWeight:800, fontSize:'16px', border:'none', borderRadius:'14px', cursor:'pointer', boxShadow:'0 4px 16px rgba(29,78,216,0.3)' }}>
+            <button onClick={() => setEtapa('agendar')} style={{ padding:'16px', background:`linear-gradient(135deg,${cor1},${cor2})`, color:'white', fontWeight:800, fontSize:'16px', border:'none', borderRadius:'14px', cursor:'pointer', boxShadow:'0 4px 16px rgba(217,119,6,0.3)' }}>
               📅 Agendar Reunião com a Especialista
             </button>
             <a href={`https://wa.me/5585986027333?text=Olá!%20Acabei%20de%20fazer%20o%20diagnóstico%20jurídico%20ORYON%20Legal%20e%20gostaria%20de%20conversar.%20Meu%20score%20foi%20${d.score}/100.`}
@@ -324,7 +324,7 @@ export default function Arq2Page() {
               <button key={op} onClick={() => setRespostas(r => { const n=[...r]; n[passo]=op; return n })} style={{
                 display:'flex', alignItems:'center', gap:'14px', padding:'16px',
                 border:`2px solid ${sel===op ? cor2 : '#e5e7eb'}`,
-                borderRadius:'14px', cursor:'pointer', background:sel===op ? '#eff6ff' : 'white',
+                borderRadius:'14px', cursor:'pointer', background:sel===op ? '#fffbeb' : 'white',
                 color:sel===op ? cor2 : '#374151', fontWeight:sel===op ? 700 : 500, fontSize:'15px', textAlign:'left',
               }}>
                 <span style={{ width:'22px', height:'22px', borderRadius:'50%', border:`2px solid ${sel===op?cor2:'#d1d5db'}`, background:sel===op?cor2:'white', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -388,7 +388,7 @@ export default function Arq2Page() {
   return (
     <div style={{ fontFamily:'system-ui,sans-serif', background:'white', overflowX:'hidden' }}>
       {/* HERO */}
-      <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,${cor1} 0%,#1e3799 50%,${cor2} 100%)`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'80px 24px', textAlign:'center', position:'relative', overflow:'hidden' }}>
+      <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,#451a03 0%,${cor1} 50%,${cor2} 100%)`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'80px 24px', textAlign:'center', position:'relative', overflow:'hidden' }}>
         {[500,700,900].map((size,i) => (
           <div key={size} style={{ position:'absolute', width:`${size}px`, height:`${size}px`, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.05)', top:'50%', left:'50%', transform:`translate(-50%,-50%) scale(${1+scrollY*0.0004*(i+1)})` }} />
         ))}

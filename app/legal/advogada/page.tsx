@@ -6,8 +6,8 @@ type Slot = { id: string; data: string; durMinutos: number; modalidade: string; 
 type Reuniao = { id: string; status: string; modalidade: string; linkOnline?: string; observacoes?: string; createdAt: string; lead: { nome: string; telefone: string; email?: string; score?: number; nivel?: string; recomendacao?: string; prioridade?: string }; slot?: Slot }
 
 const SENHA_KEY = 'oryon_adv_senha'
-const COR = '#1e3a5f'
-const COR2 = '#1d4ed8'
+const COR = '#92400e'
+const COR2 = '#d97706'
 
 const STATUS_LABEL: Record<string, string> = { PENDENTE: '⏳ Pendente', CONFIRMADA: '✅ Confirmada', REAGENDADA: '🔄 Reagendada', CANCELADA: '❌ Cancelada', CONCLUIDA: '🏁 Concluída' }
 const STATUS_COLOR: Record<string, string> = { PENDENTE: '#f59e0b', CONFIRMADA: '#22c55e', REAGENDADA: '#3b82f6', CANCELADA: '#ef4444', CONCLUIDA: '#8b5cf6' }
