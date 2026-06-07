@@ -115,15 +115,16 @@ export default function Arq2Page() {
   }
 
   async function agendar() {
-    if (!leadId) return
+    if (!leadId || leadId === 'direto' || leadId === 'fallback') return
     try {
-      await fetch('/api/oryon-legal/reunioes', {
+      const res = await fetch('/api/oryon-legal/reunioes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ leadId, slotId: slotSelecionado, modalidade }),
       })
-      setEtapa('agendado')
-    } catch { setEtapa('agendado') }
+      if (res.ok) setEtapa('agendado')
+      else alert('Erro ao agendar. Tente novamente.')
+    } catch { alert('Erro de conexão. Tente novamente.') }
   }
 
   const cor1 = '#ca8a04'
@@ -409,13 +410,6 @@ export default function Arq2Page() {
     </div>
   )
 
-  // ── AGENDAR RÁPIDO — vai direto para slots sem criar lead novo ──
-  if (etapa === 'agendar-rapido') {
-    setLeadId('direto')
-    setDiagnostico({ score: 50, nivel: 'MODERADO', vulnerabilidades: [], recomendacao: 'Agendamento direto', prioridade: 'MEDIA' })
-    setEtapa('agendar')
-    return null
-  }
 
   // ── LANDING ──
   return (
@@ -440,10 +434,6 @@ export default function Arq2Page() {
             Fazer Diagnóstico Gratuito →
           </button>
           <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'13px', marginTop:'12px' }}>7 perguntas · IA jurídica · Score personalizado · Gratuito</p>
-          <button onClick={() => setEtapa('agendar-rapido')}
-            style={{ marginTop:'16px', padding:'12px 28px', background:'rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.8)', fontWeight:600, fontSize:'14px', border:'1px solid rgba(255,255,255,0.25)', borderRadius:'12px', cursor:'pointer' }}>
-            📅 Já fiz o diagnóstico — Agendar reunião
-          </button>
         </div>
         <div style={{ position:'absolute', bottom:'32px', left:'50%', transform:'translateX(-50%)', opacity:scrollY>50?0:1, transition:'opacity 0.3s', display:'flex', flexDirection:'column', alignItems:'center', gap:'6px' }}>
           <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.4)', letterSpacing:'0.1em', textTransform:'uppercase' }}>scroll</span>
