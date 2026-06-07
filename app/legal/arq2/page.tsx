@@ -100,8 +100,8 @@ export default function Arq2Page() {
     } catch { setEtapa('agendado') }
   }
 
-  const cor1 = '#92400e'
-  const cor2 = '#d97706'
+  const cor1 = '#b45309'
+  const cor2 = '#f59e0b'
 
   const inputStyle: CSSProperties = { width: '100%', padding: '14px 16px', border: '1.5px solid #e5e7eb', borderRadius: '12px', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }
   const labelStyle: CSSProperties = { fontSize: '12px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '8px' }
@@ -388,7 +388,7 @@ export default function Arq2Page() {
   return (
     <div style={{ fontFamily:'system-ui,sans-serif', background:'white', overflowX:'hidden' }}>
       {/* HERO */}
-      <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,#451a03 0%,${cor1} 50%,${cor2} 100%)`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'80px 24px', textAlign:'center', position:'relative', overflow:'hidden' }}>
+      <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,#1c0a00 0%,#92400e 40%,#d97706 100%)`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'80px 24px', textAlign:'center', position:'relative', overflow:'hidden' }}>
         {[500,700,900].map((size,i) => (
           <div key={size} style={{ position:'absolute', width:`${size}px`, height:`${size}px`, borderRadius:'50%', border:'1px solid rgba(255,255,255,0.05)', top:'50%', left:'50%', transform:`translate(-50%,-50%) scale(${1+scrollY*0.0004*(i+1)})` }} />
         ))}
@@ -398,7 +398,7 @@ export default function Arq2Page() {
             ORYON Legal · Diagnóstico Inteligente
           </div>
           <h1 style={{ fontSize:'clamp(32px,6vw,56px)', fontWeight:900, color:'white', lineHeight:1.1, marginBottom:'20px', letterSpacing:'-0.02em' }}>
-            Descubra os riscos<br /><span style={{ color:'#93c5fd' }}>jurídicos da sua fazenda</span>
+            Descubra os riscos<br /><span style={{ color:'#fbbf24' }}>jurídicos da sua fazenda</span>
           </h1>
           <p style={{ fontSize:'18px', color:'rgba(255,255,255,0.7)', lineHeight:1.6, marginBottom:'40px', maxWidth:'480px', margin:'0 auto 40px' }}>
             Diagnóstico jurídico inteligente em 3 minutos. IA analisa sua situação e conecta você à especialista certa.

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 const RESEND_KEY = process.env.RESEND_API_KEY
 const ADVOGADA_EMAIL = process.env.ORYON_LEGAL_EMAIL ?? 'alexandre@oryonag.com.br'
 const ADVOGADA_WHATSAPP = process.env.ADVOGADA_WHATSAPP ?? '5585986027333'
+const ADVOGADA_SENHA = process.env.ADVOGADA_SENHA ?? 'oryon2026'
 
 async function sendEmail(to: string, subject: string, html: string) {
   if (!RESEND_KEY) return
@@ -36,7 +37,7 @@ function campo(label: string, value: string) {
 // GET — lista reuniões (advogada)
 export async function GET(req: NextRequest) {
   const senha = req.nextUrl.searchParams.get('senha')
-  if (senha !== process.env.ADVOGADA_SENHA) {
+  if (senha !== ADVOGADA_SENHA) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
   const reunioes = await prisma.reuniaoLegal.findMany({
@@ -117,7 +118,7 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json()
     const { id, senha, status, linkOnline, observacoes, novoSlotId } = body
 
-    if (senha !== process.env.ADVOGADA_SENHA) {
+    if (senha !== ADVOGADA_SENHA) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 

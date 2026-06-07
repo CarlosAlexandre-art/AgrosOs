@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+const ADVOGADA_SENHA = ADVOGADA_SENHA ?? 'oryon2026'
+
 // GET — slots disponíveis (futuros, não ocupados)
 export async function GET() {
   try {
@@ -19,7 +21,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    if (body.senha !== process.env.ADVOGADA_SENHA) {
+    if (body.senha !== ADVOGADA_SENHA) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
     const slot = await prisma.slotDisponivel.create({
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const { id, senha } = await req.json()
-    if (senha !== process.env.ADVOGADA_SENHA) {
+    if (senha !== ADVOGADA_SENHA) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
     await prisma.slotDisponivel.delete({ where: { id } })
