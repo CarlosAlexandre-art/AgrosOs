@@ -16,6 +16,7 @@ export default function AquaSaudePage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [erro, setErro] = useState('')
   const [formMort, setFormMort] = useState({ loteId: '', quantidade: '', causaSuspeita: '', tratamento: '', data: new Date().toISOString().slice(0, 10), observacao: '' })
   const [formTrat, setFormTrat] = useState({ loteId: '', medicamento: '', dosagem: '', carenciaDias: '', motivoCID: '', data: new Date().toISOString().slice(0, 10), observacao: '' })
 
@@ -31,15 +32,25 @@ export default function AquaSaudePage() {
   useEffect(() => { carregar() }, [carregar])
 
   async function salvarMort(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    await fetch('/api/aqua-saude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mortalidade', ...formMort }) })
-    setSaving(false); setModal(false); setFormMort(p => ({ ...p, quantidade: '', causaSuspeita: '', tratamento: '', observacao: '' })); carregar()
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-saude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mortalidade', ...formMort }) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); setSaving(false); return }
+      setModal(false); setFormMort(p => ({ ...p, quantidade: '', causaSuspeita: '', tratamento: '', observacao: '' })); carregar()
+    } catch (err: any) { setErro(err.message) }
+    setSaving(false)
   }
 
   async function salvarTrat(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    await fetch('/api/aqua-saude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tratamento', ...formTrat }) })
-    setSaving(false); setModal(false); setFormTrat(p => ({ ...p, medicamento: '', dosagem: '', carenciaDias: '', motivoCID: '', observacao: '' })); carregar()
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-saude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tratamento', ...formTrat }) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); setSaving(false); return }
+      setModal(false); setFormTrat(p => ({ ...p, medicamento: '', dosagem: '', carenciaDias: '', motivoCID: '', observacao: '' })); carregar()
+    } catch (err: any) { setErro(err.message) }
+    setSaving(false)
   }
 
   const fimCarencia = (data: string, dias: number) => {
@@ -64,6 +75,8 @@ export default function AquaSaudePage() {
           <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Controle de mortalidade, tratamentos e período de carência</p>
         </div>
       </div>
+
+      {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 20, color: '#f87171', fontSize: 13, fontWeight: 600 }}>{erro}</div>}
 
       {/* KPIs */}
       {kpis && (
@@ -165,6 +178,7 @@ export default function AquaSaudePage() {
                 </div>
                 <div><label style={labelStyle}>Causa Suspeita</label><input style={inputStyle} value={formMort.causaSuspeita} onChange={e => setFormMort(p => ({ ...p, causaSuspeita: e.target.value }))} placeholder="Estresse, falta de OD..." /></div>
                 <div><label style={labelStyle}>Tratamento adotado</label><input style={inputStyle} value={formMort.tratamento} onChange={e => setFormMort(p => ({ ...p, tratamento: e.target.value }))} /></div>
+                {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#f87171', fontSize: 13 }}>{erro}</div>}
                 <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                   <button type="button" onClick={() => setModal(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                   <button type="submit" disabled={saving} style={{ flex: 1, background: '#ef4444', color: '#fff', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Registrar'}</button>
@@ -187,6 +201,7 @@ export default function AquaSaudePage() {
                   <div><label style={labelStyle}>Data início</label><input style={inputStyle} type="date" value={formTrat.data} onChange={e => setFormTrat(p => ({ ...p, data: e.target.value }))} /></div>
                 </div>
                 <div><label style={labelStyle}>Motivo / Diagnóstico</label><input style={inputStyle} value={formTrat.motivoCID} onChange={e => setFormTrat(p => ({ ...p, motivoCID: e.target.value }))} placeholder="Columnariose, aeromoniose..." /></div>
+                {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#f87171', fontSize: 13 }}>{erro}</div>}
                 <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                   <button type="button" onClick={() => setModal(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                   <button type="submit" disabled={saving} style={{ flex: 1, background: '#0891b2', color: '#fff', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Registrar'}</button>

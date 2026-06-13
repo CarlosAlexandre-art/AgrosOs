@@ -55,7 +55,7 @@ export async function GET() {
     return NextResponse.json({ tanques, lotes, kpis })
   } catch (e: any) {
     console.error('[aqua-gestao GET]', e.message)
-    return NextResponse.json({ error: 'Erro ao carregar dados' }, { status: 500 })
+    return NextResponse.json({ error: 'Erro ao carregar dados', detail: e.message }, { status: 500 })
   }
 }
 

@@ -15,6 +15,7 @@ export default function AquaBioPage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [erro, setErro] = useState('')
   const [form, setForm] = useState({ loteId: '', amostragem: '', pesoMedioG: '', comprimentoCm: '', data: new Date().toISOString().slice(0, 10), observacao: '' })
 
   const carregar = useCallback(() => {
@@ -29,9 +30,14 @@ export default function AquaBioPage() {
   useEffect(() => { carregar() }, [carregar])
 
   async function salvar(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    await fetch('/api/aqua-bio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    setSaving(false); setModal(false); setForm(p => ({ ...p, amostragem: '', pesoMedioG: '', comprimentoCm: '', observacao: '' })); carregar()
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-bio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); setSaving(false); return }
+      setModal(false); setForm(p => ({ ...p, amostragem: '', pesoMedioG: '', comprimentoCm: '', observacao: '' })); carregar()
+    } catch (err: any) { setErro(err.message) }
+    setSaving(false)
   }
 
   const diasProd = (data: string) => Math.floor((Date.now() - new Date(data).getTime()) / 86400000)
@@ -58,6 +64,8 @@ export default function AquaBioPage() {
           <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Biometrias, curva de crescimento e estimativa de biomassa</p>
         </div>
       </div>
+
+      {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 20, color: '#f87171', fontSize: 13, fontWeight: 600 }}>{erro}</div>}
 
       {/* KPIs */}
       {kpis && (
@@ -217,6 +225,7 @@ export default function AquaBioPage() {
                 <div><label style={labelStyle}>Data</label><input style={inputStyle} type="date" value={form.data} onChange={e => setForm(p => ({ ...p, data: e.target.value }))} /></div>
               </div>
               <div><label style={labelStyle}>Observação</label><input style={inputStyle} value={form.observacao} onChange={e => setForm(p => ({ ...p, observacao: e.target.value }))} /></div>
+              {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#f87171', fontSize: 13 }}>{erro}</div>}
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <button type="button" onClick={() => setModal(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                 <button type="submit" disabled={saving} style={{ flex: 1, background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Registrar'}</button>

@@ -21,6 +21,7 @@ export default function AquaMercadoPage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [erro, setErro] = useState('')
   const [form, setForm] = useState({ loteId: '', especie: 'Tilápia', pesoKg: '', precoKg: '', comprador: '', canal: 'Frigorífico', data: new Date().toISOString().slice(0, 10), observacao: '' })
 
   const carregar = useCallback(() => {
@@ -35,9 +36,14 @@ export default function AquaMercadoPage() {
   useEffect(() => { carregar() }, [carregar])
 
   async function salvar(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    await fetch('/api/aqua-mercado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    setSaving(false); setModal(false); setForm(p => ({ ...p, pesoKg: '', precoKg: '', comprador: '', observacao: '' })); carregar()
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-mercado', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); setSaving(false); return }
+      setModal(false); setForm(p => ({ ...p, pesoKg: '', precoKg: '', comprador: '', observacao: '' })); carregar()
+    } catch (err: any) { setErro(err.message) }
+    setSaving(false)
   }
 
   const totalCanal = Object.values(porCanal).reduce((a, b) => a + b, 0)
@@ -57,6 +63,8 @@ export default function AquaMercadoPage() {
           <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Comercialização, preços e canais de venda</p>
         </div>
       </div>
+
+      {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 20, color: '#f87171', fontSize: 13, fontWeight: 600 }}>{erro}</div>}
 
       {/* KPIs */}
       {kpis && (
@@ -186,6 +194,7 @@ export default function AquaMercadoPage() {
                 <div><label style={labelStyle}>Comprador</label><input style={inputStyle} value={form.comprador} onChange={e => setForm(p => ({ ...p, comprador: e.target.value }))} placeholder="Nome / empresa" /></div>
                 <div><label style={labelStyle}>Data</label><input style={inputStyle} type="date" value={form.data} onChange={e => setForm(p => ({ ...p, data: e.target.value }))} /></div>
               </div>
+              {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#f87171', fontSize: 13 }}>{erro}</div>}
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <button type="button" onClick={() => setModal(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                 <button type="submit" disabled={saving} style={{ flex: 1, background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Registrar Venda'}</button>
