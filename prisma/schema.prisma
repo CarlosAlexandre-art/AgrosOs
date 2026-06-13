@@ -102,6 +102,8 @@ model Property {
   planosNutricionais   PlanoNutricional[]
   transacoesGado       TransacaoGado[]
   valuations           ValuationRebanho[]
+  tanquesAqua          TanqueAqua[]
+  lotesAqua            LoteAqua[]
   createdAt    DateTime     @default(now())
 }
 
@@ -944,4 +946,197 @@ model ReuniaoLegal {
 
   @@index([leadId])
   @@index([slotId])
+}
+
+// ─── AQUICULTURA ──────────────────────────────────────────────────────────────
+
+enum TipoTanque {
+  ESCAVADO
+  TANQUE_REDE
+  RACEWAY
+  ACUDE
+  VIVEIRO
+}
+
+enum StatusLoteAqua {
+  ATIVO
+  ENCERRADO
+  CANCELADO
+}
+
+model TanqueAqua {
+  id            String     @id @default(uuid())
+  propertyId    String
+  property      Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  nome          String
+  tipo          TipoTanque @default(ESCAVADO)
+  areaM2        Float?
+  volumeM3      Float?
+  profundidadeM Float?
+  localizacao   String?
+  ativo         Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lotesAqua     LoteAqua[]
+  qualidadeAgua QualidadeAguaReg[]
+
+  @@index([propertyId])
+}
+
+model LoteAqua {
+  id                 String         @id @default(uuid())
+  propertyId         String
+  property           Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tanqueId           String
+  tanque             TanqueAqua     @relation(fields: [tanqueId], references: [id], onDelete: Cascade)
+  nome               String
+  especie            String
+  quantidadeInicial  Int
+  quantidadeAtual    Int
+  pesoMedioEntradaG  Float?
+  dataPovamento      DateTime       @default(now())
+  dataDespescaPrev   DateTime?
+  dataEncerramento   DateTime?
+  status             StatusLoteAqua @default(ATIVO)
+  observacao         String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  biometrias         BiometriaAqua[]
+  arracoamentos      ArracoamentoDiario[]
+  mortalidades       MortalidadeAqua[]
+  despescas          DespescaAqua[]
+  tratamentos        TratamentoAqua[]
+  vendasAqua         VendaAqua[]
+
+  @@index([propertyId])
+  @@index([tanqueId])
+}
+
+model BiometriaAqua {
+  id            String   @id @default(uuid())
+  loteId        String
+  lote          LoteAqua @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data          DateTime @default(now())
+  amostragem    Int
+  pesoMedioG    Float
+  comprimentoCm Float?
+  biomasseKg    Float?
+  observacao    String?
+  createdAt     DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model ArracoamentoDiario {
+  id           String   @id @default(uuid())
+  loteId       String
+  lote         LoteAqua @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data         DateTime @default(now())
+  tipoRacao    String?
+  quantidadeKg Float
+  custoKg      Float?
+  observacao   String?
+  createdAt    DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model QualidadeAguaReg {
+  id              String     @id @default(uuid())
+  tanqueId        String
+  tanque          TanqueAqua @relation(fields: [tanqueId], references: [id], onDelete: Cascade)
+  data            DateTime   @default(now())
+  ph              Float?
+  oxigenioMgL     Float?
+  temperaturaC    Float?
+  amoniaMgL       Float?
+  nitritoMgL      Float?
+  turbidezNTU     Float?
+  alcalinidadeMgL Float?
+  observacao      String?
+  alertas         String?
+  createdAt       DateTime   @default(now())
+
+  @@index([tanqueId])
+}
+
+model MortalidadeAqua {
+  id            String   @id @default(uuid())
+  loteId        String
+  lote          LoteAqua @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data          DateTime @default(now())
+  quantidade    Int
+  causaSuspeita String?
+  tratamento    String?
+  observacao    String?
+  createdAt     DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model TratamentoAqua {
+  id            String   @id @default(uuid())
+  loteId        String
+  lote          LoteAqua @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data          DateTime @default(now())
+  medicamento   String
+  dosagem       String?
+  carenciaDias  Int?
+  motivoCID     String?
+  observacao    String?
+  createdAt     DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model DespescaAqua {
+  id              String   @id @default(uuid())
+  loteId          String
+  lote            LoteAqua @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data            DateTime @default(now())
+  quantidadePeixe Int
+  pesoTotalKg     Float
+  pesoMedioG      Float?
+  rendimentoPerc  Float?
+  destinoVenda    String?
+  precoKg         Float?
+  receita         Float?
+  observacao      String?
+  createdAt       DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model VendaAqua {
+  id          String   @id @default(uuid())
+  loteId      String
+  lote        LoteAqua @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data        DateTime @default(now())
+  especie     String
+  pesoKg      Float
+  precoKg     Float
+  total       Float
+  comprador   String?
+  canal       String?
+  observacao  String?
+  createdAt   DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model DocumentoAqua {
+  id          String    @id @default(uuid())
+  propertyId  String
+  tipo        String
+  numero      String?
+  orgao       String?
+  emissao     DateTime?
+  vencimento  DateTime?
+  status      String    @default("VIGENTE")
+  arquivo     String?
+  observacao  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([propertyId])
 }
