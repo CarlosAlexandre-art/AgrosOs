@@ -49,6 +49,7 @@
     "@types/react-dom": "^19",
     "@types/three": "^0.184.1",
     "@types/web-push": "^3.6.4",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "latest",
     "svgo": "^4.0.1",
