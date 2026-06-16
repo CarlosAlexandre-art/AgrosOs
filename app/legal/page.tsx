@@ -4,189 +4,377 @@ import { useEffect, useRef, useState } from 'react'
 
 const AGRORATE_URL = 'https://agrorate.app/oryon-legal'
 
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
+  const [v, setV] = useState(false)
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold })
-    if (ref.current) obs.observe(ref.current)
-    return () => obs.disconnect()
+    const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) setV(true) }, { threshold })
+    if (ref.current) o.observe(ref.current)
+    return () => o.disconnect()
   }, [threshold])
-  return { ref, visible }
+  return { ref, v }
 }
 
-function Fade({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const { ref, visible } = useInView()
+function Reveal({ children, delay = 0, y = 40 }: { children: React.ReactNode; delay?: number; y?: number }) {
+  const { ref, v } = useInView()
   return (
-    <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(28px)', transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms` }}>
+    <div ref={ref} style={{ opacity: v ? 1 : 0, transform: v ? 'none' : `translateY(${y}px)`, transition: `opacity 0.7s cubic-bezier(.16,1,.3,1) ${delay}ms, transform 0.7s cubic-bezier(.16,1,.3,1) ${delay}ms` }}>
       {children}
     </div>
   )
 }
 
+function ScoreRing({ score, color }: { score: number; color: string }) {
+  const r = 44, circ = 2 * Math.PI * r
+  return (
+    <svg width="110" height="110" viewBox="0 0 110 110">
+      <circle cx="55" cy="55" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+      <circle cx="55" cy="55" r={r} fill="none" stroke={color} strokeWidth="10"
+        strokeDasharray={`${(score / 100) * circ} ${circ}`} strokeLinecap="round"
+        transform="rotate(-90 55 55)" style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(.16,1,.3,1)' }} />
+      <text x="55" y="51" textAnchor="middle" fill="white" fontSize="22" fontWeight="900">{score}</text>
+      <text x="55" y="67" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="11">/100</text>
+    </svg>
+  )
+}
+
 export default function LegalVitrinePage() {
   const [scrollY, setScrollY] = useState(0)
+  const [activeScore] = useState(72)
+
   useEffect(() => {
     const fn = () => setScrollY(window.scrollY)
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const cor1 = '#ca8a04'
-  const cor2 = '#fbbf24'
-
   return (
-    <div style={{ fontFamily: 'system-ui,sans-serif', background: 'white', overflowX: 'hidden' }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#0a0a0f', overflowX: 'hidden' }}>
 
-      {/* HERO */}
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg,#1c0700 0%,#78350f 35%,#ca8a04 70%,#fbbf24 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        {[500, 700, 900].map((size, i) => (
-          <div key={size} style={{ position: 'absolute', width: `${size}px`, height: `${size}px`, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.05)', top: '50%', left: '50%', transform: `translate(-50%,-50%) scale(${1 + scrollY * 0.0004 * (i + 1)})` }} />
+      {/* ── HERO ─────────────────────────────────────────── */}
+      <section style={{ minHeight: '100vh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '100px 24px 80px' }}>
+
+        {/* Background layers */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(202,138,4,0.25) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 50% at 80% 80%, rgba(120,53,15,0.2) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 40% 40% at 20% 60%, rgba(251,191,36,0.08) 0%, transparent 50%)' }} />
+
+        {/* Floating orbs */}
+        {[
+          { w: 600, h: 600, t: '5%', l: '55%', op: 0.04 },
+          { w: 400, h: 400, t: '60%', l: '10%', op: 0.03 },
+          { w: 800, h: 800, t: '20%', l: '30%', op: 0.02 },
+        ].map((o, i) => (
+          <div key={i} style={{ position: 'absolute', width: o.w, height: o.h, borderRadius: '50%', border: '1px solid rgba(251,191,36,0.15)', top: o.t, left: o.l, transform: `translate(-50%,-50%) scale(${1 + scrollY * 0.0002 * (i + 1)})`, opacity: o.op + 0.05, pointerEvents: 'none' }} />
         ))}
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '680px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.9)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', borderRadius: '999px', marginBottom: '32px' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: cor2, display: 'inline-block', animation: 'pulse 2s infinite' }} />
+        {/* Grid pattern */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: '820px', textAlign: 'center' }}>
+          {/* Badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', backdropFilter: 'blur(12px)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 18px', borderRadius: '999px', marginBottom: '36px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fbbf24', display: 'inline-block', animation: 'pulse-gold 2s infinite' }} />
             ORYON Legal · Inteligência Jurídica para o Agro
           </div>
 
-          <h1 style={{ fontSize: 'clamp(32px,6vw,60px)', fontWeight: 900, color: 'white', lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-0.02em' }}>
-            Sua fazenda protegida.<br /><span style={{ color: cor2 }}>Juridicamente.</span>
+          {/* Headline */}
+          <h1 style={{ fontSize: 'clamp(40px,7vw,80px)', fontWeight: 900, color: 'white', lineHeight: 1.0, marginBottom: '24px', letterSpacing: '-0.03em' }}>
+            Sua fazenda<br />
+            <span style={{ background: 'linear-gradient(135deg,#fbbf24 0%,#f59e0b 40%,#d97706 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              protegida.
+            </span>
           </h1>
 
-          <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: '40px', maxWidth: '520px', margin: '0 auto 40px' }}>
-            Diagnóstico jurídico inteligente, score de risco e consultoria com especialista. Tudo integrado ao ecossistema OryonAG.
+          {/* Sub */}
+          <p style={{ fontSize: 'clamp(16px,2.2vw,20px)', color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>
+            Diagnóstico jurídico com IA, score de risco personalizado e consultoria com especialista — tudo integrado ao seu perfil no AgroRate.
           </p>
 
-          <a href={AGRORATE_URL} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'inline-block', padding: '18px 44px', background: 'white', color: cor1, fontWeight: 800, fontSize: '17px', borderRadius: '16px', textDecoration: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', marginBottom: '12px' }}>
-            Fazer Diagnóstico Gratuito →
-          </a>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', marginTop: '4px' }}>Disponível na plataforma AgroRate · Gratuito</p>
+          {/* CTAs */}
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '64px' }}>
+            <a href={AGRORATE_URL} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '16px 36px', background: 'linear-gradient(135deg,#ca8a04,#fbbf24)', color: '#1c0700', fontWeight: 800, fontSize: '16px', borderRadius: '14px', textDecoration: 'none', boxShadow: '0 8px 40px rgba(202,138,4,0.4), 0 0 0 1px rgba(251,191,36,0.3)', letterSpacing: '-0.01em' }}>
+              ⚖️ Fazer Diagnóstico Gratuito
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </a>
+            <a href={`${AGRORATE_URL}/minha-agenda`} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '16px 28px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.75)', fontWeight: 600, fontSize: '16px', borderRadius: '14px', textDecoration: 'none', backdropFilter: 'blur(12px)' }}>
+              📅 Minha Agenda
+            </a>
+          </div>
 
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
-            {['⚖️ Diagnóstico IA', '📊 Score Jurídico', '📅 Agendamento', '✅ Confirmação automática'].map(tag => (
-              <span key={tag} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.8)', fontSize: '13px', fontWeight: 600, padding: '6px 14px', borderRadius: '999px' }}>{tag}</span>
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: '0', justifyContent: 'center', flexWrap: 'wrap', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', backdropFilter: 'blur(16px)', overflow: 'hidden', maxWidth: '560px', margin: '0 auto' }}>
+            {[
+              { n: '7', l: 'perguntas estratégicas' },
+              { n: '3 min', l: 'para o diagnóstico' },
+              { n: '100%', l: 'gratuito' },
+              { n: 'IA', l: 'LLaMA 3.3 70B' },
+            ].map((s, i) => (
+              <div key={i} style={{ flex: 1, minWidth: '100px', padding: '20px 16px', textAlign: 'center', borderRight: i < 3 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: '#fbbf24', marginBottom: '4px' }}>{s.n}</div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{s.l}</div>
+              </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* O QUE É */}
-      <div style={{ background: 'white', padding: '96px 24px' }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
-          <Fade>
-            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: cor2, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px' }}>O que é</div>
-              <h2 style={{ fontSize: 'clamp(28px,4vw,44px)', fontWeight: 900, color: '#111827', lineHeight: 1.2, marginBottom: '16px' }}>Proteção jurídica<br />pensada para o produtor rural</h2>
-              <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, maxWidth: '600px', margin: '0 auto' }}>
-                O ORYON Legal combina inteligência artificial com assessoria jurídica especializada para identificar riscos, emitir alertas e conectar você à advogada certa.
+        {/* Scroll indicator */}
+        <div style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', opacity: scrollY > 80 ? 0 : 1, transition: 'opacity 0.4s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>scroll</span>
+          <div style={{ width: '1px', height: '40px', background: 'linear-gradient(to bottom,rgba(251,191,36,0.4),transparent)' }} />
+        </div>
+      </section>
+
+      {/* ── DIAGNÓSTICO DEMO ──────────────────────────────── */}
+      <section style={{ padding: '120px 24px', background: 'linear-gradient(180deg,#0a0a0f 0%,#0f0a02 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 100%, rgba(202,138,4,0.08) 0%, transparent 60%)' }} />
+
+        <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <Reveal>
+            <div style={{ textAlign: 'center', marginBottom: '72px' }}>
+              <div style={{ display: 'inline-block', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '6px 16px', borderRadius: '999px', marginBottom: '20px' }}>
+                Como funciona
+              </div>
+              <h2 style={{ fontSize: 'clamp(28px,4.5vw,52px)', fontWeight: 900, color: 'white', lineHeight: 1.1, marginBottom: '16px', letterSpacing: '-0.02em' }}>
+                Do diagnóstico à reunião<br />em menos de 5 minutos
+              </h2>
+              <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.75 }}>
+                IA especializada analisa sua situação jurídica e gera um score personalizado antes de qualquer reunião.
               </p>
             </div>
-          </Fade>
+          </Reveal>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
-            {[
-              { icon: '🤖', titulo: 'IA Jurídica', desc: 'LLaMA 3.3 70B analisa sua situação e gera um score de risco personalizado em segundos.' },
-              { icon: '📊', titulo: 'Score Jurídico', desc: 'De 0 a 100 — quanto mais baixo, maior o risco. Vulnerabilidades identificadas com clareza.' },
-              { icon: '📅', titulo: 'Agendamento Inteligente', desc: 'Escolha um horário na agenda da especialista. Confirmação automática por e-mail.' },
-              { icon: '🔔', titulo: 'Alertas Contínuos', desc: 'Notificações proativas quando surgem riscos jurídicos no seu perfil no AgroRate.' },
-            ].map((c, i) => (
-              <Fade key={c.titulo} delay={i * 80}>
-                <div style={{ background: '#f8f9fa', borderRadius: '20px', padding: '28px', height: '100%' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '16px' }}>{c.icon}</div>
-                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#111827', marginBottom: '8px' }}>{c.titulo}</div>
-                  <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.7 }}>{c.desc}</div>
+          {/* Steps + Mockup */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '48px', alignItems: 'center' }}>
+            {/* Steps */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[
+                { n: '01', icon: '📋', t: '7 perguntas estratégicas', d: 'Documentação, CAR, contratos, sucessão, crédito. Menos de 3 minutos.', c: '#fbbf24' },
+                { n: '02', icon: '🤖', t: 'IA jurídica analisa', d: 'LLaMA 3.3 70B processa suas respostas e identifica vulnerabilidades reais.', c: '#f59e0b' },
+                { n: '03', icon: '📊', t: 'Score Jurídico gerado', d: 'De 0 a 100 com nível de risco, vulnerabilidades e recomendações.', c: '#d97706' },
+                { n: '04', icon: '📅', t: 'Agende com a especialista', d: 'Escolha um horário disponível. Online ou presencial. Confirmação automática.', c: '#ca8a04' },
+              ].map((s, i) => (
+                <Reveal key={s.n} delay={i * 80}>
+                  <div style={{ display: 'flex', gap: '16px', padding: '20px 24px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', alignItems: 'flex-start', transition: 'all 0.3s' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: `rgba(202,138,4,0.12)`, border: `1px solid rgba(202,138,4,0.2)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>{s.icon}</div>
+                    <div>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: s.c, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Etapa {s.n}</div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: 'white', marginBottom: '4px' }}>{s.t}</div>
+                      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.65 }}>{s.d}</div>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            {/* Mockup resultado */}
+            <Reveal delay={200}>
+              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', padding: '28px', backdropFilter: 'blur(20px)' }}>
+                {/* Header do card */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg,#ca8a04,#fbbf24)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>⚖️</div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'white' }}>Diagnóstico ORYON Legal</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>Resultado personalizado por IA</div>
+                  </div>
+                  <div style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171', fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '999px' }}>ALTO RISCO</div>
                 </div>
-              </Fade>
+
+                {/* Score */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
+                  <ScoreRing score={activeScore} color="#f59e0b" />
+                  <div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Score Jurídico</div>
+                    <div style={{ fontSize: '32px', fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{activeScore}<span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>/100</span></div>
+                    <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>Prioridade: <span style={{ color: '#fbbf24', fontWeight: 700 }}>ALTA</span></div>
+                  </div>
+                </div>
+
+                {/* Vulnerabilidades */}
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>Vulnerabilidades detectadas</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>
+                  {[
+                    { t: '🔴', d: 'Escritura com pendências cartoriais' },
+                    { t: '🟡', d: 'Planejamento sucessório inexistente' },
+                    { t: '🟡', d: 'Contratos de parceria sem formalização' },
+                  ].map((v, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', background: v.t === '🔴' ? 'rgba(239,68,68,0.08)' : 'rgba(245,158,11,0.08)', border: `1px solid ${v.t === '🔴' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'}`, fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
+                      <span style={{ fontSize: '14px' }}>{v.t}</span><span>{v.d}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <a href={AGRORATE_URL} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'block', padding: '14px', background: 'linear-gradient(135deg,#ca8a04,#fbbf24)', color: '#1c0700', fontWeight: 800, textAlign: 'center', borderRadius: '12px', textDecoration: 'none', fontSize: '14px' }}>
+                  📅 Agendar com a Especialista →
+                </a>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES GRID ─────────────────────────────────── */}
+      <section style={{ padding: '120px 24px', background: '#0a0a0f', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '1px', height: '120px', background: 'linear-gradient(to bottom,rgba(251,191,36,0.3),transparent)' }} />
+
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <Reveal>
+            <div style={{ textAlign: 'center', marginBottom: '72px' }}>
+              <div style={{ display: 'inline-block', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '6px 16px', borderRadius: '999px', marginBottom: '20px' }}>
+                Funcionalidades
+              </div>
+              <h2 style={{ fontSize: 'clamp(26px,4vw,48px)', fontWeight: 900, color: 'white', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+                Tudo que você precisa<br />em um só lugar
+              </h2>
+            </div>
+          </Reveal>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '16px' }}>
+            {[
+              { icon: '🤖', t: 'IA Jurídica Especializada', d: 'LLaMA 3.3 70B treinado em direito rural brasileiro. Análise precisa em segundos.', glow: 'rgba(202,138,4,0.2)' },
+              { icon: '📊', t: 'Score Jurídico 0-100', d: 'Métrica clara do seu risco. Quanto menor o score, maior o risco identificado.', glow: 'rgba(245,158,11,0.15)' },
+              { icon: '🔍', t: 'Mapeamento de Riscos', d: 'Documentação, ambiental, contratos, sucessão — tudo auditado automaticamente.', glow: 'rgba(251,191,36,0.1)' },
+              { icon: '📅', t: 'Agendamento Integrado', d: 'Slots disponíveis da especialista em tempo real. Confirmação automática por e-mail.', glow: 'rgba(202,138,4,0.15)' },
+              { icon: '✅', t: 'Notificações Automáticas', d: 'E-mail + Google Calendar ao confirmar reunião. Cliente e especialista sincronizados.', glow: 'rgba(245,158,11,0.12)' },
+              { icon: '🔗', t: 'Integrado ao AgroRate', d: 'Seus dados de crédito rural enriquecem automaticamente o diagnóstico jurídico.', glow: 'rgba(251,191,36,0.1)' },
+            ].map((f, i) => (
+              <Reveal key={f.t} delay={i * 60}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '28px', height: '100%', position: 'relative', overflow: 'hidden', transition: 'border-color 0.3s' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: `linear-gradient(90deg,transparent,${f.glow},transparent)` }} />
+                  <div style={{ fontSize: '28px', marginBottom: '16px' }}>{f.icon}</div>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '8px' }}>{f.t}</div>
+                  <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.7 }}>{f.d}</div>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* COMO FUNCIONA */}
-      <div style={{ background: '#f8f9fa', padding: '96px 24px' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <Fade>
-            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: cor2, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px' }}>Passo a passo</div>
-              <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 900, color: '#111827' }}>Do diagnóstico à reunião em minutos</h2>
-            </div>
-          </Fade>
+      {/* ── ECOSSISTEMA ───────────────────────────────────── */}
+      <section style={{ padding: '120px 24px', background: 'linear-gradient(180deg,#0a0a0f 0%,#0c0902 50%,#0a0a0f 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(202,138,4,0.06) 0%, transparent 60%)' }} />
 
-          {[
-            { n: '01', icon: '📋', t: '7 perguntas estratégicas', d: 'Documentação, contratos, sucessão, crédito e regularidade. Menos de 3 minutos.' },
-            { n: '02', icon: '🤖', t: 'IA jurídica analisa tudo', d: 'Modelo especializado gera vulnerabilidades, score e recomendações precisas.' },
-            { n: '03', icon: '📊', t: 'Score Jurídico gerado', d: '0 a 100 com nível de risco e lista de pendências priorizadas.' },
-            { n: '04', icon: '📅', t: 'Agende com a especialista', d: 'Escolha um horário disponível na agenda. Online ou presencial.' },
-            { n: '05', icon: '✅', t: 'Reunião confirmada para os dois', d: 'Você e a advogada recebem confirmação. Link Google Calendar incluído.' },
-          ].map((p, i) => (
-            <Fade key={p.n} delay={i * 90}>
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '36px', alignItems: 'flex-start' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: `linear-gradient(135deg,${cor1},${cor2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0, boxShadow: '0 4px 16px rgba(202,138,4,0.3)' }}>{p.icon}</div>
-                <div style={{ paddingTop: '8px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: cor2, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Etapa {p.n}</div>
-                  <div style={{ fontSize: '18px', fontWeight: 800, color: '#111827', marginBottom: '4px' }}>{p.t}</div>
-                  <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.7 }}>{p.d}</div>
-                </div>
+        <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <Reveal>
+            <div style={{ textAlign: 'center', marginBottom: '72px' }}>
+              <div style={{ display: 'inline-block', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '6px 16px', borderRadius: '999px', marginBottom: '20px' }}>
+                Ecossistema OryonAG
               </div>
-            </Fade>
-          ))}
-        </div>
-      </div>
+              <h2 style={{ fontSize: 'clamp(26px,4vw,48px)', fontWeight: 900, color: 'white', lineHeight: 1.15, marginBottom: '16px', letterSpacing: '-0.02em' }}>
+                Uma plataforma integrada
+              </h2>
+              <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.75 }}>
+                O ORYON Legal não é isolado. Ele conversa com toda a sua jornada no ecossistema agrícola.
+              </p>
+            </div>
+          </Reveal>
 
-      {/* INTEGRAÇÃO ECOSSISTEMA */}
-      <div style={{ background: 'white', padding: '96px 24px' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-          <Fade>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: cor2, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '14px' }}>Ecossistema OryonAG</div>
-            <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 900, color: '#111827', marginBottom: '16px' }}>Parte de um sistema completo</h2>
-            <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: 1.8, maxWidth: '540px', margin: '0 auto 48px' }}>
-              O ORYON Legal está integrado ao AgroRate — seus dados de crédito rural alimentam o diagnóstico jurídico automaticamente.
-            </p>
-          </Fade>
-
-          <Fade delay={100}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <Reveal delay={100}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '2px', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
               {[
-                { nome: 'SmartAgroOS', desc: 'Sistema da fazenda', bg: '#f0fdf4', cor: '#15803d' },
-                { nome: '→', desc: '', bg: 'transparent', cor: '#d1d5db' },
-                { nome: 'AgroRate', desc: 'Crédito rural', bg: '#fffbeb', cor: cor1 },
-                { nome: '→', desc: '', bg: 'transparent', cor: '#d1d5db' },
-                { nome: 'ORYON Legal', desc: 'Proteção jurídica', bg: '#fef3c7', cor: '#92400e' },
-              ].map((item, i) => item.nome === '→' ? (
-                <div key={i} style={{ fontSize: '24px', color: item.cor, fontWeight: 700 }}>→</div>
-              ) : (
-                <div key={i} style={{ background: item.bg, borderRadius: '16px', padding: '20px 24px', textAlign: 'center' }}>
-                  <div style={{ fontWeight: 800, color: item.cor, fontSize: '15px' }}>{item.nome}</div>
-                  <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{item.desc}</div>
+                { nome: 'SmartAgroOS', sub: 'Sistema da Fazenda', icon: '🌱', desc: 'Operações, talhões, AgroNav e monitoramento da propriedade em tempo real.', cor: '#16a34a', active: true },
+                { nome: 'AgroRate', sub: 'Crédito Rural', icon: '📈', desc: 'Score de crédito, documentos, planner e acesso a financiamentos rurais.', cor: '#ca8a04', active: false },
+                { nome: 'ORYON Legal', sub: 'Proteção Jurídica', icon: '⚖️', desc: 'Diagnóstico IA, score jurídico, agendamento e consultoria especializada.', cor: '#fbbf24', active: false },
+              ].map((p, i) => (
+                <div key={p.nome} style={{ background: i === 2 ? 'rgba(251,191,36,0.06)' : 'rgba(255,255,255,0.02)', padding: '32px 28px', position: 'relative', borderRight: i < 2 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
+                  {i === 2 && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg,#ca8a04,#fbbf24)' }} />}
+                  <div style={{ fontSize: '28px', marginBottom: '14px' }}>{p.icon}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: p.cor, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>{p.sub}</div>
+                  <div style={{ fontSize: '18px', fontWeight: 800, color: 'white', marginBottom: '10px' }}>{p.nome}</div>
+                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.65 }}>{p.desc}</div>
+                  {i === 2 && (
+                    <a href={AGRORATE_URL} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'inline-block', marginTop: '20px', padding: '10px 20px', background: 'linear-gradient(135deg,#ca8a04,#fbbf24)', color: '#1c0700', fontWeight: 700, fontSize: '13px', borderRadius: '10px', textDecoration: 'none' }}>
+                      Acessar →
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
-          </Fade>
+          </Reveal>
         </div>
-      </div>
+      </section>
 
-      {/* CTA FINAL */}
-      <div style={{ background: `linear-gradient(160deg,${cor1},${cor2})`, padding: '96px 24px', textAlign: 'center' }}>
-        <Fade>
-          <div style={{ maxWidth: '560px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 900, color: 'white', marginBottom: '16px', lineHeight: 1.2 }}>
-              Conheça os riscos<br />da sua operação agora
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '16px', marginBottom: '40px', lineHeight: 1.7 }}>
-              Diagnóstico gratuito · IA jurídica especializada · Agendamento integrado
-            </p>
-            <a href={AGRORATE_URL} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-block', padding: '20px 56px', background: 'white', color: cor1, fontWeight: 800, fontSize: '18px', borderRadius: '18px', textDecoration: 'none', boxShadow: '0 8px 40px rgba(0,0,0,0.25)' }}>
-              Acessar ORYON Legal →
-            </a>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', marginTop: '14px' }}>Disponível no AgroRate · agrorate.app</p>
+      {/* ── ÁREAS DE ATUAÇÃO ──────────────────────────────── */}
+      <section style={{ padding: '120px 24px', background: '#0a0a0f' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <Reveal>
+            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+              <div style={{ display: 'inline-block', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '6px 16px', borderRadius: '999px', marginBottom: '20px' }}>
+                Especialidades
+              </div>
+              <h2 style={{ fontSize: 'clamp(26px,4vw,48px)', fontWeight: 900, color: 'white', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+                O que a especialista resolve
+              </h2>
+            </div>
+          </Reveal>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '12px' }}>
+            {[
+              { icon: '📜', t: 'Regularização Fundiária', d: 'Escritura, registro, CCIR e georreferenciamento.' },
+              { icon: '🌿', t: 'Regularização Ambiental', d: 'CAR, SICAR, reserva legal e APP.' },
+              { icon: '📑', t: 'Contratos Agrícolas', d: 'Arrendamento, parceria, empreitada e prestação.' },
+              { icon: '🏛️', t: 'Holding Familiar', d: 'Estruturação societária e proteção patrimonial.' },
+              { icon: '👨‍👩‍👧', t: 'Planejamento Sucessório', d: 'Testamento, inventário e herança rural.' },
+              { icon: '💳', t: 'Crédito Rural', d: 'DAP, pronaf, garantias e recuperação de acesso.' },
+            ].map((a, i) => (
+              <Reveal key={a.t} delay={i * 50}>
+                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '24px 20px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '28px', marginBottom: '12px' }}>{a.icon}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'white', marginBottom: '6px' }}>{a.t}</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.65 }}>{a.d}</div>
+                </div>
+              </Reveal>
+            ))}
           </div>
-        </Fade>
-      </div>
+        </div>
+      </section>
 
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}} *{box-sizing:border-box}`}</style>
+      {/* ── CTA FINAL ─────────────────────────────────────── */}
+      <section style={{ padding: '120px 24px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 80% at 50% 50%, rgba(202,138,4,0.12) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(251,191,36,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(251,191,36,0.02) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '680px', margin: '0 auto', textAlign: 'center' }}>
+          <Reveal>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '8px 18px', borderRadius: '999px', marginBottom: '36px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fbbf24', display: 'inline-block', animation: 'pulse-gold 2s infinite' }} />
+              Gratuito · Imediato · Personalizado
+            </div>
+
+            <h2 style={{ fontSize: 'clamp(32px,5.5vw,64px)', fontWeight: 900, color: 'white', lineHeight: 1.05, marginBottom: '20px', letterSpacing: '-0.03em' }}>
+              Descubra os riscos<br />
+              <span style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                da sua fazenda agora.
+              </span>
+            </h2>
+
+            <p style={{ fontSize: '17px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, marginBottom: '48px', maxWidth: '480px', margin: '0 auto 48px' }}>
+              7 perguntas. IA especializada. Score jurídico personalizado. Agendamento integrado. Tudo gratuito.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+              <a href={AGRORATE_URL} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', padding: '20px 48px', background: 'linear-gradient(135deg,#ca8a04,#fbbf24)', color: '#1c0700', fontWeight: 800, fontSize: '18px', borderRadius: '16px', textDecoration: 'none', boxShadow: '0 12px 48px rgba(202,138,4,0.5), 0 0 0 1px rgba(251,191,36,0.4)', letterSpacing: '-0.01em' }}>
+                ⚖️ Fazer Diagnóstico Gratuito
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </a>
+              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.25)' }}>Disponível em agrorate.app · Sem cadastro para o diagnóstico</span>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <style>{`
+        @keyframes pulse-gold { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(251,191,36,0.4)} 50%{opacity:0.7;box-shadow:0 0 0 4px rgba(251,191,36,0)} }
+        * { box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+      `}</style>
     </div>
   )
 }
