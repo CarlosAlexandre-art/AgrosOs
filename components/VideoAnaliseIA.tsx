@@ -167,27 +167,23 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
 
     try {
       let frames: string[] = []
-      const isVideo = file.type.startsWith('video/')
       const isImage = file.type.startsWith('image/')
 
-      if (!isVideo && !isImage) {
-        throw new Error('Formato não suportado. Use vídeo (MP4, MOV) ou imagem (JPG, PNG).')
+      if (!isImage) {
+        throw new Error(
+          'Envie uma imagem (JPG, PNG ou WebP).\n\n' +
+          'Para vídeos: pause no frame desejado e tire um screenshot — a qualidade de análise é melhor com imagem.'
+        )
       }
 
       // Preview
       const previewUrl = URL.createObjectURL(file)
       setPreview(previewUrl)
 
-      if (isVideo) {
-        setProgresso('Extraindo frames do vídeo...')
-        frames = await extrairFramesDoVideo(file, 8)
-        setProgresso(`${frames.length} frames extraídos. Enviando para análise IA...`)
-      } else {
-        setProgresso('Processando imagem...')
-        const b64 = await imagemParaBase64(file)
-        frames = [b64]
-        setProgresso('Imagem processada. Enviando para análise IA...')
-      }
+      setProgresso('Processando imagem...')
+      const b64 = await imagemParaBase64(file)
+      frames = [b64]
+      setProgresso('Imagem processada. Enviando para análise IA...')
 
       setEstado('analisando')
       setProgresso('IA analisando... isso pode levar até 30 segundos')
@@ -271,13 +267,14 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
             <input
               ref={inputRef}
               type="file"
-              accept="video/mp4,video/mov,video/quicktime,image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={e => e.target.files && processar(e.target.files)}
             />
-            <div className="text-4xl mb-3">📤</div>
+            <div className="text-4xl mb-3">🖼️</div>
             <p className="text-white font-medium mb-1">Arraste ou clique para enviar</p>
-            <p className="text-xs text-slate-500">Vídeo (MP4, MOV) ou imagem (JPG, PNG) · máx. 100MB</p>
+            <p className="text-xs text-slate-500">Imagem JPG, PNG ou WebP · máx. 20MB</p>
+            <p className="text-xs text-slate-600 mt-1">Para vídeos: pause e tire um screenshot para enviar</p>
           </div>
         )}
 
