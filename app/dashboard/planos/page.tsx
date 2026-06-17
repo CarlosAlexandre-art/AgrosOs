@@ -55,7 +55,7 @@ const PLANS = [
     desc: 'Para grandes operações e gestão profissional de múltiplas fazendas.',
     price: 'R$ 397',
     priceNote: '/mês',
-    priceId: process.env.NEXT_PUBLIC_AGROOS_ENTERPRISE_MENSAL_PRICE_ID ?? 'price_1TLVCSHOdd4LjuVTHZEme1gr',
+    priceId: process.env.NEXT_PUBLIC_AGROOS_ENTERPRISE_MENSAL_PRICE_ID ?? 'price_1TjQKhHOdd4LjuVTvdC0tHed',
     features: [
       { text: 'Propriedades ilimitadas', ok: true },
       { text: 'Talhões e tudo ilimitado', ok: true },
