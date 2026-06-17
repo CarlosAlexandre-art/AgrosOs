@@ -87,10 +87,10 @@ export default function AquaMercadoPage() {
         <button onClick={() => setModal(true)} style={{ background: '#f59e0b', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Registrar Venda</button>
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 60, color: '#475569' }}>Carregando...</div>}
+      {loading && <div style={{ height: 3, background: 'linear-gradient(90deg,#0891b2,#7c3aed)', borderRadius: 2, marginBottom: 4, opacity: 0.8 }} />}
 
       {/* Vendas */}
-      {!loading && tab === 'vendas' && (
+      {tab === 'vendas' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {vendas.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#475569', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.08)' }}>
@@ -116,7 +116,7 @@ export default function AquaMercadoPage() {
       )}
 
       {/* Por Canal */}
-      {!loading && tab === 'canais' && (
+      {tab === 'canais' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
           {Object.entries(porCanal).sort(([, a], [, b]) => b - a).map(([canal, receita]) => {
             const pct = totalCanal > 0 ? (receita / totalCanal) * 100 : 0
@@ -135,7 +135,7 @@ export default function AquaMercadoPage() {
       )}
 
       {/* Por Espécie */}
-      {!loading && tab === 'especies' && (
+      {tab === 'especies' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 14 }}>
           {Object.entries(porEspecie).sort(([, a], [, b]) => b.receita - a.receita).map(([esp, data]) => (
             <div key={esp} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 18 }}>

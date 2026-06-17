@@ -99,10 +99,10 @@ export default function AquaNutriPage() {
         </button>
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 60, color: '#475569' }}>Carregando...</div>}
+      {loading && <div style={{ height: 3, background: 'linear-gradient(90deg,#0891b2,#7c3aed)', borderRadius: 2, marginBottom: 4, opacity: 0.8 }} />}
 
       {/* Hoje */}
-      {!loading && tab === 'hoje' && (
+      {tab === 'hoje' && (
         <div>
           {arracoamentosHoje.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#475569', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.08)' }}>
@@ -138,7 +138,7 @@ export default function AquaNutriPage() {
       )}
 
       {/* Histórico */}
-      {!loading && tab === 'historico' && (
+      {tab === 'historico' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {arracoamentos.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#475569' }}>Nenhum registro no período</div>
@@ -157,7 +157,7 @@ export default function AquaNutriPage() {
       )}
 
       {/* TCA Análise */}
-      {!loading && tab === 'analise' && (
+      {tab === 'analise' && (
         <div>
           <div style={{ background: 'rgba(8,145,178,0.08)', border: '1px solid rgba(8,145,178,0.2)', borderRadius: 14, padding: 16, marginBottom: 20 }}>
             <div style={{ fontSize: 13, color: '#7dd3fc', fontWeight: 600, marginBottom: 6 }}>O que é TCA?</div>

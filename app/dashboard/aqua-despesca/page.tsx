@@ -106,9 +106,9 @@ export default function AquaDespescaPage() {
         <button onClick={() => setModal(true)} style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Registrar Despesca</button>
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 60, color: '#475569' }}>Carregando...</div>}
+      {loading && <div style={{ height: 3, background: 'linear-gradient(90deg,#0891b2,#7c3aed)', borderRadius: 2, marginBottom: 4, opacity: 0.8 }} />}
 
-      {!loading && (
+      {(
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {despescas.length === 0 ? (
             <div style={{ textAlign: 'center', padding: 60, color: '#475569', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.08)' }}>
