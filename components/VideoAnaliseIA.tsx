@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { fetchFile, toBlobURL } from '@ffmpeg/util'
+import { fetchFile } from '@ffmpeg/util'
 
 export type ModoAnalise = 'drone' | 'visita' | 'animal' | 'servico'
 
@@ -44,11 +44,10 @@ async function getFFmpeg(onLog?: (msg: string) => void): Promise<FFmpeg> {
     })
   }
 
-  // Arquivos servidos localmente em /public/ffmpeg — evita problemas de CORS/COEP
-  const base = typeof window !== 'undefined' ? window.location.origin : ''
+  // Carrega diretamente do servidor local — sem toBlobURL para evitar fetch cross-origin
   await ffmpeg.load({
-    coreURL: await toBlobURL(`${base}/ffmpeg/ffmpeg-core.js`, 'text/javascript'),
-    wasmURL: await toBlobURL(`${base}/ffmpeg/ffmpeg-core.wasm`, 'application/wasm'),
+    coreURL: '/ffmpeg/ffmpeg-core.js',
+    wasmURL: '/ffmpeg/ffmpeg-core.wasm',
   })
 
   ffmpegInstance = ffmpeg
