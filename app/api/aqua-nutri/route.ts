@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
         where: { propertyId: property.id, status: 'ATIVO' },
         select: { id: true, nome: true, especie: true, quantidadeAtual: true, tanque: { select: { nome: true } } },
       }),
-      (prisma as any).arracamentoDiario.findMany({
+      (prisma as any).arracoamentoDiario.findMany({
         where: {
           lote: { propertyId: property.id },
           data: { gte: diasAtras },
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const { loteId, tipoRacao, quantidadeKg, custoKg, data, observacao } = await req.json()
     if (!loteId || !quantidadeKg) return NextResponse.json({ error: 'Lote e quantidade são obrigatórios' }, { status: 400 })
 
-    const registro = await (prisma as any).arracamentoDiario.create({
+    const registro = await (prisma as any).arracoamentoDiario.create({
       data: {
         loteId,
         tipoRacao: tipoRacao || null,
