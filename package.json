@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.6.0",
     "@stripe/stripe-js": "^9.1.0",

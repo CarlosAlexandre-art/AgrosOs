@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
 
 export type ModoAnalise = 'drone' | 'visita' | 'animal' | 'servico'
 
@@ -20,129 +22,84 @@ interface Props {
 }
 
 const MODO_CONFIG = {
-  drone: { icon: '🚁', label: 'Vídeo de Drone', cor: '#34d399', dica: 'Vídeos aéreos da lavoura — MP4, MOV ou imagens JPG/PNG' },
-  visita: { icon: '🌾', label: 'Visita Técnica', cor: '#60a5fa', dica: 'Grave um vídeo caminhando no campo ou envie fotos da visita' },
-  animal: { icon: '🐄', label: 'Análise Animal', cor: '#f59e0b', dica: 'Vídeo ou fotos do animal para avaliação de condição corporal' },
-  servico: { icon: '✅', label: 'Comprovante de Serviço', cor: '#a78bfa', dica: 'Fotos ou vídeo do campo após execução do serviço' },
+  drone:   { icon: '🚁', label: 'Vídeo de Drone',        cor: '#34d399', dica: 'Vídeos aéreos da lavoura — MP4, MOV, qualquer formato' },
+  visita:  { icon: '🌾', label: 'Visita Técnica',         cor: '#60a5fa', dica: 'Grave um vídeo caminhando no campo' },
+  animal:  { icon: '🐄', label: 'Análise Animal',         cor: '#f59e0b', dica: 'Vídeo do animal para avaliação de condição corporal' },
+  servico: { icon: '✅', label: 'Comprovante de Serviço', cor: '#a78bfa', dica: 'Vídeo do campo após execução do serviço' },
 }
 
-function extrairFramesDoVideo(file: File, maxFrames = 8): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    // Lê o vídeo como data URL (mais compatível que blob URL em alguns browsers/codecs)
-    const reader = new FileReader()
-    reader.onerror = () => reject(new Error('Falha ao ler o arquivo de vídeo.'))
-    reader.onload = () => {
-      const dataUrl = reader.result as string
-      const video = document.createElement('video')
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')!
-      const frames: string[] = []
+let ffmpegInstance: FFmpeg | null = null
+let ffmpegLoaded = false
 
-      video.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:320px;height:240px;top:-9999px;left:-9999px'
-      document.body.appendChild(video)
+async function getFFmpeg(onLog?: (msg: string) => void): Promise<FFmpeg> {
+  if (ffmpegInstance && ffmpegLoaded) return ffmpegInstance
 
-      const cleanup = () => {
-        if (document.body.contains(video)) document.body.removeChild(video)
+  const ffmpeg = new FFmpeg()
+
+  if (onLog) {
+    ffmpeg.on('log', ({ message }) => {
+      if (message.includes('time=') || message.includes('frame=')) {
+        onLog('Processando vídeo...')
       }
+    })
+  }
 
-      video.src = dataUrl
-      video.muted = true
-      video.playsInline = true
-      video.preload = 'auto'
-
-      let ready = false
-      const onReady = () => {
-        if (ready) return
-        ready = true
-
-        const duration = video.duration
-        if (!duration || !isFinite(duration) || duration === 0) {
-          cleanup()
-          reject(new Error('Não foi possível ler a duração do vídeo. Tente um arquivo MP4 menor.'))
-          return
-        }
-
-        canvas.width = 640
-        canvas.height = video.videoHeight > 0
-          ? Math.round(640 * (video.videoHeight / video.videoWidth))
-          : 360
-
-        const intervalos = Array.from({ length: maxFrames }, (_, i) =>
-          Math.min((duration / (maxFrames + 1)) * (i + 1), duration - 0.1)
-        )
-
-        let idx = 0
-        let seekedOnce = false
-
-        const capturarProximo = () => {
-          if (idx >= intervalos.length) {
-            cleanup()
-            if (frames.length === 0) {
-              reject(new Error('Nenhum frame extraído. Tente enviar uma imagem (JPG/PNG) do vídeo.'))
-            } else {
-              resolve(frames)
-            }
-            return
-          }
-          video.currentTime = intervalos[idx]
-        }
-
-        video.addEventListener('seeked', () => {
-          // Ignora o primeiro seeked que alguns browsers disparam ao setar src
-          if (!seekedOnce && idx === 0 && video.currentTime < 0.01) return
-          seekedOnce = true
-          try {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-            const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1]
-            if (base64 && base64.length > 100) frames.push(base64)
-          } catch {
-            // frame com erro — pula
-          }
-          idx++
-          capturarProximo()
-        })
-
-        capturarProximo()
-      }
-
-      video.addEventListener('loadedmetadata', onReady)
-      video.addEventListener('loadeddata', onReady)
-      video.addEventListener('canplay', onReady)
-
-      video.addEventListener('error', (e) => {
-        const codigo = (e.target as HTMLVideoElement).error?.code
-        cleanup()
-        if (codigo === 3 || codigo === 4) {
-          reject(new Error(
-            'Este formato de vídeo não é suportado pelo browser.\n' +
-            'Dica: tire um print/screenshot do vídeo e envie como imagem JPG ou PNG — funciona melhor e é mais rápido.'
-          ))
-        } else {
-          reject(new Error('Erro ao carregar o vídeo (código ' + codigo + '). Tente enviar como imagem JPG/PNG.'))
-        }
-      })
-
-      // Timeout de segurança — 15 segundos
-      setTimeout(() => {
-        if (!ready) {
-          cleanup()
-          reject(new Error('Tempo esgotado ao carregar o vídeo. Tente enviar uma imagem JPG/PNG.'))
-        }
-      }, 15000)
-
-      video.load()
-    }
-    reader.readAsDataURL(file)
+  // Carrega os arquivos WASM do CDN jsDelivr (evita problemas de CORS)
+  const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.9/dist/umd'
+  await ffmpeg.load({
+    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
   })
+
+  ffmpegInstance = ffmpeg
+  ffmpegLoaded = true
+  return ffmpeg
+}
+
+async function extrairFramesDoVideo(
+  file: File,
+  maxFrames = 6,
+  onProgresso?: (msg: string) => void
+): Promise<string[]> {
+  onProgresso?.('Carregando motor de vídeo (primeira vez pode levar ~20s)...')
+  const ffmpeg = await getFFmpeg(onProgresso)
+
+  onProgresso?.('Lendo arquivo de vídeo...')
+  await ffmpeg.writeFile('input', await fetchFile(file))
+
+  // Extrai 1 frame a cada N segundos usando ffmpeg
+  onProgresso?.('Extraindo frames...')
+  await ffmpeg.exec([
+    '-i', 'input',
+    '-vf', `fps=1/${Math.ceil(30 / maxFrames)},scale=640:-1`,
+    '-frames:v', String(maxFrames),
+    '-q:v', '3',
+    'frame%02d.jpg',
+  ])
+
+  const frames: string[] = []
+  for (let i = 1; i <= maxFrames; i++) {
+    const num = String(i).padStart(2, '0')
+    try {
+      const data = await ffmpeg.readFile(`frame${num}.jpg`) as Uint8Array
+      const b64 = btoa(String.fromCharCode(...data))
+      if (b64.length > 100) frames.push(b64)
+      await ffmpeg.deleteFile(`frame${num}.jpg`)
+    } catch {
+      break
+    }
+  }
+
+  await ffmpeg.deleteFile('input').catch(() => {})
+
+  if (frames.length === 0) throw new Error('Nenhum frame extraído do vídeo. Tente um arquivo diferente.')
+  return frames
 }
 
 function imagemParaBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = e => {
-      const base64 = (e.target?.result as string).split(',')[1]
-      resolve(base64)
-    }
+    reader.onload = e => resolve((e.target?.result as string).split(',')[1])
     reader.onerror = reject
     reader.readAsDataURL(file)
   })
@@ -154,7 +111,6 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
   const [resultado, setResultado] = useState<VideoAnalysisResult | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [progresso, setProgresso] = useState('')
-  const [preview, setPreview] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const processar = useCallback(async (files: FileList) => {
@@ -167,23 +123,18 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
 
     try {
       let frames: string[] = []
-      const isImage = file.type.startsWith('image/')
+      const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|m4v|3gp)$/i.test(file.name)
 
-      if (!isImage) {
-        throw new Error(
-          'Envie uma imagem (JPG, PNG ou WebP).\n\n' +
-          'Para vídeos: pause no frame desejado e tire um screenshot — a qualidade de análise é melhor com imagem.'
-        )
+      if (isVideo) {
+        frames = await extrairFramesDoVideo(file, 6, setProgresso)
+        setProgresso(`${frames.length} frames extraídos. Enviando para análise IA...`)
+      } else if (file.type.startsWith('image/')) {
+        setProgresso('Processando imagem...')
+        frames = [await imagemParaBase64(file)]
+        setProgresso('Enviando para análise IA...')
+      } else {
+        throw new Error('Formato não suportado. Envie um vídeo (MP4, MOV, AVI) ou imagem (JPG, PNG).')
       }
-
-      // Preview
-      const previewUrl = URL.createObjectURL(file)
-      setPreview(previewUrl)
-
-      setProgresso('Processando imagem...')
-      const b64 = await imagemParaBase64(file)
-      frames = [b64]
-      setProgresso('Imagem processada. Enviando para análise IA...')
 
       setEstado('analisando')
       setProgresso('IA analisando... isso pode levar até 30 segundos')
@@ -219,18 +170,13 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
     setResultado(null)
     setErro(null)
     setProgresso('')
-    setPreview(null)
     if (inputRef.current) inputRef.current.value = ''
   }
 
   const formatarAnalise = (texto: string) => {
     return texto.split('\n').map((linha, i) => {
-      if (linha.startsWith('**') && linha.endsWith('**')) {
+      if (/^\d+\.\s\*\*/.test(linha) || (linha.startsWith('**') && linha.endsWith('**'))) {
         return <p key={i} className="font-bold text-white mt-4 mb-1">{linha.replace(/\*\*/g, '')}</p>
-      }
-      if (/^\d+\.\s\*\*/.test(linha)) {
-        const clean = linha.replace(/\*\*/g, '')
-        return <p key={i} className="font-semibold text-white mt-3 mb-1">{clean}</p>
       }
       if (linha.trim() === '') return <br key={i} />
       return <p key={i} className="text-slate-300 text-sm leading-relaxed">{linha.replace(/\*\*/g, '')}</p>
@@ -258,7 +204,7 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
       <div className="p-5">
         {estado === 'idle' && (
           <div
-            className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all hover:border-opacity-60"
+            className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all"
             style={{ borderColor: `${config.cor}30` }}
             onDragOver={e => e.preventDefault()}
             onDrop={onDrop}
@@ -267,30 +213,32 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
             <input
               ref={inputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="video/mp4,video/quicktime,video/avi,video/x-matroska,video/webm,video/x-m4v,image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={e => e.target.files && processar(e.target.files)}
             />
-            <div className="text-4xl mb-3">🖼️</div>
+            <div className="text-4xl mb-3">🎬</div>
             <p className="text-white font-medium mb-1">Arraste ou clique para enviar</p>
-            <p className="text-xs text-slate-500">Imagem JPG, PNG ou WebP · máx. 20MB</p>
-            <p className="text-xs text-slate-600 mt-1">Para vídeos: pause e tire um screenshot para enviar</p>
+            <p className="text-xs text-slate-500">Vídeo (MP4, MOV, AVI, MKV) ou imagem (JPG, PNG)</p>
+            <p className="text-xs text-slate-600 mt-1">Primeira análise de vídeo carrega o motor (~20s) · após isso é rápido</p>
           </div>
         )}
 
         {(estado === 'processando' || estado === 'analisando') && (
           <div className="text-center py-10">
             <div className="w-12 h-12 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: config.cor, borderTopColor: 'transparent' }} />
-            <p className="text-white font-medium mb-1">{estado === 'processando' ? 'Processando arquivo...' : 'Analisando com IA...'}</p>
-            <p className="text-xs text-slate-500">{progresso}</p>
+            <p className="text-white font-medium mb-2">
+              {estado === 'processando' ? 'Processando vídeo...' : 'IA analisando...'}
+            </p>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">{progresso}</p>
           </div>
         )}
 
         {estado === 'erro' && (
           <div className="text-center py-8">
             <div className="text-3xl mb-3">⚠️</div>
-            <p className="text-red-400 font-medium mb-1">Erro na análise</p>
-            <p className="text-xs text-slate-500 mb-4">{erro}</p>
+            <p className="text-red-400 font-medium mb-2">Erro na análise</p>
+            <p className="text-xs text-slate-400 mb-4 max-w-sm mx-auto leading-relaxed">{erro}</p>
             <button onClick={resetar} className="text-sm px-4 py-2 rounded-lg font-medium transition-colors" style={{ background: `${config.cor}18`, color: config.cor, border: `1px solid ${config.cor}30` }}>
               Tentar novamente
             </button>
@@ -299,27 +247,17 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
 
         {estado === 'concluido' && resultado && (
           <div>
-            {/* Metadados */}
             <div className="flex items-center gap-3 mb-4 flex-wrap">
               <span className="text-xs px-2 py-1 rounded-full" style={{ background: `${config.cor}15`, color: config.cor }}>
                 {resultado.frames} frame{resultado.frames > 1 ? 's' : ''} analisado{resultado.frames > 1 ? 's' : ''}
               </span>
-              <span className="text-xs text-slate-600">
-                {new Date(resultado.geradoEm).toLocaleString('pt-BR')}
-              </span>
-              <span className="text-xs text-slate-700 font-mono truncate max-w-[200px]">
-                {resultado.modeloUsado}
-              </span>
+              <span className="text-xs text-slate-600">{new Date(resultado.geradoEm).toLocaleString('pt-BR')}</span>
             </div>
 
-            {/* Resultado */}
             <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,0,0,.3)', border: '1px solid rgba(255,255,255,.06)' }}>
-              <div className="prose prose-invert max-w-none">
-                {formatarAnalise(resultado.analise)}
-              </div>
+              {formatarAnalise(resultado.analise)}
             </div>
 
-            {/* Ações */}
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => {
@@ -329,7 +267,7 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
                   a.download = `analise-${modo}-${new Date().toISOString().split('T')[0]}.txt`
                   a.click()
                 }}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                className="text-xs px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: `${config.cor}18`, color: config.cor, border: `1px solid ${config.cor}30` }}
               >
                 Baixar relatório
@@ -341,11 +279,7 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
               >
                 Copiar texto
               </button>
-              <button
-                onClick={resetar}
-                className="text-xs px-3 py-1.5 rounded-lg font-medium text-slate-500 hover:text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)' }}
-              >
+              <button onClick={resetar} className="text-xs px-3 py-1.5 rounded-lg font-medium text-slate-500 hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)' }}>
                 Nova análise
               </button>
             </div>
