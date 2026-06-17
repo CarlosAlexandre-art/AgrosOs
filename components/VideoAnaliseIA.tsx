@@ -34,23 +34,42 @@ function extrairFramesDoVideo(file: File, maxFrames = 8): Promise<string[]> {
     const frames: string[] = []
     const url = URL.createObjectURL(file)
 
+    // Precisa estar no DOM para funcionar em todos os browsers
+    video.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px'
+    document.body.appendChild(video)
+
+    const cleanup = () => {
+      URL.revokeObjectURL(url)
+      if (document.body.contains(video)) document.body.removeChild(video)
+    }
+
     video.src = url
     video.muted = true
-    video.crossOrigin = 'anonymous'
+    video.playsInline = true
+    video.preload = 'auto'
 
-    video.addEventListener('loadedmetadata', () => {
+    const onReady = () => {
       const duration = video.duration
+      if (!duration || !isFinite(duration)) {
+        cleanup()
+        reject(new Error('Não foi possível determinar a duração do vídeo. Tente um formato MP4.'))
+        return
+      }
+
       canvas.width = 640
-      canvas.height = Math.round(640 * (video.videoHeight / video.videoWidth))
+      canvas.height = video.videoHeight > 0
+        ? Math.round(640 * (video.videoHeight / video.videoWidth))
+        : 360
 
       const intervalos = Array.from({ length: maxFrames }, (_, i) =>
-        (duration / (maxFrames + 1)) * (i + 1)
+        Math.min((duration / (maxFrames + 1)) * (i + 1), duration - 0.1)
       )
 
       let idx = 0
-      const capturar = () => {
+
+      const capturarProximo = () => {
         if (idx >= intervalos.length) {
-          URL.revokeObjectURL(url)
+          cleanup()
           resolve(frames)
           return
         }
@@ -58,19 +77,33 @@ function extrairFramesDoVideo(file: File, maxFrames = 8): Promise<string[]> {
       }
 
       video.addEventListener('seeked', () => {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-        const base64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1]
-        frames.push(base64)
+        try {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          const base64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1]
+          if (base64) frames.push(base64)
+        } catch {
+          // frame com erro — pula e continua
+        }
         idx++
-        capturar()
+        capturarProximo()
       })
 
-      capturar()
-    })
+      capturarProximo()
+    }
 
-    video.addEventListener('error', () => {
-      URL.revokeObjectURL(url)
-      reject(new Error('Erro ao carregar o vídeo'))
+    video.addEventListener('loadeddata', onReady)
+    video.addEventListener('canplay', onReady, { once: true })
+
+    video.addEventListener('error', (e) => {
+      const codigo = (e.target as HTMLVideoElement).error?.code
+      const msgs: Record<number, string> = {
+        1: 'Carregamento abortado.',
+        2: 'Erro de rede ao carregar o vídeo.',
+        3: 'Formato de vídeo não suportado pelo browser. Tente converter para MP4 H.264.',
+        4: 'Formato não suportado. Use MP4 (H.264) ou envie uma imagem JPG/PNG.',
+      }
+      cleanup()
+      reject(new Error(msgs[codigo ?? 4] ?? 'Erro ao carregar o vídeo. Use MP4 ou envie uma imagem.'))
     })
 
     video.load()
