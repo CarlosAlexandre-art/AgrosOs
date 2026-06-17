@@ -28,85 +28,111 @@ const MODO_CONFIG = {
 
 function extrairFramesDoVideo(file: File, maxFrames = 8): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    const video = document.createElement('video')
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')!
-    const frames: string[] = []
-    const url = URL.createObjectURL(file)
+    // Lê o vídeo como data URL (mais compatível que blob URL em alguns browsers/codecs)
+    const reader = new FileReader()
+    reader.onerror = () => reject(new Error('Falha ao ler o arquivo de vídeo.'))
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')!
+      const frames: string[] = []
 
-    // Precisa estar no DOM para funcionar em todos os browsers
-    video.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px'
-    document.body.appendChild(video)
+      video.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:320px;height:240px;top:-9999px;left:-9999px'
+      document.body.appendChild(video)
 
-    const cleanup = () => {
-      URL.revokeObjectURL(url)
-      if (document.body.contains(video)) document.body.removeChild(video)
-    }
-
-    video.src = url
-    video.muted = true
-    video.playsInline = true
-    video.preload = 'auto'
-
-    const onReady = () => {
-      const duration = video.duration
-      if (!duration || !isFinite(duration)) {
-        cleanup()
-        reject(new Error('Não foi possível determinar a duração do vídeo. Tente um formato MP4.'))
-        return
+      const cleanup = () => {
+        if (document.body.contains(video)) document.body.removeChild(video)
       }
 
-      canvas.width = 640
-      canvas.height = video.videoHeight > 0
-        ? Math.round(640 * (video.videoHeight / video.videoWidth))
-        : 360
+      video.src = dataUrl
+      video.muted = true
+      video.playsInline = true
+      video.preload = 'auto'
 
-      const intervalos = Array.from({ length: maxFrames }, (_, i) =>
-        Math.min((duration / (maxFrames + 1)) * (i + 1), duration - 0.1)
-      )
+      let ready = false
+      const onReady = () => {
+        if (ready) return
+        ready = true
 
-      let idx = 0
-
-      const capturarProximo = () => {
-        if (idx >= intervalos.length) {
+        const duration = video.duration
+        if (!duration || !isFinite(duration) || duration === 0) {
           cleanup()
-          resolve(frames)
+          reject(new Error('Não foi possível ler a duração do vídeo. Tente um arquivo MP4 menor.'))
           return
         }
-        video.currentTime = intervalos[idx]
+
+        canvas.width = 640
+        canvas.height = video.videoHeight > 0
+          ? Math.round(640 * (video.videoHeight / video.videoWidth))
+          : 360
+
+        const intervalos = Array.from({ length: maxFrames }, (_, i) =>
+          Math.min((duration / (maxFrames + 1)) * (i + 1), duration - 0.1)
+        )
+
+        let idx = 0
+        let seekedOnce = false
+
+        const capturarProximo = () => {
+          if (idx >= intervalos.length) {
+            cleanup()
+            if (frames.length === 0) {
+              reject(new Error('Nenhum frame extraído. Tente enviar uma imagem (JPG/PNG) do vídeo.'))
+            } else {
+              resolve(frames)
+            }
+            return
+          }
+          video.currentTime = intervalos[idx]
+        }
+
+        video.addEventListener('seeked', () => {
+          // Ignora o primeiro seeked que alguns browsers disparam ao setar src
+          if (!seekedOnce && idx === 0 && video.currentTime < 0.01) return
+          seekedOnce = true
+          try {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            const base64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1]
+            if (base64 && base64.length > 100) frames.push(base64)
+          } catch {
+            // frame com erro — pula
+          }
+          idx++
+          capturarProximo()
+        })
+
+        capturarProximo()
       }
 
-      video.addEventListener('seeked', () => {
-        try {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-          const base64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1]
-          if (base64) frames.push(base64)
-        } catch {
-          // frame com erro — pula e continua
+      video.addEventListener('loadedmetadata', onReady)
+      video.addEventListener('loadeddata', onReady)
+      video.addEventListener('canplay', onReady)
+
+      video.addEventListener('error', (e) => {
+        const codigo = (e.target as HTMLVideoElement).error?.code
+        cleanup()
+        if (codigo === 3 || codigo === 4) {
+          reject(new Error(
+            'Este formato de vídeo não é suportado pelo browser.\n' +
+            'Dica: tire um print/screenshot do vídeo e envie como imagem JPG ou PNG — funciona melhor e é mais rápido.'
+          ))
+        } else {
+          reject(new Error('Erro ao carregar o vídeo (código ' + codigo + '). Tente enviar como imagem JPG/PNG.'))
         }
-        idx++
-        capturarProximo()
       })
 
-      capturarProximo()
+      // Timeout de segurança — 15 segundos
+      setTimeout(() => {
+        if (!ready) {
+          cleanup()
+          reject(new Error('Tempo esgotado ao carregar o vídeo. Tente enviar uma imagem JPG/PNG.'))
+        }
+      }, 15000)
+
+      video.load()
     }
-
-    video.addEventListener('loadeddata', onReady)
-    video.addEventListener('canplay', onReady, { once: true })
-
-    video.addEventListener('error', (e) => {
-      const codigo = (e.target as HTMLVideoElement).error?.code
-      const msgs: Record<number, string> = {
-        1: 'Carregamento abortado.',
-        2: 'Erro de rede ao carregar o vídeo.',
-        3: 'Formato de vídeo não suportado pelo browser. Tente converter para MP4 H.264.',
-        4: 'Formato não suportado. Use MP4 (H.264) ou envie uma imagem JPG/PNG.',
-      }
-      cleanup()
-      reject(new Error(msgs[codigo ?? 4] ?? 'Erro ao carregar o vídeo. Use MP4 ou envie uma imagem.'))
-    })
-
-    video.load()
+    reader.readAsDataURL(file)
   })
 }
 
