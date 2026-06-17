@@ -41,7 +41,7 @@ export const PLANO_LIMITES = {
   },
   enterprise: {
     nome: 'Empresarial',
-    preco: 'R$ 297/mês ou R$ 2.970/ano',
+    preco: 'R$ 397/mês',
     propriedades: 9999,
     talhoesPorProp: 9999,
     atividadesMes: 9999,
