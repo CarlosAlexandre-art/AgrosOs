@@ -107,6 +107,7 @@ export default function AquaBioPage() {
 
       {loading && <div style={{ height: 3, background: 'linear-gradient(90deg,#0891b2,#7c3aed)', borderRadius: 2, marginBottom: 4, opacity: 0.8 }} />}
 
+      <div style={{ minHeight: 'calc(100vh - 320px)' }}>
       {/* Biometrias */}
       {tab === 'biometrias' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -195,6 +196,7 @@ export default function AquaBioPage() {
           )}
         </div>
       )}
+      </div>
 
       {/* Modal */}
       {modal && (
