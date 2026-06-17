@@ -155,7 +155,9 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
       setEstado('concluido')
       onResultado?.(data)
     } catch (e: any) {
-      setErro(e.message ?? 'Erro desconhecido')
+      console.error('[AgroVision]', e)
+      const msg = e?.message || e?.toString() || JSON.stringify(e) || 'Erro desconhecido'
+      setErro(msg)
       setEstado('erro')
     }
   }, [modo, onResultado])
