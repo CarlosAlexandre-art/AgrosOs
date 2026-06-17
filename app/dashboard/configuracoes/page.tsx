@@ -4,6 +4,24 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import PushNotificationButton from '@/components/PushNotificationButton'
+import Link from 'next/link'
+
+function ExclusaoDadosBtn() {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'err'>('idle')
+  async function handleClick() {
+    if (!confirm('Confirmar solicitação de exclusão de dados? Você receberá uma resposta em até 30 dias.')) return
+    setStatus('loading')
+    const res = await fetch('/api/lgpd/solicitar-exclusao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+    setStatus(res.ok ? 'ok' : 'err')
+  }
+  if (status === 'ok') return <p className="text-sm text-green-600 font-medium">✓ Solicitação enviada. Processamos em até 30 dias.</p>
+  if (status === 'err') return <p className="text-sm text-red-600">Erro ao enviar. Tente novamente ou escreva para privacidade@oryonag.com.br</p>
+  return (
+    <button onClick={handleClick} disabled={status === 'loading'} className="text-sm text-red-600 font-semibold hover:text-red-700 transition-colors disabled:opacity-50 underline">
+      {status === 'loading' ? 'Enviando solicitação...' : 'Solicitar exclusão de dados'}
+    </button>
+  )
+}
 
 export default function ConfiguracoesPage() {
   const router = useRouter()
@@ -214,6 +232,11 @@ export default function ConfiguracoesPage() {
                 </button>
               )}
             </div>
+          </div>
+          <div className="py-3 border-b border-slate-100">
+            <div className="text-sm font-medium text-slate-900 mb-1">Privacidade e dados pessoais</div>
+            <p className="text-xs text-slate-400 mb-3">Conforme a LGPD (Art. 18), você pode solicitar a exclusão dos seus dados a qualquer momento. <Link href="/privacidade" className="text-[#16a34a] hover:underline">Ver política de privacidade</Link></p>
+            <ExclusaoDadosBtn />
           </div>
           <button onClick={handleSignOut} className="flex items-center gap-2 text-sm text-red-600 font-medium hover:text-red-700 transition-colors pt-1">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>

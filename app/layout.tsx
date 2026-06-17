@@ -4,6 +4,7 @@ import './globals.css'
 import PWAInstaller from '@/components/PWAInstaller'
 import SplashScreen from '@/components/SplashScreen'
 import OfflineIndicator from '@/components/OfflineIndicator'
+import CookieBanner from '@/components/CookieBanner'
 
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' })
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <OfflineIndicator />
         {children}
         <PWAInstaller />
+        <CookieBanner />
         <script dangerouslySetInnerHTML={{
           __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});});}`
         }} />
