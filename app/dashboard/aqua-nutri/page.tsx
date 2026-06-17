@@ -84,7 +84,7 @@ export default function AquaNutriPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['hoje', 'Hoje'], ['historico', 'Histórico'], ['analise', 'TCA / Análise']] .map(([k, v]) => (
-          <button key={k} onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); setTab(k as any) }} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#0891b2' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>
+          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#0891b2' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>
             {v}
           </button>
         ))}
