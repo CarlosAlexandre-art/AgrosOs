@@ -25,13 +25,12 @@ const MODO_CONFIG = {
   servico: { icon: '✅', label: 'Comprovante de Serviço', cor: '#a78bfa', dica: 'Vídeo do campo após execução do serviço' },
 }
 
-// Extrai frames diretamente no browser via canvas — sem ffmpeg, sem upload pesado
-function extrairFrames(file: File, maxFrames = 5, onProgresso?: (msg: string) => void): Promise<string[]> {
+// Extrai frames via canvas (rápido, funciona com H.264)
+function extrairFramesCanvas(file: File, maxFrames = 5, onProgresso?: (msg: string) => void): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
     video.muted = true
     video.playsInline = true
-    // Precisa estar no DOM para funcionar em alguns browsers
     video.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px'
     document.body.appendChild(video)
 
@@ -45,12 +44,7 @@ function extrairFrames(file: File, maxFrames = 5, onProgresso?: (msg: string) =>
 
     video.onerror = () => {
       cleanup()
-      const code = video.error?.code
-      if (code === 4) {
-        reject(new Error('Codec não suportado pelo navegador. Use MP4 com codec H.264 (não HEVC/H.265).'))
-      } else {
-        reject(new Error(`Erro ao carregar vídeo (código ${code ?? '?'}).`))
-      }
+      reject(new Error('CODEC_NOT_SUPPORTED'))
     }
 
     video.onloadedmetadata = async () => {
@@ -65,40 +59,83 @@ function extrairFrames(file: File, maxFrames = 5, onProgresso?: (msg: string) =>
       canvas.width = 640
       canvas.height = 360
       const ctx = canvas.getContext('2d')!
-
       const frames: string[] = []
-      // Distribui os timestamps ao longo do vídeo (evita início e fim)
       const posicoes = Array.from({ length: maxFrames }, (_, i) =>
         Math.min((duration * (i + 1)) / (maxFrames + 1), duration - 0.1)
       )
 
       for (let i = 0; i < posicoes.length; i++) {
         onProgresso?.(`Extraindo frame ${i + 1} de ${maxFrames}...`)
-        await new Promise<void>((res, rej) => {
-          const t = setTimeout(() => rej(new Error('Timeout ao buscar frame')), 5000)
+        await new Promise<void>((res) => {
+          const t = setTimeout(res, 5000)
           video.onseeked = () => {
             clearTimeout(t)
             try {
               ctx.drawImage(video, 0, 0, 640, 360)
               const b64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1]
               if (b64 && b64.length > 500) frames.push(b64)
-            } catch { /* frame em branco, ignora */ }
+            } catch { /* frame em branco */ }
             res()
           }
           video.currentTime = posicoes[i]
-        }).catch(() => { /* timeout neste frame, continua */ })
+        })
       }
 
       cleanup()
-      if (frames.length === 0) {
-        reject(new Error('Nenhum frame extraído. Tente um vídeo MP4 H.264 de pelo menos 2 segundos.'))
-      } else {
-        resolve(frames)
-      }
+      if (frames.length === 0) reject(new Error('Nenhum frame extraído.'))
+      else resolve(frames)
     }
 
     video.load()
   })
+}
+
+// Fallback via ffmpeg WASM — suporta HEVC/H.265 e outros codecs
+async function extrairFramesFFmpeg(file: File, onProgresso?: (msg: string) => void): Promise<string[]> {
+  onProgresso?.('Carregando suporte a HEVC (pode levar ~15s na primeira vez)...')
+  const { FFmpeg } = await import('@ffmpeg/ffmpeg')
+  const { fetchFile } = await import('@ffmpeg/util')
+
+  const ffmpeg = new FFmpeg()
+  await ffmpeg.load({
+    coreURL: '/ffmpeg/ffmpeg-core.js',
+    wasmURL: '/ffmpeg/ffmpeg-core.wasm',
+  })
+
+  onProgresso?.('Lendo arquivo de vídeo...')
+  await ffmpeg.writeFile('input', await fetchFile(file))
+
+  const frames: string[] = []
+  const posicoes = [1, 3, 6, 10, 15]
+
+  for (let i = 0; i < posicoes.length; i++) {
+    const nome = `f${i}.jpg`
+    onProgresso?.(`Extraindo frame ${i + 1} de ${posicoes.length}...`)
+    try {
+      await ffmpeg.exec(['-ss', String(posicoes[i]), '-i', 'input', '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '4', nome])
+      const data = await ffmpeg.readFile(nome) as Uint8Array
+      let binary = ''
+      for (let j = 0; j < data.length; j += 8192) binary += String.fromCharCode(...data.subarray(j, j + 8192))
+      const b64 = btoa(binary)
+      if (b64.length > 500) frames.push(b64)
+      await ffmpeg.deleteFile(nome).catch(() => {})
+    } catch { break }
+  }
+
+  await ffmpeg.deleteFile('input').catch(() => {})
+  return frames
+}
+
+// Tenta canvas primeiro (rápido), cai no ffmpeg WASM se codec não suportado
+async function extrairFrames(file: File, maxFrames = 5, onProgresso?: (msg: string) => void): Promise<string[]> {
+  try {
+    return await extrairFramesCanvas(file, maxFrames, onProgresso)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : ''
+    if (msg !== 'CODEC_NOT_SUPPORTED') throw e
+    onProgresso?.('Codec HEVC detectado — usando motor alternativo...')
+    return extrairFramesFFmpeg(file, onProgresso)
+  }
 }
 
 function imagemParaBase64(file: File): Promise<string> {
