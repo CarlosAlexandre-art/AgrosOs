@@ -78,7 +78,7 @@ export default function AquaMercadoPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['vendas', 'Vendas'], ['canais', 'Por Canal'], ['especies', 'Por Espécie']].map(([k, v]) => (
-          <button key={k} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#f59e0b' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
+          <button key={k} onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); setTab(k as any) }} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#f59e0b' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
         ))}
         <div style={{ flex: 1 }} />
         <select style={{ background: '#111827', border: '1px solid #1e293b', color: '#94a3b8', borderRadius: 10, padding: '8px 12px', fontSize: 13, cursor: 'pointer', outline: 'none' }} value={periodo} onChange={e => setPeriodo(e.target.value)}>

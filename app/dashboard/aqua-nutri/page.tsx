@@ -84,7 +84,7 @@ export default function AquaNutriPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['hoje', 'Hoje'], ['historico', 'Histórico'], ['analise', 'TCA / Análise']] .map(([k, v]) => (
-          <button key={k} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#0891b2' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>
+          <button key={k} onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); setTab(k as any) }} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#0891b2' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>
             {v}
           </button>
         ))}
@@ -101,6 +101,7 @@ export default function AquaNutriPage() {
 
       {loading && <div style={{ height: 3, background: 'linear-gradient(90deg,#0891b2,#7c3aed)', borderRadius: 2, marginBottom: 4, opacity: 0.8 }} />}
 
+      <div style={{ minHeight: 'calc(100vh - 320px)' }}>
       {/* Hoje */}
       {tab === 'hoje' && (
         <div>
@@ -187,6 +188,8 @@ export default function AquaNutriPage() {
           </div>
         </div>
       )}
+
+      </div>
 
       {/* Modal */}
       {modal && (

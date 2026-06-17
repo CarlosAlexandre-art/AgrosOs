@@ -99,7 +99,7 @@ export default function AquaBioPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['biometrias', 'Biometrias'], ['curva', 'Curva de Crescimento']].map(([k, v]) => (
-          <button key={k} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#7c3aed' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
+          <button key={k} onClick={(e) => { (e.currentTarget as HTMLButtonElement).blur(); setTab(k as any) }} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#7c3aed' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
         ))}
         <div style={{ flex: 1 }} />
         <button onClick={() => setModal(true)} style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Nova Biometria</button>
