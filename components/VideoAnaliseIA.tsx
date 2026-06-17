@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 export type ModoAnalise = 'drone' | 'visita' | 'animal' | 'servico'
 
 interface VideoAnalysisResult {
@@ -20,10 +19,86 @@ interface Props {
 }
 
 const MODO_CONFIG = {
-  drone:   { icon: '🚁', label: 'Vídeo de Drone',        cor: '#34d399', dica: 'Vídeos aéreos da lavoura — MP4, MOV, qualquer formato' },
+  drone:   { icon: '🚁', label: 'Vídeo de Drone',        cor: '#34d399', dica: 'Vídeos aéreos da lavoura — MP4 H.264' },
   visita:  { icon: '🌾', label: 'Visita Técnica',         cor: '#60a5fa', dica: 'Grave um vídeo caminhando no campo' },
   animal:  { icon: '🐄', label: 'Análise Animal',         cor: '#f59e0b', dica: 'Vídeo do animal para avaliação de condição corporal' },
   servico: { icon: '✅', label: 'Comprovante de Serviço', cor: '#a78bfa', dica: 'Vídeo do campo após execução do serviço' },
+}
+
+// Extrai frames diretamente no browser via canvas — sem ffmpeg, sem upload pesado
+function extrairFrames(file: File, maxFrames = 5, onProgresso?: (msg: string) => void): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    video.muted = true
+    video.playsInline = true
+    // Precisa estar no DOM para funcionar em alguns browsers
+    video.style.cssText = 'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px'
+    document.body.appendChild(video)
+
+    const url = URL.createObjectURL(file)
+    video.src = url
+
+    const cleanup = () => {
+      URL.revokeObjectURL(url)
+      if (document.body.contains(video)) document.body.removeChild(video)
+    }
+
+    video.onerror = () => {
+      cleanup()
+      const code = video.error?.code
+      if (code === 4) {
+        reject(new Error('Codec não suportado pelo navegador. Use MP4 com codec H.264 (não HEVC/H.265).'))
+      } else {
+        reject(new Error(`Erro ao carregar vídeo (código ${code ?? '?'}).`))
+      }
+    }
+
+    video.onloadedmetadata = async () => {
+      const duration = video.duration
+      if (!isFinite(duration) || duration <= 0) {
+        cleanup()
+        reject(new Error('Não foi possível determinar a duração do vídeo.'))
+        return
+      }
+
+      const canvas = document.createElement('canvas')
+      canvas.width = 640
+      canvas.height = 360
+      const ctx = canvas.getContext('2d')!
+
+      const frames: string[] = []
+      // Distribui os timestamps ao longo do vídeo (evita início e fim)
+      const posicoes = Array.from({ length: maxFrames }, (_, i) =>
+        Math.min((duration * (i + 1)) / (maxFrames + 1), duration - 0.1)
+      )
+
+      for (let i = 0; i < posicoes.length; i++) {
+        onProgresso?.(`Extraindo frame ${i + 1} de ${maxFrames}...`)
+        await new Promise<void>((res, rej) => {
+          const t = setTimeout(() => rej(new Error('Timeout ao buscar frame')), 5000)
+          video.onseeked = () => {
+            clearTimeout(t)
+            try {
+              ctx.drawImage(video, 0, 0, 640, 360)
+              const b64 = canvas.toDataURL('image/jpeg', 0.75).split(',')[1]
+              if (b64 && b64.length > 500) frames.push(b64)
+            } catch { /* frame em branco, ignora */ }
+            res()
+          }
+          video.currentTime = posicoes[i]
+        }).catch(() => { /* timeout neste frame, continua */ })
+      }
+
+      cleanup()
+      if (frames.length === 0) {
+        reject(new Error('Nenhum frame extraído. Tente um vídeo MP4 H.264 de pelo menos 2 segundos.'))
+      } else {
+        resolve(frames)
+      }
+    }
+
+    video.load()
+  })
 }
 
 function imagemParaBase64(file: File): Promise<string> {
@@ -56,41 +131,28 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
       const isImage = file.type.startsWith('image/')
 
       if (!isVideo && !isImage) {
-        throw new Error('Formato não suportado. Envie um vídeo (MP4, MOV, AVI) ou imagem (JPG, PNG).')
+        throw new Error('Formato não suportado. Envie um vídeo (MP4 H.264, MOV, WebM) ou imagem (JPG, PNG).')
       }
 
-      let res: Response
+      let frames: string[]
 
       if (isVideo) {
-        // Upload direto para o Supabase Storage (evita limite de 4.5MB do Vercel)
-        setProgresso('Enviando vídeo para o storage... (pode levar alguns segundos)')
-        const supabase = createClient()
-        const storagePath = `upload/${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, '_')}`
-        const { error: uploadErr } = await supabase.storage
-          .from('agrovision-temp')
-          .upload(storagePath, file, { upsert: true, contentType: file.type })
-        if (uploadErr) throw new Error(`Erro no upload: ${uploadErr.message}`)
-
-        const { data: { publicUrl } } = supabase.storage.from('agrovision-temp').getPublicUrl(storagePath)
-
-        setEstado('analisando')
-        setProgresso('Servidor extraindo frames e analisando com IA... (~30s)')
-        res = await fetch('/api/ai/analisar-video-upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ videoUrl: publicUrl, storagePath, modo }),
-        })
+        setProgresso('Carregando vídeo...')
+        frames = await extrairFrames(file, 5, (msg) => setProgresso(msg))
       } else {
         setProgresso('Processando imagem...')
         const b64 = await imagemParaBase64(file)
-        setEstado('analisando')
-        setProgresso('IA analisando...')
-        res = await fetch('/api/ai/analisar-video', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ frames: [b64], modo }),
-        })
+        frames = [b64]
       }
+
+      setEstado('analisando')
+      setProgresso(`${frames.length} frame${frames.length > 1 ? 's' : ''} extraído${frames.length > 1 ? 's' : ''} — IA analisando...`)
+
+      const res = await fetch('/api/ai/analisar-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frames, modo }),
+      })
 
       if (!res.ok) {
         const err = await res.json()
@@ -101,9 +163,9 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
       setResultado(data)
       setEstado('concluido')
       onResultado?.(data)
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('[AgroVision]', e)
-      const msg = e?.message || e?.toString() || JSON.stringify(e) || 'Erro desconhecido'
+      const msg = e instanceof Error ? e.message : 'Erro desconhecido'
       setErro(msg)
       setEstado('erro')
     }
@@ -134,7 +196,6 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
 
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,.03)', border: `1px solid ${config.cor}22` }}>
-      {/* Header */}
       <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: `1px solid ${config.cor}15` }}>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xl" style={{ background: `${config.cor}18`, border: `1px solid ${config.cor}30` }}>
           {config.icon}
@@ -162,14 +223,14 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
             <input
               ref={inputRef}
               type="file"
-              accept="video/mp4,video/quicktime,video/avi,video/x-matroska,video/webm,video/x-m4v,image/jpeg,image/png,image/webp"
+              accept="video/mp4,video/quicktime,video/webm,video/avi,image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={e => e.target.files && processar(e.target.files)}
             />
             <div className="text-4xl mb-3">🎬</div>
             <p className="text-white font-medium mb-1">Arraste ou clique para enviar</p>
-            <p className="text-xs text-slate-500">Vídeo (MP4, MOV, AVI, MKV) ou imagem (JPG, PNG)</p>
-            <p className="text-xs text-slate-600 mt-1">Primeira análise de vídeo carrega o motor (~20s) · após isso é rápido</p>
+            <p className="text-xs text-slate-500">Vídeo MP4 (H.264), MOV, WebM ou imagem JPG/PNG</p>
+            <p className="text-xs text-slate-600 mt-1">Processamento local — sem upload pesado</p>
           </div>
         )}
 
