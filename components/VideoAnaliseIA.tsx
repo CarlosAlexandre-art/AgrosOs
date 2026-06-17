@@ -68,25 +68,35 @@ async function extrairFramesDoVideo(
 
   // Extrai 1 frame a cada N segundos usando ffmpeg
   onProgresso?.('Extraindo frames...')
-  await ffmpeg.exec([
-    '-i', 'input',
-    '-vf', `fps=1/${Math.ceil(30 / maxFrames)},scale=640:-1`,
-    '-frames:v', String(maxFrames),
-    '-q:v', '3',
-    'frame%02d.jpg',
-  ])
 
   const frames: string[] = []
-  for (let i = 1; i <= maxFrames; i++) {
-    const num = String(i).padStart(2, '0')
+
+  // Extrai frames em posições fixas — simples e confiável no WASM
+  const posicoes = [2, 5, 10, 20, 30, 45] // segundos
+  for (let i = 0; i < posicoes.length; i++) {
+    const t = posicoes[i]
+    const nome = `f${i}.jpg`
     try {
-      const data = await ffmpeg.readFile(`frame${num}.jpg`) as Uint8Array
+      await ffmpeg.exec([
+        '-ss', String(t),
+        '-i', 'input',
+        '-frames:v', '1',
+        '-vf', 'scale=640:-1',
+        '-q:v', '4',
+        nome,
+      ])
+      const data = await ffmpeg.readFile(nome) as Uint8Array
       const b64 = btoa(String.fromCharCode(...data))
-      if (b64.length > 100) frames.push(b64)
-      await ffmpeg.deleteFile(`frame${num}.jpg`)
+      if (b64.length > 500) {
+        frames.push(b64)
+        onProgresso?.(`Frame ${frames.length} extraído...`)
+      }
+      await ffmpeg.deleteFile(nome).catch(() => {})
     } catch {
+      // posição além da duração do vídeo — para
       break
     }
+    if (frames.length >= maxFrames) break
   }
 
   await ffmpeg.deleteFile('input').catch(() => {})
