@@ -138,6 +138,137 @@ async function extrairFrames(file: File, maxFrames = 5, onProgresso?: (msg: stri
   }
 }
 
+const MODO_LABELS: Record<ModoAnalise, string> = {
+  drone: 'Análise Aérea / Drone',
+  visita: 'Relatório de Visita Técnica',
+  animal: 'Avaliação de Saúde Animal',
+  servico: 'Laudo de Serviço Executado',
+}
+
+function gerarPDF(resultado: VideoAnalysisResult, cfg: typeof MODO_CONFIG[ModoAnalise]) {
+  const data = new Date(resultado.geradoEm).toLocaleString('pt-BR')
+  const titulo = MODO_LABELS[resultado.modo]
+
+  // Converte markdown simples em HTML
+  const htmlAnalise = resultado.analise
+    .split('\n')
+    .map(l => {
+      if (/^###\s/.test(l)) return `<h3>${l.replace(/^###\s/, '')}</h3>`
+      if (/^##\s/.test(l)) return `<h2>${l.replace(/^##\s/, '')}</h2>`
+      if (/^-\s/.test(l)) return `<li>${l.replace(/^-\s/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`
+      if (l.trim() === '') return '<br>'
+      return `<p>${l.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</p>`
+    })
+    .join('\n')
+    .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>${titulo} — AgroVision IA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', sans-serif; color: #1a1a2e; background: #fff; }
+  .page { max-width: 780px; margin: 0 auto; padding: 48px 48px 64px; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid ${cfg.cor}; padding-bottom: 24px; margin-bottom: 32px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 44px; height: 44px; background: ${cfg.cor}20; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .brand-name { font-size: 22px; font-weight: 700; color: #111; }
+  .brand-sub { font-size: 11px; color: #888; letter-spacing: .04em; text-transform: uppercase; margin-top: 1px; }
+  .badge { background: ${cfg.cor}18; color: ${cfg.cor}; border: 1px solid ${cfg.cor}40; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+  /* Meta */
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .meta-card { background: #f8f9fc; border-radius: 10px; padding: 14px 16px; }
+  .meta-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .meta-value { font-size: 13px; font-weight: 600; color: #222; }
+
+  /* Título */
+  .section-title { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .section-sub { font-size: 13px; color: #666; margin-bottom: 24px; }
+
+  /* Conteúdo */
+  .content { line-height: 1.75; }
+  .content h2 { font-size: 15px; font-weight: 700; color: ${cfg.cor}; margin: 24px 0 8px; padding-bottom: 6px; border-bottom: 1px solid ${cfg.cor}25; }
+  .content h3 { font-size: 14px; font-weight: 600; color: #333; margin: 20px 0 6px; }
+  .content p { font-size: 13px; color: #444; margin-bottom: 8px; }
+  .content ul { margin: 6px 0 12px 20px; }
+  .content li { font-size: 13px; color: #444; margin-bottom: 5px; }
+  .content strong { color: #222; font-weight: 600; }
+
+  /* Footer */
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+  .footer-left { font-size: 11px; color: #aaa; }
+  .footer-right { font-size: 11px; color: #aaa; text-align: right; }
+  .watermark { font-size: 11px; font-weight: 600; color: #ccc; letter-spacing: .04em; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 32px 40px 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">${cfg.icon}</div>
+      <div>
+        <div class="brand-name">AgroVision IA</div>
+        <div class="brand-sub">SmartAgroOS · ORYON AG</div>
+      </div>
+    </div>
+    <div class="badge">Llama 4 Scout Vision · Groq</div>
+  </div>
+
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="meta-label">Tipo de análise</div>
+      <div class="meta-value">${titulo}</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Frames analisados</div>
+      <div class="meta-value">${resultado.frames} frame${resultado.frames > 1 ? 's' : ''}</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Data / Hora</div>
+      <div class="meta-value">${data}</div>
+    </div>
+  </div>
+
+  <div class="section-title">${titulo}</div>
+  <div class="section-sub">Relatório gerado automaticamente por visão computacional com IA multimodal</div>
+
+  <div class="content">
+    ${htmlAnalise}
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">
+      Gerado por AgroVision IA — SmartAgroOS<br>
+      Modelo: ${resultado.modeloUsado}
+    </div>
+    <div class="footer-right">
+      <div class="watermark">ORYON AG</div>
+      agroos.site
+    </div>
+  </div>
+</div>
+<script>window.onload = () => { window.print() }</script>
+</body>
+</html>`
+
+  const w = window.open('', '_blank')
+  if (w) {
+    w.document.write(html)
+    w.document.close()
+  }
+}
+
 function imagemParaBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -307,17 +438,11 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
 
             <div className="flex gap-2 flex-wrap">
               <button
-                onClick={() => {
-                  const blob = new Blob([resultado.analise], { type: 'text/plain' })
-                  const a = document.createElement('a')
-                  a.href = URL.createObjectURL(blob)
-                  a.download = `analise-${modo}-${new Date().toISOString().split('T')[0]}.txt`
-                  a.click()
-                }}
+                onClick={() => gerarPDF(resultado, config)}
                 className="text-xs px-3 py-1.5 rounded-lg font-medium"
                 style={{ background: `${config.cor}18`, color: config.cor, border: `1px solid ${config.cor}30` }}
               >
-                Baixar relatório
+                Baixar PDF
               </button>
               <button
                 onClick={() => navigator.clipboard.writeText(resultado.analise)}
