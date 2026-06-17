@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 export type ModoAnalise = 'drone' | 'visita' | 'animal' | 'servico'
 
 interface VideoAnalysisResult {
@@ -23,83 +24,6 @@ const MODO_CONFIG = {
   visita:  { icon: '🌾', label: 'Visita Técnica',         cor: '#60a5fa', dica: 'Grave um vídeo caminhando no campo' },
   animal:  { icon: '🐄', label: 'Análise Animal',         cor: '#f59e0b', dica: 'Vídeo do animal para avaliação de condição corporal' },
   servico: { icon: '✅', label: 'Comprovante de Serviço', cor: '#a78bfa', dica: 'Vídeo do campo após execução do serviço' },
-}
-
-let ffmpegInstance: FFmpeg | null = null
-let ffmpegLoaded = false
-
-async function getFFmpeg(onLog?: (msg: string) => void): Promise<FFmpeg> {
-  if (ffmpegInstance && ffmpegLoaded) return ffmpegInstance
-
-  const ffmpeg = new FFmpeg()
-
-  if (onLog) {
-    ffmpeg.on('log', ({ message }) => {
-      if (message.includes('time=') || message.includes('frame=')) {
-        onLog('Processando vídeo...')
-      }
-    })
-  }
-
-  // Carrega diretamente do servidor local — sem toBlobURL para evitar fetch cross-origin
-  await ffmpeg.load({
-    coreURL: '/ffmpeg/ffmpeg-core.js',
-    wasmURL: '/ffmpeg/ffmpeg-core.wasm',
-  })
-
-  ffmpegInstance = ffmpeg
-  ffmpegLoaded = true
-  return ffmpeg
-}
-
-async function extrairFramesDoVideo(
-  file: File,
-  maxFrames = 6,
-  onProgresso?: (msg: string) => void
-): Promise<string[]> {
-  onProgresso?.('Carregando motor de vídeo (primeira vez pode levar ~20s)...')
-  const ffmpeg = await getFFmpeg(onProgresso)
-
-  onProgresso?.('Lendo arquivo de vídeo...')
-  await ffmpeg.writeFile('input', await fetchFile(file))
-
-  // Extrai 1 frame a cada N segundos usando ffmpeg
-  onProgresso?.('Extraindo frames...')
-
-  const frames: string[] = []
-
-  // Extrai frames em posições fixas — simples e confiável no WASM
-  const posicoes = [2, 5, 10, 20, 30, 45] // segundos
-  for (let i = 0; i < posicoes.length; i++) {
-    const t = posicoes[i]
-    const nome = `f${i}.jpg`
-    try {
-      await ffmpeg.exec([
-        '-ss', String(t),
-        '-i', 'input',
-        '-frames:v', '1',
-        '-vf', 'scale=640:-1',
-        '-q:v', '4',
-        nome,
-      ])
-      const data = await ffmpeg.readFile(nome) as Uint8Array
-      const b64 = btoa(String.fromCharCode(...data))
-      if (b64.length > 500) {
-        frames.push(b64)
-        onProgresso?.(`Frame ${frames.length} extraído...`)
-      }
-      await ffmpeg.deleteFile(nome).catch(() => {})
-    } catch {
-      // posição além da duração do vídeo — para
-      break
-    }
-    if (frames.length >= maxFrames) break
-  }
-
-  await ffmpeg.deleteFile('input').catch(() => {})
-
-  if (frames.length === 0) throw new Error('Nenhum frame extraído do vídeo. Tente um arquivo diferente.')
-  return frames
 }
 
 function imagemParaBase64(file: File): Promise<string> {
@@ -138,13 +62,24 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
       let res: Response
 
       if (isVideo) {
-        setProgresso('Enviando vídeo para o servidor...')
-        const form = new FormData()
-        form.append('video', file)
-        form.append('modo', modo)
+        // Upload direto para o Supabase Storage (evita limite de 4.5MB do Vercel)
+        setProgresso('Enviando vídeo para o storage... (pode levar alguns segundos)')
+        const supabase = createClient()
+        const storagePath = `upload/${Date.now()}-${file.name.replace(/[^a-z0-9.]/gi, '_')}`
+        const { error: uploadErr } = await supabase.storage
+          .from('agrovision-temp')
+          .upload(storagePath, file, { upsert: true, contentType: file.type })
+        if (uploadErr) throw new Error(`Erro no upload: ${uploadErr.message}`)
+
+        const { data: { publicUrl } } = supabase.storage.from('agrovision-temp').getPublicUrl(storagePath)
+
         setEstado('analisando')
         setProgresso('Servidor extraindo frames e analisando com IA... (~30s)')
-        res = await fetch('/api/ai/analisar-video-upload', { method: 'POST', body: form })
+        res = await fetch('/api/ai/analisar-video-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: publicUrl, storagePath, modo }),
+        })
       } else {
         setProgresso('Processando imagem...')
         const b64 = await imagemParaBase64(file)

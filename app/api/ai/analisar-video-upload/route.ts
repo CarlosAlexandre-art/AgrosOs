@@ -21,13 +21,18 @@ function uint8ToBase64(bytes: Uint8Array): string {
 
 async function extrairFramesServidor(videoUrl: string, maxFrames = 5): Promise<string[]> {
   const { FFmpeg } = await import('@ffmpeg/ffmpeg')
-  const { fetchFile } = await import('@ffmpeg/util')
+  const { readFile } = await import('fs/promises')
+  const { join } = await import('path')
 
   const ffmpeg = new FFmpeg()
-  await ffmpeg.load({
-    coreURL: '/ffmpeg/ffmpeg-core.js',
-    wasmURL: '/ffmpeg/ffmpeg-core.wasm',
-  })
+
+  // Em Node.js, fetch() não suporta caminhos relativos — carrega via data: URL
+  const coreJsBuf = await readFile(join(process.cwd(), 'public/ffmpeg/ffmpeg-core.js'))
+  const coreWasmBuf = await readFile(join(process.cwd(), 'public/ffmpeg/ffmpeg-core.wasm'))
+  const coreURL = `data:text/javascript;base64,${coreJsBuf.toString('base64')}`
+  const wasmURL = `data:application/wasm;base64,${coreWasmBuf.toString('base64')}`
+
+  await ffmpeg.load({ coreURL, wasmURL })
 
   // Baixa o vídeo do Supabase Storage
   const res = await fetch(videoUrl)
@@ -67,38 +72,24 @@ export async function POST(req: NextRequest) {
     const { allowed } = rateLimit(`analisar-video:${user.id}`, 5, 3600_000)
     if (!allowed) return NextResponse.json({ error: 'Limite de 5 análises de vídeo por hora atingido.' }, { status: 429 })
 
-    const formData = await req.formData()
-    const file = formData.get('video') as File | null
-    const modo = formData.get('modo') as ModoAnalise
+    const body = await req.json()
+    const { videoUrl, storagePath: sp, modo } = body as { videoUrl: string; storagePath: string; modo: ModoAnalise }
+    storagePath = sp ?? null
 
-    if (!file) return NextResponse.json({ error: 'Nenhum vídeo enviado' }, { status: 400 })
+    if (!videoUrl) return NextResponse.json({ error: 'URL do vídeo não informada' }, { status: 400 })
     if (!MODOS_VALIDOS.includes(modo)) return NextResponse.json({ error: 'Modo inválido' }, { status: 400 })
-    if (file.size > 60 * 1024 * 1024) return NextResponse.json({ error: 'Vídeo muito grande. Máximo 60MB.' }, { status: 400 })
 
-    // Garante bucket temporário
-    await admin.storage.createBucket(BUCKET, { public: true, fileSizeLimit: 60 * 1024 * 1024 }).catch(() => {})
-
-    // Upload para Supabase Storage
-    storagePath = `${user.id}/${Date.now()}.mp4`
-    const bytes = await file.arrayBuffer()
-    const { error: uploadError } = await admin.storage.from(BUCKET).upload(storagePath, bytes, { contentType: file.type, upsert: true })
-    if (uploadError) throw new Error(`Erro no upload: ${uploadError.message}`)
-
-    const { data: { publicUrl } } = admin.storage.from(BUCKET).getPublicUrl(storagePath)
-
-    // Extrai frames no servidor
-    const frames = await extrairFramesServidor(publicUrl, 5)
+    const frames = await extrairFramesServidor(videoUrl, 5)
     if (frames.length === 0) throw new Error('Nenhum frame extraído do vídeo.')
 
-    // Analisa com Groq Vision
     const resultado = await analisarFrames(frames, modo)
     return NextResponse.json(resultado)
 
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Erro interno'
     console.error('[analisar-video-upload]', e)
-    return NextResponse.json({ error: e?.message ?? 'Erro interno' }, { status: 500 })
+    return NextResponse.json({ error: msg }, { status: 500 })
   } finally {
-    // Deleta o vídeo do storage após processar
     if (storagePath) {
       await admin.storage.from(BUCKET).remove([storagePath]).catch(() => {})
     }
