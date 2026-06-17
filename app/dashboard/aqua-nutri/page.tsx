@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 
 type Lote = { id: string; nome: string; especie: string; quantidadeAtual: number; tanque: { nome: string } }
 type Arracoamento = {
@@ -12,6 +12,19 @@ type Kpis = { totalKgPeriodo: number; totalCustoPeriodo: number; kgHoje: number;
 
 export default function AquaNutriPage() {
   const [tab, setTab] = useState<'hoje' | 'historico' | 'analise'>('hoje')
+  const savedScroll = useRef<number | null>(null)
+  const scroller = useRef<HTMLElement | null>(null)
+  useLayoutEffect(() => { scroller.current = document.querySelector('main') }, [])
+  useLayoutEffect(() => {
+    if (savedScroll.current !== null && scroller.current) {
+      scroller.current.scrollTop = savedScroll.current
+      savedScroll.current = null
+    }
+  }, [tab])
+  function changeTab(t: 'hoje' | 'historico' | 'analise') {
+    if (scroller.current) savedScroll.current = scroller.current.scrollTop
+    setTab(t)
+  }
   const [lotes, setLotes] = useState<Lote[]>([])
   const [arracoamentos, setArracoamentos] = useState<Arracoamento[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
@@ -84,7 +97,7 @@ export default function AquaNutriPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['hoje', 'Hoje'], ['historico', 'Histórico'], ['analise', 'TCA / Análise']] .map(([k, v]) => (
-          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#0891b2' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>
+          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => changeTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#0891b2' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>
             {v}
           </button>
         ))}

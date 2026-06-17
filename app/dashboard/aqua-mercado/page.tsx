@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 
 type Lote = { id: string; nome: string; especie: string; quantidadeAtual: number }
 type Venda = { id: string; loteId: string; data: string; especie: string; pesoKg: number; precoKg: number; total: number; comprador: string | null; canal: string | null; observacao: string | null; lote: { nome: string; especie: string } }
@@ -12,6 +12,19 @@ const PERIODOS = [{ v: '30', l: '30 dias' }, { v: '60', l: '60 dias' }, { v: '90
 
 export default function AquaMercadoPage() {
   const [tab, setTab] = useState<'vendas' | 'canais' | 'especies'>('vendas')
+  const savedScroll = useRef<number | null>(null)
+  const scroller = useRef<HTMLElement | null>(null)
+  useLayoutEffect(() => { scroller.current = document.querySelector('main') }, [])
+  useLayoutEffect(() => {
+    if (savedScroll.current !== null && scroller.current) {
+      scroller.current.scrollTop = savedScroll.current
+      savedScroll.current = null
+    }
+  }, [tab])
+  function changeTab(t: 'vendas' | 'canais' | 'especies') {
+    if (scroller.current) savedScroll.current = scroller.current.scrollTop
+    setTab(t)
+  }
   const [lotes, setLotes] = useState<Lote[]>([])
   const [vendas, setVendas] = useState<Venda[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
@@ -78,7 +91,7 @@ export default function AquaMercadoPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['vendas', 'Vendas'], ['canais', 'Por Canal'], ['especies', 'Por Espécie']].map(([k, v]) => (
-          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#f59e0b' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
+          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => changeTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#f59e0b' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
         ))}
         <div style={{ flex: 1 }} />
         <select style={{ background: '#111827', border: '1px solid #1e293b', color: '#94a3b8', borderRadius: 10, padding: '8px 12px', fontSize: 13, cursor: 'pointer', outline: 'none' }} value={periodo} onChange={e => setPeriodo(e.target.value)}>

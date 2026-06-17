@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 
 type Tanque = {
   id: string; nome: string; tipo: string; areaM2: number | null; volumeM3: number | null
@@ -24,6 +24,19 @@ const ESPECIES = ['Tilápia', 'Tambaqui', 'Pacu', 'Pintado/Surubim', 'Piau', 'Cu
 
 export default function AquaGestaoPage() {
   const [tab, setTab] = useState<'tanques' | 'lotes'>('tanques')
+  const savedScroll = useRef<number | null>(null)
+  const scroller = useRef<HTMLElement | null>(null)
+  useLayoutEffect(() => { scroller.current = document.querySelector('main') }, [])
+  useLayoutEffect(() => {
+    if (savedScroll.current !== null && scroller.current) {
+      scroller.current.scrollTop = savedScroll.current
+      savedScroll.current = null
+    }
+  }, [tab])
+  function changeTab(t: 'tanques' | 'lotes') {
+    if (scroller.current) savedScroll.current = scroller.current.scrollTop
+    setTab(t)
+  }
   const [tanques, setTanques] = useState<Tanque[]>([])
   const [lotes, setLotes] = useState<Lote[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
@@ -102,7 +115,7 @@ export default function AquaGestaoPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {(['tanques', 'lotes'] as const).map(t => (
-          <button key={t} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(t)} style={{ padding: '8px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === t ? '#0891b2' : '#111827', color: tab === t ? '#fff' : '#64748b', transition: 'all .15s' }}>
+          <button key={t} onMouseDown={(e) => e.preventDefault()} onClick={() => changeTab(t)} style={{ padding: '8px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === t ? '#0891b2' : '#111827', color: tab === t ? '#fff' : '#64748b', transition: 'all .15s' }}>
             {t === 'tanques' ? 'Tanques / Viveiros' : 'Lotes Ativos'}
           </button>
         ))}

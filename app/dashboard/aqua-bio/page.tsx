@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 
 type Lote = { id: string; nome: string; especie: string; quantidadeAtual: number; dataPovamento: string; dataDespescaPrev: string | null; tanque: { nome: string } }
 type Biometria = { id: string; loteId: string; data: string; amostragem: number; pesoMedioG: number; comprimentoCm: number | null; biomasseKg: number | null; observacao: string | null; lote: { nome: string; especie: string; quantidadeAtual: number } }
@@ -8,6 +8,19 @@ type Kpis = { biomasseTotal: number; pesoMedioGeral: number; totalBiometrias: nu
 
 export default function AquaBioPage() {
   const [tab, setTab] = useState<'biometrias' | 'curva'>('biometrias')
+  const savedScroll = useRef<number | null>(null)
+  const scroller = useRef<HTMLElement | null>(null)
+  useLayoutEffect(() => { scroller.current = document.querySelector('main') }, [])
+  useLayoutEffect(() => {
+    if (savedScroll.current !== null && scroller.current) {
+      scroller.current.scrollTop = savedScroll.current
+      savedScroll.current = null
+    }
+  }, [tab])
+  function changeTab(t: 'biometrias' | 'curva') {
+    if (scroller.current) savedScroll.current = scroller.current.scrollTop
+    setTab(t)
+  }
   const [lotes, setLotes] = useState<Lote[]>([])
   const [biometrias, setBiometrias] = useState<Biometria[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
@@ -99,7 +112,7 @@ export default function AquaBioPage() {
       {/* Tabs + Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[['biometrias', 'Biometrias'], ['curva', 'Curva de Crescimento']].map(([k, v]) => (
-          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => setTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#7c3aed' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
+          <button key={k} onMouseDown={(e) => e.preventDefault()} onClick={() => changeTab(k as any)} style={{ padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === k ? '#7c3aed' : '#111827', color: tab === k ? '#fff' : '#64748b' }}>{v}</button>
         ))}
         <div style={{ flex: 1 }} />
         <button onClick={() => setModal(true)} style={{ background: '#7c3aed', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Nova Biometria</button>
