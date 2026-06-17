@@ -14,11 +14,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
       "font-src 'self' https://fonts.gstatic.com https://unpkg.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://*.openstreetmap.org https://unpkg.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.open-meteo.com https://api.openweathermap.org https://cdn.jsdelivr.net",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.open-meteo.com https://api.openweathermap.org",
       "frame-src 'none'",
       "worker-src 'self' blob:",
       "script-src-elem 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net blob:",

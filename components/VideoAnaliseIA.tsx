@@ -44,11 +44,11 @@ async function getFFmpeg(onLog?: (msg: string) => void): Promise<FFmpeg> {
     })
   }
 
-  // Carrega os arquivos WASM do CDN jsDelivr (evita problemas de CORS)
-  const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.9/dist/umd'
+  // Arquivos servidos localmente em /public/ffmpeg — evita problemas de CORS/COEP
+  const base = typeof window !== 'undefined' ? window.location.origin : ''
   await ffmpeg.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    coreURL: await toBlobURL(`${base}/ffmpeg/ffmpeg-core.js`, 'text/javascript'),
+    wasmURL: await toBlobURL(`${base}/ffmpeg/ffmpeg-core.wasm`, 'application/wasm'),
   })
 
   ffmpegInstance = ffmpeg
