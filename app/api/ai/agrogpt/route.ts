@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 import { groqStream, Msg } from '@/lib/groq'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const maxDuration = 60
 
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return new Response('Não autenticado', { status: 401 })
+
+    const { allowed } = rateLimit(`agrogpt:${user.id}`, 30, 3600_000)
+    if (!allowed) return new Response('Limite de mensagens atingido. Tente em 1 hora.', { status: 429 })
 
     const { messages }: { messages: Msg[] } = await req.json()
 
