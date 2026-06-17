@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePlan } from '@/lib/hooks/usePlan'
 import ProPaywall from '@/components/ProPaywall'
+import VideoAnaliseIA from '@/components/VideoAnaliseIA'
 
 interface Campo {
   id: string
@@ -220,6 +221,20 @@ export default function SegmentacaoLavouras() {
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 <span className="text-xs text-slate-600">{data.source}</span>
                 <span className="text-xs text-slate-700">· {new Date(data.generatedAt).toLocaleString('pt-BR')}</span>
+              </div>
+
+              {/* AgroVision — Análise de Drone */}
+              <div className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-px flex-1 bg-white/5" />
+                  <span className="text-xs text-slate-600 font-medium px-3">AgroVision IA</span>
+                  <div className="h-px flex-1 bg-white/5" />
+                </div>
+                <VideoAnaliseIA
+                  modo="drone"
+                  titulo="Análise de Vídeo de Drone"
+                  descricao="Envie um vídeo ou imagem aérea da lavoura para análise automática por IA"
+                />
               </div>
             </>
           ) : (
