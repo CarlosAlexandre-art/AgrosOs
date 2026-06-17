@@ -1,9 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { fetchFile } from '@ffmpeg/util'
-
 export type ModoAnalise = 'drone' | 'visita' | 'animal' | 'servico'
 
 interface VideoAnalysisResult {
@@ -131,28 +128,34 @@ export default function VideoAnaliseIA({ modo, titulo, descricao, onResultado }:
     setResultado(null)
 
     try {
-      let frames: string[] = []
       const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|avi|mkv|webm|m4v|3gp)$/i.test(file.name)
+      const isImage = file.type.startsWith('image/')
 
-      if (isVideo) {
-        frames = await extrairFramesDoVideo(file, 6, setProgresso)
-        setProgresso(`${frames.length} frames extraídos. Enviando para análise IA...`)
-      } else if (file.type.startsWith('image/')) {
-        setProgresso('Processando imagem...')
-        frames = [await imagemParaBase64(file)]
-        setProgresso('Enviando para análise IA...')
-      } else {
+      if (!isVideo && !isImage) {
         throw new Error('Formato não suportado. Envie um vídeo (MP4, MOV, AVI) ou imagem (JPG, PNG).')
       }
 
-      setEstado('analisando')
-      setProgresso('IA analisando... isso pode levar até 30 segundos')
+      let res: Response
 
-      const res = await fetch('/api/ai/analisar-video', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frames, modo }),
-      })
+      if (isVideo) {
+        setProgresso('Enviando vídeo para o servidor...')
+        const form = new FormData()
+        form.append('video', file)
+        form.append('modo', modo)
+        setEstado('analisando')
+        setProgresso('Servidor extraindo frames e analisando com IA... (~30s)')
+        res = await fetch('/api/ai/analisar-video-upload', { method: 'POST', body: form })
+      } else {
+        setProgresso('Processando imagem...')
+        const b64 = await imagemParaBase64(file)
+        setEstado('analisando')
+        setProgresso('IA analisando...')
+        res = await fetch('/api/ai/analisar-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ frames: [b64], modo }),
+        })
+      }
 
       if (!res.ok) {
         const err = await res.json()
