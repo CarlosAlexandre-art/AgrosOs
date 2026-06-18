@@ -147,9 +147,11 @@ Formato obrigatório:
           html,
         }),
       })
+      const resendBody = await resendRes.json()
       if (!resendRes.ok) {
-        const resendErr = await resendRes.json()
-        console.error('Resend error:', JSON.stringify(resendErr))
+        console.error('Resend error:', JSON.stringify(resendBody))
+      } else {
+        console.log('Resend ok — id:', resendBody.id, '— to:', ADVOGADA_EMAIL)
       }
     }
 
