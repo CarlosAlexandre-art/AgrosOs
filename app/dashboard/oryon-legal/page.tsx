@@ -136,6 +136,10 @@ export default function OryonLegalDashboardPage() {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '13px 22px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontWeight: 600, fontSize: '14px', borderRadius: '12px', textDecoration: 'none' }}>
                 📅 Minha Agenda
               </a>
+              <a href="https://talitamartinsadv.com.br/" target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '13px 22px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24', fontWeight: 600, fontSize: '14px', borderRadius: '12px', textDecoration: 'none' }}>
+                👩‍⚖️ Conhecer Profissional
+              </a>
             </div>
           </div>
         </Fade>
