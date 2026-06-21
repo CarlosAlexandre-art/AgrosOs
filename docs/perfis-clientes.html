@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfis de Clientes — Ecossistema Agro</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --agrocore-dark:   #104e27;
+    --agrocore-green:  #679d3f;
+    --agrocore-cream:  #dad6ca;
+    --agrocore-brown:  #7b492d;
+    --smartagro-green: #16a34a;
+    --smartagro-dark:  #0f172a;
+    --smartagro-bg:    #f0fdf4;
+    --agrorate-dark:   #065f46;
+    --agrorate-light:  #10b981;
+    --agrorate-gold:   #d97706;
+    --agrorate-goldbg: #fef3c7;
+    --slate:           #64748b;
+    --slate-light:     #f8fafc;
+    --white:           #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #1e293b;
+    background: #f1f5f9;
+    line-height: 1.6;
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    body { background: white; font-size: 12px; }
+    .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .no-print { display: none; }
+    @page { size: A4; margin: 0; }
+  }
+
+  /* ─── LAYOUT ─── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    margin: 24px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── COVER ─── */
+  .cover {
+    background: linear-gradient(145deg, #052e16 0%, #104e27 45%, #166534 100%);
+    min-height: 297mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+  }
+  .cover-top { padding: 56px 64px 0; }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #86efac;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 99px;
+    margin-bottom: 40px;
+  }
+  .cover-eco-logos {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    margin-bottom: 64px;
+  }
+  .eco-logo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .eco-logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .eco-logo-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+  }
+  .cover-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 52px;
+    line-height: 1.05;
+    color: white;
+    margin-bottom: 20px;
+    letter-spacing: -1.5px;
+  }
+  .cover-title span { color: #86efac; }
+  .cover-subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.65);
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 56px;
+  }
+  .cover-stats {
+    display: flex;
+    gap: 40px;
+  }
+  .cover-stat-num {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    color: #4ade80;
+    line-height: 1;
+  }
+  .cover-stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .cover-bottom {
+    padding: 0 64px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cover-meta { color: rgba(255,255,255,0.35); font-size: 11px; }
+  .cover-version {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    font-family: monospace;
+  }
+  .cover-wave {
+    width: 100%;
+    margin-bottom: -4px;
+    margin-top: 24px;
+  }
+
+  /* ─── SECTION HEADER ─── */
+  .section-header {
+    padding: 40px 48px 28px;
+    position: relative;
+  }
+  .section-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+  .section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--slate);
+    margin-top: 6px;
+    max-width: 560px;
+  }
+  .section-rule {
+    height: 3px;
+    border-radius: 99px;
+    margin: 16px 0 0;
+    width: 56px;
+  }
+
+  /* ─── PROFILE CARD ─── */
+  .profile-page { padding: 0 48px 48px; }
+  .profile-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .profile-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: start;
+    padding: 24px 28px;
+  }
+  .profile-avatar {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .profile-name {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.2;
+  }
+  .profile-sub {
+    font-size: 12px;
+    margin-top: 3px;
+    opacity: 0.65;
+  }
+  .profile-quote {
+    background: rgba(0,0,0,0.04);
+    border-left: 3px solid currentColor;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-style: italic;
+    border-radius: 0 8px 8px 0;
+    margin-top: 16px;
+    line-height: 1.5;
+    color: #334155;
+  }
+  .profile-fit-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  .fit-pill {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── PROFILE BODY GRID ─── */
+  .profile-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid #f1f5f9;
+  }
+  .profile-col {
+    padding: 20px 24px;
+  }
+  .profile-col:first-child { border-right: 1px solid #f1f5f9; }
+  .col-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 10px;
+  }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .demo-item { }
+  .demo-key {
+    font-size: 10px;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  .demo-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.3;
+  }
+
+  .list-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    align-items: flex-start;
+  }
+  .list-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .tag {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  /* ─── FULL-WIDTH DIVIDER ROW ─── */
+  .profile-divider-row {
+    border-top: 1px solid #f1f5f9;
+    padding: 16px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .mini-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+  .objection-item {
+    font-size: 11px;
+    background: #fef9ef;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 5px;
+    line-height: 1.4;
+  }
+  .objection-q { font-weight: 600; color: #92400e; }
+  .objection-a { color: #78350f; margin-top: 2px; }
+  .channel-pill {
+    display: inline-block;
+    font-size: 10px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    margin: 2px;
+    font-weight: 500;
+  }
+
+  /* ─── STARS ─── */
+  .stars { color: #fbbf24; font-size: 11px; letter-spacing: 1px; }
+  .stars-empty { color: #e2e8f0; }
+
+  /* ─── TOC PAGE ─── */
+  .toc-page { padding: 48px; }
+  .toc-section { margin-bottom: 28px; }
+  .toc-section-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid;
+  }
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 12px;
+    border-radius: 8px;
+    margin-bottom: 3px;
+    font-size: 13px;
+  }
+  .toc-item:hover { background: #f8fafc; }
+  .toc-code {
+    font-family: monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+
+  /* ─── MAP PAGE ─── */
+  .map-page { padding: 48px; }
+  .matrix-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .matrix-table th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: left;
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .matrix-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 12px;
+    vertical-align: middle;
+  }
+  .matrix-table tr:hover td { background: #f8fafc; }
+  .matrix-dots { font-size: 13px; letter-spacing: 2px; }
+  .dot-filled { color: #16a34a; }
+  .dot-empty { color: #e2e8f0; }
+
+  /* Colors per section */
+  .color-agrocore { color: var(--agrocore-dark); }
+  .color-smartagro { color: var(--smartagro-green); }
+  .color-agrorate { color: var(--agrorate-dark); }
+
+  .bg-agrocore { background: var(--agrocore-dark); }
+  .bg-smartagro { background: var(--smartagro-green); }
+  .bg-agrorate { background: var(--agrorate-dark); }
+
+  .header-agrocore { background: linear-gradient(135deg, #052e16, #104e27); color: white; }
+  .header-smartagro { background: linear-gradient(135deg, #14532d, #16a34a); color: white; }
+  .header-agrorate { background: linear-gradient(135deg, #022c22, #065f46); color: white; }
+
+  .rule-agrocore { background: var(--agrocore-green); }
+  .rule-smartagro { background: var(--smartagro-green); }
+  .rule-agrorate { background: var(--agrorate-light); }
+
+  .accent-agrocore { color: var(--agrocore-green); }
+  .accent-smartagro { color: #4ade80; }
+  .accent-agrorate { color: #6ee7b7; }
+
+  .dot-agrocore { background: var(--agrocore-green); }
+  .dot-smartagro { background: var(--smartagro-green); }
+  .dot-agrorate { background: var(--agrorate-light); }
+
+  .avatar-agrocore { background: #dcfce7; color: var(--agrocore-dark); }
+  .avatar-smartagro { background: #d1fae5; color: var(--agrorate-dark); }
+  .avatar-agrorate { background: #d1fae5; color: var(--agrorate-dark); }
+
+  /* ─── CHANNEL PILLS ─── */
+  .ch-green { background: #dcfce7; color: #166534; }
+  .ch-blue { background: #dbeafe; color: #1e40af; }
+  .ch-orange { background: #ffedd5; color: #9a3412; }
+  .ch-purple { background: #ede9fe; color: #5b21b6; }
+  .ch-gray { background: #f1f5f9; color: #475569; }
+  .ch-gold { background: #fef3c7; color: #92400e; }
+
+  /* ─── FIT PILLS ─── */
+  .fit-high { background: #dcfce7; color: #166534; }
+  .fit-mid { background: #fef3c7; color: #92400e; }
+  .fit-low { background: #f1f5f9; color: #64748b; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     CAPA
+════════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-top">
+    <div class="cover-badge">Ecossistema Agro · Documento Estratégico</div>
+
+    <div class="cover-eco-logos">
+      <div class="eco-logo-item">
+        <div class="eco-logo-dot" style="background:#679d3f"></div>
+        <span class="eco-logo-name">AgroCore</span>
+      </div>
+      <div class="eco-logo-item">
+        <div class="eco-logo-dot" style="background:#16a34a"></div>
+        <span class="eco-logo-name">SmartAgroOS</span>
+      </div>
+      <div class="eco-logo-item">
+        <div class="eco-logo-dot" style="background:#10b981"></div>
+        <span class="eco-logo-name">AgroRate</span>
+      </div>
+    </div>
+
+    <div class="cover-title">
+      Perfis de<br><span>Clientes</span><br>do Ecossistema
+    </div>
+    <div class="cover-subtitle">
+      13 perfis assertivos para orientar estratégia de produto, marketing e comunicação nos três pilares do agronegócio digital brasileiro.
+    </div>
+
+    <div class="cover-stats">
+      <div>
+        <div class="cover-stat-num">13</div>
+        <div class="cover-stat-label">Perfis detalhados</div>
+      </div>
+      <div>
+        <div class="cover-stat-num">3</div>
+        <div class="cover-stat-label">Plataformas</div>
+      </div>
+      <div>
+        <div class="cover-stat-num">5</div>
+        <div class="cover-stat-label">Segmentos</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <svg class="cover-wave" viewBox="0 0 1200 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,40 C200,80 400,0 600,40 C800,80 1000,10 1200,40 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.04)"/>
+      <path d="M0,55 C300,20 600,70 900,30 C1050,15 1150,50 1200,55 L1200,80 L0,80 Z" fill="rgba(255,255,255,0.06)"/>
+    </svg>
+    <div class="cover-bottom">
+      <div class="cover-meta">Junho · 2026 · Uso interno — Documento vivo</div>
+      <div class="cover-version">v1.0 · ecossistema-agro</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     SUMÁRIO
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div style="background: linear-gradient(135deg, #052e16, #104e27); padding: 36px 48px 28px; color: white;">
+    <div style="font-family: Montserrat, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; opacity: 0.6; margin-bottom: 8px; text-transform: uppercase;">Índice de Perfis</div>
+    <div style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.5px;">Visão Geral do Documento</div>
+  </div>
+
+  <div class="toc-page" style="padding-top: 32px;">
+
+    <div class="toc-section">
+      <div class="toc-section-title color-agrocore" style="border-color: var(--agrocore-green);">
+        AgroCore — Marketplace de Serviços Agrícolas
+      </div>
+      <div style="font-size: 11px; color: var(--slate); margin-bottom: 12px;">Perfis de produtores que contratam e prestadores que oferecem serviços no marketplace.</div>
+      <div class="toc-item"><div><span style="font-weight:700">P1</span> · Médio Produtor de Grãos</div><span class="toc-code" style="background:#dcfce7;color:#166534">PRODUTOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P2</span> · Pequeno Agricultor Familiar</div><span class="toc-code" style="background:#dcfce7;color:#166534">PRODUTOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P3</span> · Grande Produtor Rural / Grupo Empresarial</div><span class="toc-code" style="background:#dcfce7;color:#166534">PRODUTOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P4</span> · Operador de Máquinas Agrícolas</div><span class="toc-code" style="background:#fef3c7;color:#92400e">PRESTADOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P5</span> · Agrônomo / Técnico Autônomo</div><span class="toc-code" style="background:#fef3c7;color:#92400e">PRESTADOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P6</span> · Piloto de Drone Agrícola</div><span class="toc-code" style="background:#fef3c7;color:#92400e">PRESTADOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P7</span> · Veterinário Rural / Inseminador</div><span class="toc-code" style="background:#fef3c7;color:#92400e">PRESTADOR</span></div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title color-smartagro" style="border-color: var(--smartagro-green);">
+        SmartAgroOS — Sistema Operacional da Fazenda
+      </div>
+      <div style="font-size: 11px; color: var(--slate); margin-bottom: 12px;">Perfis de gestores que administram operações rurais via dashboard integrado.</div>
+      <div class="toc-item"><div><span style="font-weight:700">P8</span> · Fazendeiro Gestor Moderno</div><span class="toc-code" style="background:#d1fae5;color:#065f46">GESTOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P9</span> · Gerente / Engenheiro Agrônomo de Fazenda</div><span class="toc-code" style="background:#d1fae5;color:#065f46">GESTOR</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P10</span> · Visitante Curioso do Site (5 subperfis)</div><span class="toc-code" style="background:#e0e7ff;color:#3730a3">FUNIL TOPO</span></div>
+    </div>
+
+    <div class="toc-section">
+      <div class="toc-section-title color-agrorate" style="border-color: var(--agrorate-light);">
+        AgroRate — Score de Crédito Rural
+      </div>
+      <div style="font-size: 11px; color: var(--slate); margin-bottom: 12px;">Perfis de produtores que buscam acesso a crédito rural via plataforma de score.</div>
+      <div class="toc-item"><div><span style="font-weight:700">P11</span> · Produtor em Busca de Custeio Agrícola</div><span class="toc-code" style="background:#d1fae5;color:#065f46">CRÉDITO</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P12</span> · Produtor em Expansão de Área ou Equipamentos</div><span class="toc-code" style="background:#d1fae5;color:#065f46">CRÉDITO</span></div>
+      <div class="toc-item"><div><span style="font-weight:700">P13</span> · Produtor com Histórico de Crédito Comprometido</div><span class="toc-code" style="background:#fecaca;color:#991b1b">RECUPERAÇÃO</span></div>
+    </div>
+
+    <div style="margin-top: 28px; padding: 16px 20px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 12px; color: var(--slate); display: flex; gap: 24px;">
+      <div>📋 <strong>Como usar</strong>: cada perfil contém demografia, jobs-to-be-done, dores, motivações, objeções e canais de comunicação.</div>
+      <div>🔄 <strong>Revisão</strong>: atualizar a cada safra ou a cada 500 usuários ativos por plataforma.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     AGROCORE — PRODUTORES
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-header header-agrocore" style="padding-bottom: 36px;">
+    <div class="section-label accent-agrocore">AgroCore · Marketplace Agrícola</div>
+    <div class="section-title">Produtores que Contratam Serviços</div>
+    <div class="section-desc" style="color: rgba(255,255,255,0.6);">Três perfis que representam o lado da demanda no marketplace — de quem terceiriza esporadicamente a quem precisa de gestão de fornecedores em escala.</div>
+  </div>
+
+  <div class="profile-page" style="padding-top: 28px;">
+
+    <!-- P1 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar avatar-agrocore" style="background:#dcfce7; color:#104e27; font-size:24px;">🌾</div>
+        <div>
+          <div class="profile-name color-agrocore">P1 · Médio Produtor de Grãos</div>
+          <div class="profile-sub">100–500 ha · MT, GO, MS, PR, SP interior · R$ 15k–80k/mês</div>
+          <div class="profile-quote" style="border-color: var(--agrocore-green);">
+            "Eu sei o que preciso, só não tenho tempo pra ficar ligando pra todo mundo."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-high">AgroCore ★★★★★</div>
+          <div class="fit-pill fit-mid">AgroRate ★★★★☆</div>
+          <div class="fit-pill fit-low">SmartAgroOS ★★★☆☆</div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Perfil Demográfico</div>
+          <div class="demo-grid">
+            <div class="demo-item"><div class="demo-key">Idade</div><div class="demo-val">35–55 anos</div></div>
+            <div class="demo-item"><div class="demo-key">Gênero</div><div class="demo-val">82% masculino</div></div>
+            <div class="demo-item"><div class="demo-key">Escolaridade</div><div class="demo-val">Médio–Superior (Agro/Admin)</div></div>
+            <div class="demo-item"><div class="demo-key">Área</div><div class="demo-val">100–500 ha</div></div>
+            <div class="demo-item"><div class="demo-key">Culturas</div><div class="demo-val">Soja, milho, algodão</div></div>
+            <div class="demo-item"><div class="demo-key">Regime</div><div class="demo-val">PF com NIRF ou ME</div></div>
+          </div>
+          <div style="margin-top: 14px;">
+            <div class="col-title">Jobs To Be Done</div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Contratar pulverização em urgência (praga/fungo)</div></div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Agendar colheita sem perder janela de safra</div></div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Terceirizar quando equipamento quebra</div></div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Controlar rastreabilidade de quem foi à fazenda</div></div>
+          </div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Dores & Frustrações</div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Horas no telefone buscando prestador disponível</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Depende de "tchau de confiança" — risco de falta</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Sem controle de custo por serviço terceirizado</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Medo de contratar sem garantia e perder dinheiro</div></div>
+          <div style="margin-top: 14px;">
+            <div class="col-title">O que busca na plataforma</div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Propostas em minutos após publicar o serviço</div></div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Avaliações reais de outros produtores</div></div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Pagamento seguro (escrow — paga só após concluído)</div></div>
+            <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Histórico de todos os serviços por safra</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-divider-row">
+        <div>
+          <div class="mini-section-title">Como Chega ao AgroCore</div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:6px"></div><div>Indicação de colega de cooperativa</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:6px"></div><div>Post patrocinado Facebook / Instagram agro</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:6px"></div><div>Stands em feiras (Agrishow, Tecnoshow)</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:6px"></div><div>Grupo de WhatsApp de produtores da região</div></div>
+        </div>
+        <div>
+          <div class="mini-section-title">Principais Objeções</div>
+          <div class="objection-item"><div class="objection-q">"Não conheço a empresa"</div><div class="objection-a">→ Avaliações verificadas + histórico do prestador</div></div>
+          <div class="objection-item"><div class="objection-q">"Prefiro quem já conheço"</div><div class="objection-a">→ Pode adicionar prestadores favoritos</div></div>
+          <div class="objection-item"><div class="objection-q">"E se o serviço for mal feito?"</div><div class="objection-a">→ Sistema de disputa e escrow garante pagamento</div></div>
+        </div>
+        <div>
+          <div class="mini-section-title">Canais Preferidos</div>
+          <div class="tag-row">
+            <span class="channel-pill ch-green">WhatsApp</span>
+            <span class="channel-pill ch-blue">Facebook Groups</span>
+            <span class="channel-pill ch-orange">Instagram</span>
+            <span class="channel-pill ch-gray">Rádio local</span>
+            <span class="channel-pill ch-gray">Agrishow</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P2 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" style="background:#fef9ef; color:#7b492d; font-size:24px;">🌱</div>
+        <div>
+          <div class="profile-name" style="color: var(--agrocore-brown);">P2 · Pequeno Agricultor Familiar</div>
+          <div class="profile-sub">Até 50 ha · MG, PR, SC, RS, BA, PE · R$ 3k–12k/mês · DAP obrigatória</div>
+          <div class="profile-quote" style="border-color: var(--agrocore-brown);">
+            "Quero melhorar, mas não posso arriscar muito. Cada real conta."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-high">AgroCore ★★★★☆</div>
+          <div class="fit-pill fit-high">AgroRate ★★★★★</div>
+          <div class="fit-pill fit-low">SmartAgroOS ★★☆☆☆</div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Perfil Demográfico</div>
+          <div class="demo-grid">
+            <div class="demo-item"><div class="demo-key">Idade</div><div class="demo-val">30–60 anos</div></div>
+            <div class="demo-item"><div class="demo-key">Gênero</div><div class="demo-val">Misto (mais diverso)</div></div>
+            <div class="demo-item"><div class="demo-key">Escolaridade</div><div class="demo-val">Fundamental–Médio</div></div>
+            <div class="demo-item"><div class="demo-key">Área</div><div class="demo-val">Até 50 ha (módulo fiscal)</div></div>
+            <div class="demo-item"><div class="demo-key">Culturas</div><div class="demo-val">Milho, feijão, hortifruti, café</div></div>
+            <div class="demo-item"><div class="demo-key">Estrutura</div><div class="demo-val">Mão de obra familiar</div></div>
+          </div>
+          <div style="margin-top: 14px;">
+            <div class="col-title">Dores Principais</div>
+            <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Apps digitais "não são para ele" — sente exclusão</div></div>
+            <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Desconfiança com pagamento online</div></div>
+            <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Não sabe "o preço certo" — sente que paga mais</div></div>
+            <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Conexão de internet instável na propriedade</div></div>
+          </div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Como Chega & O que Busca</div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Indicação de técnico EMATER ou cooperativa</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Programa de extensão rural do governo</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Interface simples: poucos cliques para o serviço</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Prestadores próximos — não quer de outra cidade</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>PIX como forma de pagamento acessível</div></div>
+          <div style="margin-top:14px"><div class="col-title">Objeções críticas</div>
+          <div class="objection-item"><div class="objection-q">"Não sei mexer bem no celular"</div><div class="objection-a">→ Onboarding simplificado + suporte por WhatsApp</div></div>
+          <div class="objection-item"><div class="objection-q">"Tenho medo de golpe"</div><div class="objection-a">→ Escrow: paga só após serviço concluído e aprovado</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P3 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" style="background:#1e293b; color:#4ade80; font-size:24px;">🏢</div>
+        <div>
+          <div class="profile-name" style="color: var(--smartagro-dark);">P3 · Grande Produtor / Grupo Empresarial</div>
+          <div class="profile-sub">1.000–50.000 ha · MT, GO, MS, MATOPIBA · Faturamento R$ 500k+/mês</div>
+          <div class="profile-quote" style="border-color: #334155;">
+            "Preciso de escala, confiabilidade e relatórios para justificar ao conselho."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-mid">AgroCore ★★★☆☆</div>
+          <div class="fit-pill fit-high">SmartAgroOS ★★★★★</div>
+          <div class="fit-pill fit-mid">AgroRate ★★★☆☆</div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Perfil & Contexto</div>
+          <div class="demo-grid">
+            <div class="demo-item"><div class="demo-key">Estrutura</div><div class="demo-val">Empresa rural com CNPJ</div></div>
+            <div class="demo-item"><div class="demo-key">Time</div><div class="demo-val">10–200 funcionários</div></div>
+            <div class="demo-item"><div class="demo-key">Escolaridade</div><div class="demo-val">Superior (Agro, Admin, Direito)</div></div>
+            <div class="demo-item"><div class="demo-key">Maquinário</div><div class="demo-val">Frota própria + terceiriza</div></div>
+          </div>
+          <div style="margin-top:12px"><div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>Contratar serviços especializados em massa</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>Auditoria e rastreabilidade (certificações ESG)</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>Diversificar fornecedores homologados</div></div>
+          </div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">O que Exige da Plataforma</div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>Plano Enterprise ilimitado com SLA garantido</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>Relatórios gerenciais exportáveis</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>NF para todos os serviços contratados</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#1e293b"></div><div>Contratos digitais via ClickSign</div></div>
+          <div style="margin-top:12px"><div class="col-title">Como Chega</div>
+          <div class="tag-row">
+            <span class="channel-pill ch-blue">LinkedIn</span>
+            <span class="channel-pill ch-gray">Outbound comercial</span>
+            <span class="channel-pill ch-gray">Forum do Agro</span>
+            <span class="channel-pill ch-orange">Globo Rural</span>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     AGROCORE — PRESTADORES
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-header header-agrocore" style="padding-bottom: 36px;">
+    <div class="section-label accent-agrocore">AgroCore · Marketplace Agrícola</div>
+    <div class="section-title">Prestadores de Serviços</div>
+    <div class="section-desc" style="color: rgba(255,255,255,0.6);">Quatro perfis do lado da oferta — operadores de máquina, técnicos agrônomos, pilotos de drone e veterinários que buscam clientes via plataforma.</div>
+  </div>
+
+  <div class="profile-page" style="padding-top: 28px;">
+
+    <!-- P4 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar avatar-agrocore" style="font-size:24px;">🚜</div>
+        <div>
+          <div class="profile-name color-agrocore">P4 · Operador de Máquinas Agrícolas</div>
+          <div class="profile-sub">28–55 anos · Itinerante · R$ 6k–25k/mês (altamente sazonal) · MEI a Simples</div>
+          <div class="profile-quote" style="border-color: var(--agrocore-green);">
+            "Tenho a máquina, tenho a capacidade. Só falta o cliente certo na hora certa."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-high">AgroCore ★★★★★</div>
+          <div class="fit-pill fit-low">SmartAgroOS ★☆☆☆☆</div>
+          <div class="fit-pill fit-mid">AgroRate ★★★☆☆</div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Equipamentos & Serviços</div>
+          <div class="tag-row" style="margin-bottom:12px">
+            <span class="tag">Trator + plantadeira</span><span class="tag">Colheitadeira</span>
+            <span class="tag">Pulverizador</span><span class="tag">Aração</span>
+            <span class="tag">Subsolagem</span><span class="tag">Fertilização</span>
+          </div>
+          <div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Ocupar a máquina no vazio sazonal entre safras</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Descobrir demanda sem ficar ligando para todo mundo</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Garantir pagamento antes de se deslocar 200km</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Construir reputação para reduzir dependência de indicação</div></div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Dores Críticas</div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Máquina parada = prejuízo com financiamento ativo</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Fica sabendo das demandas tarde — já fecharam com outro</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Clientes desconhecidos que não pagam ou atrasam</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Não sabe se está precificando certo</div></div>
+          <div style="margin-top:12px"><div class="col-title">Objeções sobre a plataforma</div>
+          <div class="objection-item"><div class="objection-q">"5% de comissão é muito"</div><div class="objection-a">→ Comparar com custo real de prospectar cliente ativo</div></div>
+          <div class="objection-item"><div class="objection-q">"E se cancelar depois que me desloquei?"</div><div class="objection-a">→ Política de cancelamento protege o prestador</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P5 + P6 em duas colunas menores -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+      <div class="profile-card">
+        <div class="profile-header" style="grid-template-columns: auto 1fr; gap: 14px;">
+          <div class="profile-avatar avatar-agrocore" style="font-size:20px; width:46px; height:46px;">🧑‍🔬</div>
+          <div>
+            <div class="profile-name color-agrocore" style="font-size:15px;">P5 · Agrônomo / Técnico Autônomo</div>
+            <div class="profile-sub">24–45 anos · CREA/CFMV · R$ 5k–18k/mês</div>
+            <div class="profile-quote" style="border-color:var(--agrocore-green); font-size:11px;">
+              "Estudei 5 anos para isso. Quero atender mais fazendas sem carteira assinada."
+            </div>
+          </div>
+        </div>
+        <div class="profile-body" style="grid-template-columns: 1fr;">
+          <div class="profile-col">
+            <div class="col-title">Serviços oferecidos</div>
+            <div class="tag-row" style="margin-bottom:12px">
+              <span class="tag">Análise de solo</span><span class="tag">Consultoria</span>
+              <span class="tag">Manejo de pragas</span><span class="tag">Prescrição</span>
+              <span class="tag">Laudo técnico</span>
+            </div>
+            <div class="col-title">Jobs To Be Done</div>
+            <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:5px"></div><div>Encontrar novos clientes fora da rede pessoal</div></div>
+            <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:5px"></div><div>Demonstrar credenciais (CREA) para clientes novos</div></div>
+            <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrocore" style="width:5px;height:5px;margin-top:5px"></div><div>Otimizar rota de visitas por região</div></div>
+            <div class="col-title" style="margin-top:12px">Canais</div>
+            <div class="tag-row">
+              <span class="channel-pill ch-blue">LinkedIn</span>
+              <span class="channel-pill ch-gray">CREA Eventos</span>
+              <span class="channel-pill ch-orange">Instagram técnico</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-header" style="grid-template-columns: auto 1fr; gap: 14px;">
+          <div class="profile-avatar avatar-agrocore" style="font-size:20px; width:46px; height:46px;">🚁</div>
+          <div>
+            <div class="profile-name color-agrocore" style="font-size:15px;">P6 · Piloto de Drone Agrícola</div>
+            <div class="profile-sub">22–40 anos · ANAC RPAS · R$ 8k–35k/mês (3 meses de pico)</div>
+            <div class="profile-quote" style="border-color:var(--agrocore-green); font-size:11px;">
+              "Meu drone custa R$ 80 mil. Cada hora parado é desperdício de dinheiro."
+            </div>
+          </div>
+        </div>
+        <div class="profile-body" style="grid-template-columns: 1fr;">
+          <div class="profile-col">
+            <div class="col-title">Serviços & Equipamentos</div>
+            <div class="tag-row" style="margin-bottom:12px">
+              <span class="tag">Pulverização aérea</span><span class="tag">Mapeamento fotogramétrico</span>
+              <span class="tag">NDVI</span><span class="tag">Fungicida/Herbicida</span>
+            </div>
+            <div class="col-title">Dores Críticas</div>
+            <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#ef4444;width:5px;height:5px;margin-top:5px"></div><div>Alta demanda concentrada em 3 meses; vazio nos outros 9</div></div>
+            <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#ef4444;width:5px;height:5px;margin-top:5px"></div><div>Concorrência de pilotos sem certificação cobrando menos</div></div>
+            <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#ef4444;width:5px;height:5px;margin-top:5px"></div><div>Muitos produtores ainda desconfiam de drone para aplicação</div></div>
+            <div class="col-title" style="margin-top:12px">Canais</div>
+            <div class="tag-row">
+              <span class="channel-pill ch-orange">YouTube</span>
+              <span class="channel-pill ch-purple">Discord pilotos</span>
+              <span class="channel-pill ch-gray">Agrishow</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P7 -->
+    <div class="profile-card" style="margin-top:20px">
+      <div class="profile-header">
+        <div class="profile-avatar avatar-agrocore" style="font-size:22px;">🐄</div>
+        <div>
+          <div class="profile-name color-agrocore">P7 · Veterinário Rural / Inseminador</div>
+          <div class="profile-sub">26–50 anos · 50% feminino · CFMV obrigatório · GO, MT, MS, MG, RS, PR · R$ 6k–22k/mês</div>
+          <div class="profile-quote" style="border-color: var(--agrocore-green);">
+            "Tem muito animal pra pouco veterinário aqui. Mas os produtores não me encontram."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-high">AgroCore ★★★★☆</div>
+          <div class="fit-pill fit-low">SmartAgroOS ★★☆☆☆</div>
+        </div>
+      </div>
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Serviços & Modelo</div>
+          <div class="tag-row" style="margin-bottom:12px">
+            <span class="tag">Sanidade animal</span><span class="tag">Inseminação</span>
+            <span class="tag">Manejo reprodutivo</span><span class="tag">Vacinação</span><span class="tag">Emergências</span>
+          </div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Carro adaptado como clínica móvel rural</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Plantões de emergência + visitas programadas</div></div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Ser chamado em emergências por produtores sem vet fixo</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Converter visitas avulsas em contratos recorrentes de sanidade</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Garantir pagamento para deslocamentos de emergência</div></div>
+          <div class="list-item"><div class="list-dot dot-agrocore"></div><div>Ser a referência técnica de pecuária na microrregião</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     SMARTAGROOS
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-header header-smartagro" style="padding-bottom: 36px;">
+    <div class="section-label accent-smartagro">SmartAgroOS · Sistema Operacional da Fazenda</div>
+    <div class="section-title">Usuários do Sistema de Gestão</div>
+    <div class="section-desc" style="color: rgba(255,255,255,0.6);">O proprietário que quer controle remoto da fazenda, o agrônomo que gerencia operações no dia a dia, e os cinco subperfis de visitantes que chegam ao site mas ainda não converteram.</div>
+  </div>
+
+  <div class="profile-page" style="padding-top: 28px;">
+
+    <!-- P8 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar avatar-smartagro" style="font-size:24px;">📱</div>
+        <div>
+          <div class="profile-name color-smartagro">P8 · Fazendeiro Gestor Moderno</div>
+          <div class="profile-sub">35–55 anos · 300–5.000 ha · Faturamento R$ 200k–5M/safra · Pode estar na cidade</div>
+          <div class="profile-quote" style="border-color: var(--smartagro-green);">
+            "Quero saber o que está acontecendo na fazenda sem precisar estar lá o tempo todo."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-mid">AgroCore ★★★★☆</div>
+          <div class="fit-pill fit-high">SmartAgroOS ★★★★★</div>
+          <div class="fit-pill fit-high">AgroRate ★★★★★</div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Perfil & Tecnologia atual</div>
+          <div class="demo-grid">
+            <div class="demo-item"><div class="demo-key">Área</div><div class="demo-val">300–5.000 ha</div></div>
+            <div class="demo-item"><div class="demo-key">Culturas</div><div class="demo-val">Soja + milho safrinha</div></div>
+            <div class="demo-item"><div class="demo-key">Time</div><div class="demo-val">5–50 funcionários</div></div>
+            <div class="demo-item"><div class="demo-key">Gestão atual</div><div class="demo-val">WhatsApp + Excel</div></div>
+          </div>
+          <div style="margin-top:12px"><div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Monitorar operações remotamente via celular</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Registrar atividades, insumos e custos por talhão</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Gerenciar equipe com tarefas e acompanhamento</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Planejar crédito integrado com dados reais de safra</div></div>
+          </div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Dores & Frustrações</div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Gestão por WhatsApp — perda de informação garantida</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Sem custo real por talhão por hectare</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>IAs genéricas que não conhecem a fazenda específica</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Já tentou 3 sistemas e abandonou pela complexidade</div></div>
+          <div style="margin-top:12px"><div class="col-title">Módulos mais usados</div>
+          <div class="tag-row">
+            <span class="tag">Dashboard financeiro</span><span class="tag">Mapa/talhões</span>
+            <span class="tag">AgroGPT</span><span class="tag">Alertas</span>
+            <span class="tag">AgroNav</span><span class="tag">Satélite/NDVI</span>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="profile-divider-row">
+        <div>
+          <div class="mini-section-title">Como Chega ao SmartAgroOS</div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-smartagro" style="width:5px;height:5px;margin-top:6px"></div><div>YouTube (Canal Rural, influencer agro)</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-smartagro" style="width:5px;height:5px;margin-top:6px"></div><div>Indicação de agrônomo ou cooperativa</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-smartagro" style="width:5px;height:5px;margin-top:6px"></div><div>Feiras: Agrishow, Tecnoshow Comigo</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-smartagro" style="width:5px;height:5px;margin-top:6px"></div><div>Anúncio com foco em produtividade agro</div></div>
+        </div>
+        <div>
+          <div class="mini-section-title">Objeções Principais</div>
+          <div class="objection-item"><div class="objection-q">"Já tentei 3 sistemas e abandonei"</div><div class="objection-a">→ Onboarding guiado + sucesso do cliente ativo</div></div>
+          <div class="objection-item"><div class="objection-q">"Minha equipe não vai usar"</div><div class="objection-a">→ App mobile simples para operadores de campo</div></div>
+          <div class="objection-item"><div class="objection-q">"É caro demais"</div><div class="objection-a">→ ROI: R$5/ha × 300 ha = R$1.500/mês economizados</div></div>
+        </div>
+        <div>
+          <div class="mini-section-title">Canais Preferidos</div>
+          <div class="tag-row">
+            <span class="channel-pill ch-orange">YouTube</span>
+            <span class="channel-pill ch-green">WhatsApp</span>
+            <span class="channel-pill ch-blue">LinkedIn</span>
+            <span class="channel-pill ch-gold">Podcast agro</span>
+            <span class="channel-pill ch-gray">Agrishow</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P9 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar avatar-smartagro" style="font-size:22px;">📊</div>
+        <div>
+          <div class="profile-name color-smartagro">P9 · Gerente / Engenheiro Agrônomo de Fazenda</div>
+          <div class="profile-sub">26–42 anos · 60% masc. / 40% fem. · CLT ou PJ da fazenda · R$ 4.5k–12k/mês</div>
+          <div class="profile-quote" style="border-color: var(--smartagro-green);">
+            "O dono quer relatório todo dia. Preciso de uma ferramenta que me ajude a entregar isso."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-mid">AgroCore ★★★☆☆</div>
+          <div class="fit-pill fit-high">SmartAgroOS ★★★★★</div>
+        </div>
+      </div>
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Registrar atividades da equipe em tempo real</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Gerar relatórios de produção e custo para o dono</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Prescrever insumos com base em análise de solo histórica</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Monitorar saúde da lavoura via imagens de satélite</div></div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Módulos mais usados</div>
+          <div class="tag-row" style="margin-bottom:12px">
+            <span class="tag">Operações</span><span class="tag">Safra/Talhões</span>
+            <span class="tag">Solo</span><span class="tag">Satélite/NDVI</span>
+            <span class="tag">AgroGPT</span><span class="tag">AgroNav</span>
+          </div>
+          <div class="col-title">Diferencial buscado</div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>IA como copiloto agronômico — não substituto</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Dados que respaldem recomendações técnicas</div></div>
+          <div class="list-item"><div class="list-dot dot-smartagro"></div><div>Automatizar relatórios para focar no estratégico</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P10 -->
+    <div class="profile-card" style="border: 2px dashed #e2e8f0;">
+      <div class="profile-header">
+        <div class="profile-avatar" style="background:#e0e7ff; color:#3730a3; font-size:22px;">👁️</div>
+        <div>
+          <div class="profile-name" style="color:#3730a3;">P10 · Visitante Curioso do Site (5 subperfis)</div>
+          <div class="profile-sub">Usuário de topo de funil — chegou ao site mas ainda não criou conta</div>
+          <div class="profile-quote" style="border-color:#818cf8;">
+            "Vi no Instagram / encontrei no Google. Quero entender o que é antes de criar conta."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill" style="background:#e0e7ff; color:#3730a3;">Conversão via landing page</div>
+        </div>
+      </div>
+      <div class="profile-body" style="grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid #f1f5f9;">
+        <div class="profile-col" style="border-right: 1px solid #f1f5f9;">
+          <div class="col-title">Subperfis</div>
+          <div style="font-size:11px; margin-bottom:6px"><strong>10A</strong> Produtor em pesquisa — insatisfeito com planilha, tem medo de adotar mais uma ferramenta</div>
+          <div style="font-size:11px; margin-bottom:6px"><strong>10B</strong> Filho/filha do produtor — quer modernizar a fazenda do pai</div>
+          <div style="font-size:11px; margin-bottom:6px"><strong>10C</strong> Técnico/Cooperativa — avaliando para recomendar a clientes</div>
+          <div style="font-size:11px; margin-bottom:6px"><strong>10D</strong> Estudante de Agronomia — pesquisa ou futuro cliente</div>
+          <div style="font-size:11px"><strong>10E</strong> Jornalista / Investidor — due diligence ou imprensa</div>
+        </div>
+        <div class="profile-col" style="border-right: 1px solid #f1f5f9;">
+          <div class="col-title">Comportamento no Site</div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div>45s–3min de permanência média</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div>Taxa de bounce alta sem proposta de valor clara em 5s</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div>Scrollam até o meio da página antes de sair</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div>Maioria acessa pelo celular</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div>Raramente convertem na 1ª visita (retargeting essencial)</div></div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">O Site Precisa Comunicar</div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div><strong>Para quem é:</strong> "Para produtor rural que quer gestão moderna"</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div><strong>O que faz:</strong> demo visual ou vídeo de 60s do produto real</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div><strong>Prova social:</strong> depoimento com foto, nome e hectares</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div><strong>Trial:</strong> grátis sem cartão de crédito</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot" style="background:#818cf8;width:5px;height:5px;margin-top:5px"></div><div><strong>Suporte:</strong> WhatsApp visível — produtor prefere falar com pessoa</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     AGRORATE
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-header header-agrorate" style="padding-bottom: 36px;">
+    <div class="section-label accent-agrorate">AgroRate · Score de Crédito Rural</div>
+    <div class="section-title">Produtores que Buscam Crédito</div>
+    <div class="section-desc" style="color: rgba(255,255,255,0.6);">Três perfis com motivações radicalmente diferentes: quem precisa de custeio cíclico, quem quer expandir, e quem precisa se reabilitar após inadimplência.</div>
+  </div>
+
+  <div class="profile-page" style="padding-top: 28px;">
+
+    <!-- P11 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" style="background:#d1fae5; color:#065f46; font-size:24px;">💰</div>
+        <div>
+          <div class="profile-name" style="color: var(--agrorate-dark);">P11 · Produtor em Busca de Custeio Agrícola</div>
+          <div class="profile-sub">30–60 anos · Todo Brasil rural · 50–2.000 ha · PRONAF, Pronamp, Custeio convencional</div>
+          <div class="profile-quote" style="border-color: var(--agrorate-light);">
+            "Preciso de crédito agora para comprar insumo. O banco pede documentação que demora semanas."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-mid">AgroCore ★★★★☆</div>
+          <div class="fit-pill fit-mid">SmartAgroOS ★★★☆☆</div>
+          <div class="fit-pill fit-high">AgroRate ★★★★★</div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Contexto de Crédito</div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Precisa de crédito <strong>cíclico e recorrente</strong> — toda safra</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Processo de renovação bancária é burocrático toda vez</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Usa barter de insumo como alternativa — custo altíssimo</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Prazo bancário não casa com janela de plantio</div></div>
+          <div style="margin-top:12px"><div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Saber o próprio score <em>antes</em> de ir ao banco</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Organizar documentação antecipadamente (DAP, CAR, matrícula)</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Entender por que foi negado e o que melhorar</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Apresentar relatório profissional ao banco/cooperativa</div></div>
+          </div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Dores & Frustrações</div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Surpreendido com negativa de crédito sem aviso prévio</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Não entende quais fatores pesaram negativamente</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Desconfia de bureaus — acha que dados foram colocados sem saber</div></div>
+          <div style="margin-top:12px"><div class="col-title">Módulos mais relevantes</div>
+          <div class="tag-row">
+            <span class="tag">Score AgroRate</span><span class="tag">Fatores</span>
+            <span class="tag">Documentos</span><span class="tag">Certidões</span>
+            <span class="tag">Simulações</span><span class="tag">PRONAF Calc.</span>
+            <span class="tag">Planner Crédito</span><span class="tag">Parceiros</span>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="profile-divider-row">
+        <div>
+          <div class="mini-section-title">Como Chega ao AgroRate</div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrorate" style="width:5px;height:5px;margin-top:6px"></div><div>Negativa de crédito + busca Google "como melhorar score rural"</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrorate" style="width:5px;height:5px;margin-top:6px"></div><div>Indicação de técnico extensão rural ou cooperativa</div></div>
+          <div class="list-item" style="font-size:11px"><div class="list-dot dot-agrorate" style="width:5px;height:5px;margin-top:6px"></div><div>Cooperativa usando AgroRate como pré-análise</div></div>
+        </div>
+        <div>
+          <div class="mini-section-title">Objeções Principais</div>
+          <div class="objection-item"><div class="objection-q">"Meu CPF vai ficar exposto?"</div><div class="objection-a">→ Criptografia de ponta + LGPD compliance total</div></div>
+          <div class="objection-item"><div class="objection-q">"O banco vai ver o que eu colocar?"</div><div class="objection-a">→ Consentimento explícito: produtor escolhe com quem compartilha</div></div>
+          <div class="objection-item"><div class="objection-q">"Pesquisar vai cair meu score?"</div><div class="objection-a">→ Consulta interna é soft inquiry — não afeta score</div></div>
+        </div>
+        <div>
+          <div class="mini-section-title">Canais Preferidos</div>
+          <div class="tag-row">
+            <span class="channel-pill ch-orange">Google (busca ativa)</span>
+            <span class="channel-pill ch-green">WhatsApp</span>
+            <span class="channel-pill ch-gray">Cooperativa</span>
+            <span class="channel-pill ch-orange">YouTube crédito rural</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P12 -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" style="background:#fef3c7; color:#92400e; font-size:24px;">📈</div>
+        <div>
+          <div class="profile-name" style="color: var(--agrorate-gold);">P12 · Produtor em Expansão de Área ou Equipamentos</div>
+          <div class="profile-sub">32–55 anos · 200–3.000 ha · Moderfrota, BNDES Agro, FINAME Agrícola</div>
+          <div class="profile-quote" style="border-color: var(--agrorate-gold);">
+            "Surgiu uma área pra arrendar. Quanto posso tomar de crédito de longo prazo?"
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-mid">AgroCore ★★★☆☆</div>
+          <div class="fit-pill fit-mid">SmartAgroOS ★★★★☆</div>
+          <div class="fit-pill fit-high">AgroRate ★★★★★</div>
+        </div>
+      </div>
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot" style="background: var(--agrorate-gold)"></div><div>Montar dossiê financeiro completo da fazenda para o banco</div></div>
+          <div class="list-item"><div class="list-dot" style="background: var(--agrorate-gold)"></div><div>Simular capacidade de pagamento vs. receita de safra</div></div>
+          <div class="list-item"><div class="list-dot" style="background: var(--agrorate-gold)"></div><div>Organizar garantias: imóvel rural, penhor de máquinas, CPR</div></div>
+          <div class="list-item"><div class="list-dot" style="background: var(--agrorate-gold)"></div><div>Identificar qual linha de crédito é mais adequada</div></div>
+          <div class="list-item"><div class="list-dot" style="background: var(--agrorate-gold)"></div><div>Ter score alto para conseguir taxa prefixada melhor</div></div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Módulos mais relevantes</div>
+          <div class="tag-row" style="margin-bottom:12px">
+            <span class="tag">Garantias</span><span class="tag">Score + Relatório</span>
+            <span class="tag">Fluxo de caixa</span><span class="tag">Contratos</span>
+            <span class="tag">Parceiros</span><span class="tag">Planner Crédito</span>
+          </div>
+          <div class="col-title">Dores críticas</div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Precisa de relação pessoal com gerente para conseguir crédito</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Projeções de receita no caderno não têm credibilidade bancária</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#ef4444"></div><div>Processo de análise demora 30–90 dias — oportunidade passa</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P13 -->
+    <div class="profile-card" style="border-color: #fecaca;">
+      <div class="profile-header" style="background: #fff5f5;">
+        <div class="profile-avatar" style="background:#fecaca; color:#991b1b; font-size:24px;">🔄</div>
+        <div>
+          <div class="profile-name" style="color:#991b1b;">P13 · Produtor com Histórico de Crédito Comprometido</div>
+          <div class="profile-sub">35–65 anos · 30–500 ha · Regularizado atualmente, mas score baixo · Renegociou nos últimos 3–5 anos</div>
+          <div class="profile-quote" style="border-color:#f87171;">
+            "Tive uma safra ruim, fiz renegociação. Agora estou de pé, mas o banco ainda não confia."
+          </div>
+        </div>
+        <div class="profile-fit-pills">
+          <div class="fit-pill fit-mid">AgroCore ★★★☆☆</div>
+          <div class="fit-pill fit-low">SmartAgroOS ★★☆☆☆</div>
+          <div class="fit-pill fit-high">AgroRate ★★★★★</div>
+        </div>
+      </div>
+      <div class="profile-body">
+        <div class="profile-col">
+          <div class="col-title">Contexto de crédito</div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Passou por renegociação, prorrogação ou refinanciamento</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Safra ruim (seca, baixa de preço, pragas) causou inadimplência</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Atualmente regularizado — score não reflete situação atual</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Bancos formais negam sem análise individual</div></div>
+          <div style="margin-top:12px"><div class="col-title">Jobs To Be Done</div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Entender exatamente o que pesa negativamente no score</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Comprovar que a situação atual é diferente da época da crise</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Encontrar alternativas além dos bancos tradicionais</div></div>
+          <div class="list-item"><div class="list-dot dot-agrorate"></div><div>Ter plano de recuperação de score com etapas concretas</div></div>
+          </div>
+        </div>
+        <div class="profile-col">
+          <div class="col-title">Dores Emocionais (além das financeiras)</div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Sente que "pagou" pela crise mas ainda é tratado como inadimplente</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Bureaus tradicionais não entendem sazonalidade do agro</div></div>
+          <div class="list-item"><div class="list-dot" style="background:#f87171"></div><div>Vergonha de falar sobre histórico com pessoas que não conhece</div></div>
+          <div style="margin-top:12px"><div class="col-title">Módulos mais relevantes</div>
+          <div class="tag-row">
+            <span class="tag">Score + Fatores</span><span class="tag">Histórico</span>
+            <span class="tag">Certidões negativas</span><span class="tag">Renegociação</span>
+            <span class="tag">Equipe IA</span><span class="tag">ORYON Legal</span>
+            <span class="tag">Acelerar</span>
+          </div>
+          <div class="col-title" style="margin-top:12px">Objeções críticas</div>
+          <div class="objection-item"><div class="objection-q">"Tenho vergonha do meu histórico"</div><div class="objection-a">→ Dados nunca compartilhados sem consentimento explícito</div></div>
+          <div class="objection-item"><div class="objection-q">"Não vai adiantar"</div><div class="objection-a">→ Mostrar casos reais de recuperação de score no agro</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MAPA DE SOBREPOSIÇÃO + CANAIS
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div style="background: linear-gradient(135deg, #052e16, #0f2027); padding: 36px 48px 28px; color: white;">
+    <div style="font-family: Montserrat, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; opacity: 0.6; margin-bottom: 8px; text-transform: uppercase;">Análise Estratégica</div>
+    <div style="font-family: Montserrat, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.5px;">Sobreposição entre Plataformas & Mensagens por Canal</div>
+  </div>
+
+  <div class="map-page" style="padding-top: 28px;">
+
+    <div style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--slate); margin-bottom: 12px;">Matriz de Fit — Qual plataforma cada perfil usa (★ = fit alto)</div>
+
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Perfil</th>
+          <th style="color: var(--agrocore-dark);">AgroCore</th>
+          <th style="color: var(--smartagro-green);">SmartAgroOS</th>
+          <th style="color: var(--agrorate-dark);">AgroRate</th>
+          <th>Segmento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>P1</strong> · Médio Produtor de Grãos</td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★</span><span class="dot-empty">★</span></span></td><td><span class="toc-code" style="background:#dcfce7;color:#166534;font-size:10px">PRODUTOR</span></td></tr>
+        <tr><td><strong>P2</strong> · Pequeno Agricultor Familiar</td><td><span class="matrix-dots"><span class="dot-filled">★★★★</span><span class="dot-empty">★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="toc-code" style="background:#dcfce7;color:#166534;font-size:10px">PRODUTOR</span></td></tr>
+        <tr><td><strong>P3</strong> · Grande Produtor</td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="toc-code" style="background:#dcfce7;color:#166534;font-size:10px">PRODUTOR</span></td></tr>
+        <tr style="background:#fafff7"><td><strong>P4</strong> · Operador de Máquinas</td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★</span><span class="dot-empty">★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="toc-code" style="background:#fef3c7;color:#92400e;font-size:10px">PRESTADOR</span></td></tr>
+        <tr style="background:#fafff7"><td><strong>P5</strong> · Agrônomo / Técnico Autônomo</td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="toc-code" style="background:#fef3c7;color:#92400e;font-size:10px">PRESTADOR</span></td></tr>
+        <tr style="background:#fafff7"><td><strong>P6</strong> · Piloto de Drone</td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★</span><span class="dot-empty">★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="toc-code" style="background:#fef3c7;color:#92400e;font-size:10px">PRESTADOR</span></td></tr>
+        <tr style="background:#fafff7"><td><strong>P7</strong> · Veterinário Rural</td><td><span class="matrix-dots"><span class="dot-filled">★★★★</span><span class="dot-empty">★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="toc-code" style="background:#fef3c7;color:#92400e;font-size:10px">PRESTADOR</span></td></tr>
+        <tr style="background:#f0fdf4"><td><strong>P8</strong> · Fazendeiro Gestor Moderno</td><td><span class="matrix-dots"><span class="dot-filled">★★★★</span><span class="dot-empty">★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="toc-code" style="background:#d1fae5;color:#065f46;font-size:10px">GESTOR</span></td></tr>
+        <tr style="background:#f0fdf4"><td><strong>P9</strong> · Gerente / Agrônomo de Fazenda</td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="toc-code" style="background:#d1fae5;color:#065f46;font-size:10px">GESTOR</span></td></tr>
+        <tr style="background:#faf5ff"><td><strong>P10</strong> · Visitante Curioso</td><td><span class="matrix-dots"><span class="dot-empty">★★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★</span><span class="dot-empty">★★★★</span></span></td><td><span class="matrix-dots"><span class="dot-empty">★★★★★</span></span></td><td><span class="toc-code" style="background:#e0e7ff;color:#3730a3;font-size:10px">FUNIL TOPO</span></td></tr>
+        <tr style="background:#ecfdf5"><td><strong>P11</strong> · Produtor em Custeio</td><td><span class="matrix-dots"><span class="dot-filled">★★★★</span><span class="dot-empty">★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="toc-code" style="background:#d1fae5;color:#065f46;font-size:10px">CRÉDITO</span></td></tr>
+        <tr style="background:#ecfdf5"><td><strong>P12</strong> · Produtor em Expansão</td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★</span><span class="dot-empty">★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="toc-code" style="background:#d1fae5;color:#065f46;font-size:10px">CRÉDITO</span></td></tr>
+        <tr style="background:#fff5f5"><td><strong>P13</strong> · Produtor Score Baixo</td><td><span class="matrix-dots"><span class="dot-filled">★★★</span><span class="dot-empty">★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★</span><span class="dot-empty">★★★</span></span></td><td><span class="matrix-dots"><span class="dot-filled">★★★★★</span></span></td><td><span class="toc-code" style="background:#fecaca;color:#991b1b;font-size:10px">RECUPERAÇÃO</span></td></tr>
+      </tbody>
+    </table>
+
+    <!-- Insights de cross-sell -->
+    <div style="margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+      <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; padding: 16px; border: 1px solid #bbf7d0;">
+        <div style="font-family:Montserrat,sans-serif; font-weight:800; font-size:12px; color: var(--agrocore-dark); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Sweet Spot Total</div>
+        <div style="font-size:12px; color: #166534; font-weight:600; margin-bottom:4px">P1 · Médio Produtor de Grãos</div>
+        <div style="font-size:11px; color:#166534; line-height:1.5">100–500 ha é o sweet spot de todos os três produtos simultaneamente. Prioridade máxima de aquisição.</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #f0fdf4, #d1fae5); border-radius: 12px; padding: 16px; border: 1px solid #a7f3d0;">
+        <div style="font-family:Montserrat,sans-serif; font-weight:800; font-size:12px; color: var(--agrorate-dark); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Hub do Ecossistema</div>
+        <div style="font-size:12px; color: var(--agrorate-dark); font-weight:600; margin-bottom:4px">P8 · Fazendeiro Gestor</div>
+        <div style="font-size:11px; color:#065f46; line-height:1.5">SmartAgroOS como hub: puxa AgroCore para serviços e AgroRate para crédito. Estratégia de entrada ideal.</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #fef9ef, #fef3c7); border-radius: 12px; padding: 16px; border: 1px solid #fde68a;">
+        <div style="font-family:Montserrat,sans-serif; font-weight:800; font-size:12px; color: #92400e; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Upsell Natural</div>
+        <div style="font-size:12px; color: #92400e; font-weight:600; margin-bottom:4px">P11 → SmartAgroOS</div>
+        <div style="font-size:11px; color:#92400e; line-height:1.5">Produtor começa no AgroRate. Dados de safra do SmartAgroOS fortalecem o score. Gatilho de cross-sell.</div>
+      </div>
+    </div>
+
+    <!-- Tabela de canais -->
+    <div style="margin-top: 28px;">
+      <div style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--slate); margin-bottom: 12px;">Mensagem-Chave por Canal e Plataforma</div>
+      <table class="matrix-table">
+        <thead>
+          <tr><th>Plataforma</th><th>Perfil</th><th>Canal Principal</th><th>Mensagem-Chave</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="color:var(--agrocore-dark);font-weight:700">AgroCore</td><td>P1 Médio Grãos</td><td><span class="channel-pill ch-blue">Facebook/WhatsApp</span></td><td style="font-size:11px;font-style:italic">"Publique o serviço e receba propostas em minutos"</td></tr>
+          <tr><td style="color:var(--agrocore-dark);font-weight:700">AgroCore</td><td>P2 Familiar</td><td><span class="channel-pill ch-gray">EMATER / Cooperativa</span></td><td style="font-size:11px;font-style:italic">"Acesse os mesmos serviços que os grandes produtores"</td></tr>
+          <tr><td style="color:var(--agrocore-dark);font-weight:700">AgroCore</td><td>P4 Operador</td><td><span class="channel-pill ch-orange">Facebook Groups</span></td><td style="font-size:11px;font-style:italic">"Sua máquina trabalhando o ano todo, não só na safra"</td></tr>
+          <tr><td style="color:var(--agrocore-dark);font-weight:700">AgroCore</td><td>P6 Drone</td><td><span class="channel-pill ch-orange">YouTube / Discord</span></td><td style="font-size:11px;font-style:italic">"Encontre quem precisa de drone sem precisar buscar"</td></tr>
+          <tr style="background:#f0fdf4"><td style="color:var(--smartagro-green);font-weight:700">SmartAgroOS</td><td>P8 Gestor</td><td><span class="channel-pill ch-orange">YouTube / Agrishow</span></td><td style="font-size:11px;font-style:italic">"A sala de controle da sua fazenda no celular"</td></tr>
+          <tr style="background:#f0fdf4"><td style="color:var(--smartagro-green);font-weight:700">SmartAgroOS</td><td>P10B Filho</td><td><span class="channel-pill ch-purple">Instagram / TikTok</span></td><td style="font-size:11px;font-style:italic">"Modernize a fazenda do seu pai com uma ferramenta simples"</td></tr>
+          <tr style="background:#ecfdf5"><td style="color:var(--agrorate-dark);font-weight:700">AgroRate</td><td>P11 Custeio</td><td><span class="channel-pill ch-orange">Google busca ativa</span></td><td style="font-size:11px;font-style:italic">"Saiba seu score antes de ir ao banco"</td></tr>
+          <tr style="background:#ecfdf5"><td style="color:var(--agrorate-dark);font-weight:700">AgroRate</td><td>P12 Expansão</td><td><span class="channel-pill ch-blue">Banco / Cooperativa</span></td><td style="font-size:11px;font-style:italic">"Monte seu dossiê com relatório profissional de crédito"</td></tr>
+          <tr style="background:#fff5f5"><td style="color:#991b1b;font-weight:700">AgroRate</td><td>P13 Score baixo</td><td><span class="channel-pill ch-orange">Google desespero</span></td><td style="font-size:11px;font-style:italic">"Entenda o que pesa e construa um plano de recuperação"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 24px; padding: 16px 20px; background: #0f172a; border-radius: 12px; color: rgba(255,255,255,0.65); font-size: 11px; line-height: 1.6;">
+      <strong style="color:white">Nota metodológica:</strong> Este documento foi construído a partir da análise dos módulos, APIs, fluxos de usuário e padrões de dados dos três produtos do ecossistema. Recomenda-se validar com entrevistas qualitativas com 5–8 usuários por perfil antes de usar como base definitiva para campanhas pagas.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
