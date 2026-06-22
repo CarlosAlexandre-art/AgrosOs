@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Fichas de Persona — Ecossistema Agro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4 portrait;margin:0}
+  body{background:white}
+  .page{margin:0;box-shadow:none}
+}
+.page{width:210mm;min-height:297mm;background:white;margin:0 auto 8mm;page-break-after:always;position:relative;display:flex;flex-direction:column}
+
+/* COVER */
+.cover{background:linear-gradient(150deg,#052e16 0%,#104e27 50%,#15803d 100%);align-items:center;justify-content:center;text-align:center;padding:20mm 20mm;position:relative;overflow:hidden}
+.cover-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,0.04)}
+.cover-c1{width:200px;height:200px;bottom:-60px;right:-60px}
+.cover-c2{width:120px;height:120px;top:30px;left:-40px}
+.cover-tag{display:inline-block;background:rgba(134,239,172,0.15);border:1px solid rgba(134,239,172,0.3);color:#86efac;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:20px}
+.cover h1{font-size:56px;font-weight:800;color:white;line-height:1.05;margin-bottom:6px}
+.cover h1 em{font-style:normal;color:#86efac}
+.cover-sub{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.65;max-width:130mm;margin:0 auto 36px}
+.cover-div{width:36px;height:3px;background:#86efac;border-radius:2px;margin:0 auto 24px}
+.cover-stats{display:flex;gap:44px;justify-content:center;margin-bottom:36px}
+.cs-num{font-size:38px;font-weight:800;color:white;line-height:1}
+.cs-lbl{font-size:8.5px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.cover-pills{display:flex;gap:10px;justify-content:center}
+.cpill{padding:6px 14px;border-radius:6px;font-size:10px;font-weight:600;color:white;display:flex;align-items:center;gap:6px}
+.cdot{width:7px;height:7px;border-radius:50%}
+.cpill-ac{background:rgba(103,157,63,0.25);border:1px solid rgba(103,157,63,0.4)}
+.cpill-ac .cdot{background:#679d3f}
+.cpill-os{background:rgba(22,163,74,0.2);border:1px solid rgba(22,163,74,0.35)}
+.cpill-os .cdot{background:#16a34a}
+.cpill-ar{background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.35)}
+.cpill-ar .cdot{background:#10b981}
+
+/* PAGE HEADER */
+.ph{padding:6mm 11mm 4mm;border-bottom:1.5px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ph-label{font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}
+.ph-num{font-size:8px;color:#9ca3af}
+
+/* CARDS */
+.cards{padding:5mm 9mm;display:flex;flex-direction:column;gap:4.5mm;flex:1}
+.card{border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;display:flex;height:116mm}
+
+/* Sidebar */
+.cs{width:44mm;flex-shrink:0;padding:7mm 5mm;display:flex;flex-direction:column;align-items:center;gap:3px}
+.av{width:17mm;height:17mm;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;flex-shrink:0;margin-bottom:3px}
+.ptype{font-size:7.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-align:center}
+.pname{font-size:13.5px;font-weight:800;color:#111827;text-align:center;line-height:1.2;margin-top:2px}
+.pmeta{font-size:8px;color:#6b7280;text-align:center;line-height:1.5;margin-top:1px}
+.pbadge{margin-top:5px;padding:3px 10px;border-radius:20px;font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.b-ac{background:#d1fae5;color:#065f46}
+.b-os{background:#dcfce7;color:#15803d}
+.b-ar{background:#a7f3d0;color:#065f46}
+.b-ar2{background:#fef3c7;color:#92400e}
+.ch-lbl{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;margin-top:7px}
+.ch-wrap{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:2px}
+.ch{font-size:7.5px;background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;font-weight:500}
+
+/* Body */
+.cb{flex:1;padding:6mm 7mm;border-left:1.5px solid #f0f0f0;display:flex;flex-direction:column;gap:4.5mm;overflow:hidden}
+.quote{font-size:10.5px;font-style:italic;color:#374151;line-height:1.55;padding:3mm 4mm;border-left:3px solid;background:#fafafa;border-radius:0 6px 6px 0;flex-shrink:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4mm;flex:1}
+.sec h5{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.sec ul{list-style:none}
+.sec ul li{font-size:9px;color:#374151;padding:1.5px 0;display:flex;align-items:flex-start;gap:5px;line-height:1.4}
+.sec ul li span{flex-shrink:0;font-weight:800;font-size:10px}
+.obj{padding:2.5mm 3.5mm;border-radius:6px;flex-shrink:0}
+.obj-lbl{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px}
+.obj-txt{font-size:9.5px;line-height:1.45;font-style:italic}
+
+/* Themes */
+.t-ac .cs{background:linear-gradient(160deg,#f0fdf4,#dcfce7)}
+.t-ac .quote{border-left-color:#679d3f}
+.t-ac .sec h5{color:#15803d}
+.t-ac .sec ul li span{color:#679d3f}
+.t-ac .obj{background:#fff7ed;border:1px solid #fed7aa}
+.t-ac .obj-lbl{color:#9a3412}
+.t-ac .obj-txt{color:#7c2d12}
+.t-ac .ptype{color:#679d3f}
+
+.t-os .cs{background:linear-gradient(160deg,#f0fdf4,#bbf7d0)}
+.t-os .quote{border-left-color:#16a34a}
+.t-os .sec h5{color:#15803d}
+.t-os .sec ul li span{color:#16a34a}
+.t-os .obj{background:#fefce8;border:1px solid #fde68a}
+.t-os .obj-lbl{color:#92400e}
+.t-os .obj-txt{color:#78350f}
+.t-os .ptype{color:#16a34a}
+
+.t-ar .cs{background:linear-gradient(160deg,#ecfdf5,#a7f3d0)}
+.t-ar .quote{border-left-color:#10b981}
+.t-ar .sec h5{color:#065f46}
+.t-ar .sec ul li span{color:#10b981}
+.t-ar .obj{background:#fff7ed;border:1px solid #fcd34d}
+.t-ar .obj-lbl{color:#92400e}
+.t-ar .obj-txt{color:#78350f}
+.t-ar .ptype{color:#10b981}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="page cover" style="display:flex">
+  <div class="cover-circle cover-c1"></div>
+  <div class="cover-circle cover-c2"></div>
+  <div class="cover-tag">Ecossistema Agro · 2025</div>
+  <h1>Fichas de<br><em>Persona</em></h1>
+  <div class="cover-div"></div>
+  <p class="cover-sub">Referência visual para vendas, CS e produto — quem são nossos clientes, o que pensam e como falar com eles.</p>
+  <div class="cover-stats">
+    <div><div class="cs-num">11</div><div class="cs-lbl">Personas</div></div>
+    <div><div class="cs-num">3</div><div class="cs-lbl">Plataformas</div></div>
+    <div><div class="cs-num">2</div><div class="cs-lbl">Perfis de Acesso</div></div>
+  </div>
+  <div class="cover-pills">
+    <div class="cpill cpill-ac"><div class="cdot"></div>AgroCore</div>
+    <div class="cpill cpill-os"><div class="cdot"></div>SmartAgroOS</div>
+    <div class="cpill cpill-ar"><div class="cdot"></div>AgroRate</div>
+  </div>
+</div>
+
+<!-- PÁG 2: AgroCore Prestadores -->
+<div class="page">
+  <div class="ph"><span class="ph-label" style="color:#15803d">AgroCore · Prestadores de Serviço</span><span class="ph-num">Persona 1 e 2 de 11</span></div>
+  <div class="cards">
+    <div class="card t-ac">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#15803d,#679d3f)">MS</div>
+        <div class="ptype">Prestador Solo</div>
+        <div class="pname">Marcos Santos</div>
+        <div class="pmeta">34 anos · Sorriso/MT<br>MEI · Pulverizador</div>
+        <span class="pbadge b-ac">AgroCore</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">WhatsApp</span><span class="ch">YouTube</span><span class="ch">Indicação</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Fico sem serviço no entressafra e não sei como me programar financeiramente. Preciso de previsibilidade."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Sazonalidade — renda para no entressafra</li>
+            <li><span>·</span>Concorrência de preço com informais</li>
+            <li><span>·</span>Dificuldade de expandir fora da região</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Renda previsível durante todo o ano</li>
+            <li><span>·</span>Ser reconhecido pela qualidade do trabalho</li>
+            <li><span>·</span>Crescer para contratar funcionários</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"R$79/mês é caro se eu não tiver garantia de serviço todo mês."</div></div>
+      </div>
+    </div>
+    <div class="card t-ac">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#104e27,#15803d)">BF</div>
+        <div class="ptype">Prestador Empresa</div>
+        <div class="pname">Bruno Ferreira</div>
+        <div class="pmeta">45 anos · Cascavel/PR<br>CNPJ · 8 funcionários · R$80k/mês</div>
+        <span class="pbadge b-ac">AgroCore</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">LinkedIn</span><span class="ch">Google</span><span class="ch">Feiras</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Perco tempo procurando cliente novo e minha equipe fica parada. Quero escala sem ter que contratar um vendedor."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>CAC alto — R$2k+ por cliente novo</li>
+            <li><span>·</span>Gestão de agenda e equipe no WhatsApp</li>
+            <li><span>·</span>Inadimplência em contratos informais</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Previsibilidade de receita mensal</li>
+            <li><span>·</span>Expandir para novos municípios</li>
+            <li><span>·</span>Contratos digitais com proteção legal</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Já tenho minha carteira de clientes. Por que pagar plataforma se os meus já me conhecem?"</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁG 3: AgroCore Produtores -->
+<div class="page">
+  <div class="ph"><span class="ph-label" style="color:#15803d">AgroCore · Produtores Contratantes</span><span class="ph-num">Persona 3 e 4 de 11</span></div>
+  <div class="cards">
+    <div class="card t-ac">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#679d3f,#a3d15a)">BL</div>
+        <div class="ptype">Produtora Média</div>
+        <div class="pname">Beatriz Lima</div>
+        <div class="pmeta">42 anos · Primavera do Leste/MT<br>800 ha · Soja + Milho</div>
+        <span class="pbadge b-ac">AgroCore</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">WhatsApp</span><span class="ch">Indicação</span><span class="ch">Assoc.</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Gasto horas ligando para prestadores e ainda não sei se o cara que vem é confiável. Já fui enganada uma vez."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Dificuldade de encontrar prestador confiável</li>
+            <li><span>·</span>Preço sem referência de mercado</li>
+            <li><span>·</span>Disponibilidade crítica no pico da safra</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Contratar rápido com segurança</li>
+            <li><span>·</span>Ver avaliações reais de outros produtores</li>
+            <li><span>·</span>Pagar com proteção contra inadimplência</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Prefiro contratar quem já conheço. Com desconhecido é muito arriscado."</div></div>
+      </div>
+    </div>
+    <div class="card t-ac">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#052e16,#104e27)">RV</div>
+        <div class="ptype">Produtor Grande</div>
+        <div class="pname">Ricardo Valle</div>
+        <div class="pmeta">55 anos · Barreiras/BA<br>5.000 ha · Soja + Algodão + Pecuária</div>
+        <span class="pbadge b-ac">AgroCore</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">Email</span><span class="ch">Agrishow</span><span class="ch">Consultor</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Preciso de relatório consolidado de todos os serviços para prestar contas ao conselho e ao banco financiador."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Controle fragmentado de múltiplos contratos</li>
+            <li><span>·</span>Compliance e auditoria trabalhosa</li>
+            <li><span>·</span>Dependência de intermediários para contratar</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Painel único de todos os serviços</li>
+            <li><span>·</span>Contratos digitais com validade jurídica</li>
+            <li><span>·</span>Relatórios automáticos para stakeholders</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Meu departamento jurídico precisa validar a plataforma antes de adotar oficialmente."</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁG 4: SmartAgroOS 1 -->
+<div class="page">
+  <div class="ph"><span class="ph-label" style="color:#16a34a">SmartAgroOS · Produtores</span><span class="ph-num">Persona 5 e 6 de 11</span></div>
+  <div class="cards">
+    <div class="card t-os">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#15803d,#16a34a)">CM</div>
+        <div class="ptype">Gestor Moderno</div>
+        <div class="pname">Carlos Mendes</div>
+        <div class="pmeta">38 anos · Rio Verde/GO<br>Eng. Agr. · 2.000 ha</div>
+        <span class="pbadge b-os">SmartAgroOS</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">Instagram</span><span class="ch">Podcast</span><span class="ch">LinkedIn</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Meu pai geria a fazenda no caderno. Eu quero gestão em tempo real com dados que eu consiga confiar."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Dados dispersos em planilhas e WhatsApp</li>
+            <li><span>·</span>Equipe de campo sem visibilidade central</li>
+            <li><span>·</span>Tomada de decisão lenta por falta de dados</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Dashboard integrado safra + financeiro</li>
+            <li><span>·</span>AgroGPT para análise agronômica com IA</li>
+            <li><span>·</span>AgroToken para tokenizar recebíveis</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Gosto da plataforma, mas preciso que minha equipe de campo adote antes de assinar."</div></div>
+      </div>
+    </div>
+    <div class="card t-os">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#365314,#4d7c0f)">AS</div>
+        <div class="ptype">Produtor Familiar</div>
+        <div class="pname">Seu Antônio</div>
+        <div class="pmeta">58 anos · Uberlândia/MG<br>Policultor · 150 ha · Sucessão familiar</div>
+        <span class="pbadge b-os">SmartAgroOS</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">Sindicato</span><span class="ch">Rádio</span><span class="ch">Filho</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Meu filho quer modernizar a fazenda, mas tenho medo de perder o controle do que está acontecendo."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Tecnologia percebida como complexa demais</li>
+            <li><span>·</span>Custo e tempo de implantação incertos</li>
+            <li><span>·</span>Tensão na transição de gestão para o filho</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Deixar a fazenda organizada para os filhos</li>
+            <li><span>·</span>Financeiro simples e claro de entender</li>
+            <li><span>·</span>Provar ao filho que consegue aprender</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Tenho 58 anos. Não sei se vou conseguir aprender a usar isso no dia a dia."</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁG 5: SmartAgroOS 2 -->
+<div class="page">
+  <div class="ph"><span class="ph-label" style="color:#16a34a">SmartAgroOS · Gestora e Consultor</span><span class="ph-num">Persona 7 e 8 de 11</span></div>
+  <div class="cards">
+    <div class="card t-os">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#0f766e,#16a34a)">MC</div>
+        <div class="ptype">Gestora de Fazenda</div>
+        <div class="pname">Marina Costa</div>
+        <div class="pmeta">31 anos · Luís Eduardo/BA<br>Eng. Agr. contratada</div>
+        <span class="pbadge b-os">SmartAgroOS</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">WhatsApp</span><span class="ch">Grupos</span><span class="ch">CREA</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Sou cobrada por resultado mas as ferramentas que tenho são antigas. Quero dados para defender minhas decisões."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Ferramentas antigas vs cobrança moderna</li>
+            <li><span>·</span>Relatórios feitos manualmente no Excel</li>
+            <li><span>·</span>Sem histórico para comparar safras</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Mostrar resultado claro ao proprietário</li>
+            <li><span>·</span>Relatórios automáticos de desempenho</li>
+            <li><span>·</span>Dados para justificar investimentos</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Quem precisa pagar é o dono — eu preciso convencê-lo primeiro."</div></div>
+      </div>
+    </div>
+    <div class="card t-os">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8)">RA</div>
+        <div class="ptype">Consultor Agronômico</div>
+        <div class="pname">Dr. Renato Alves</div>
+        <div class="pmeta">45 anos · Rondonópolis/MT<br>CREA · 15 clientes ativos</div>
+        <span class="pbadge b-os">SmartAgroOS</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">WhatsApp</span><span class="ch">Embrapa</span><span class="ch">CREA</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Atendo 15 fazendas. Preciso de uma ferramenta que todos meus clientes usem para eu centralizar os dados."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Dados de cada cliente em sistemas diferentes</li>
+            <li><span>·</span>Dificuldade de escalar sem mais horas</li>
+            <li><span>·</span>Sem visão consolidada multi-fazenda</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Ser referência e indicar SmartAgroOS</li>
+            <li><span>·</span>Dashboard multi-cliente centralizado</li>
+            <li><span>·</span>Faturar mais sem aumentar carga horária</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Não quero que a plataforma entre em contato direto com meu cliente e me retire do processo."</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁG 6: AgroRate 1 -->
+<div class="page">
+  <div class="ph"><span class="ph-label" style="color:#065f46">AgroRate · Produtores em Busca de Crédito</span><span class="ph-num">Persona 9 e 10 de 11</span></div>
+  <div class="cards">
+    <div class="card t-ar">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#065f46,#10b981)">FO</div>
+        <div class="ptype">Crédito de Custeio</div>
+        <div class="pname">Fernanda Oliveira</div>
+        <div class="pmeta">44 anos · Patrocínio/MG<br>400 ha · Café · Sem histórico digital</div>
+        <span class="pbadge b-ar">AgroRate</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">Cooperativa</span><span class="ch">Contador</span><span class="ch">Indicação</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"O banco pediu tantos documentos que desisti na metade. Mas preciso de crédito antes da janela de plantio fechar."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Burocracia bancária exaustiva e lenta</li>
+            <li><span>·</span>Score ruim por falta de histórico digital</li>
+            <li><span>·</span>Janela da safra não espera o banco</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Crédito rápido com documentação guiada</li>
+            <li><span>·</span>Score que valorize o histórico real</li>
+            <li><span>·</span>Parceiros além do banco tradicional</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Mais um app que vai pedir meus dados e no final não vai me dar crédito de verdade."</div></div>
+      </div>
+    </div>
+    <div class="card t-ar">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#1e40af,#0284c7)">JA</div>
+        <div class="ptype">Crédito de Expansão</div>
+        <div class="pname">Jonas Almeida</div>
+        <div class="pmeta">47 anos · Sinop/MT<br>1.200 ha grãos · Quer expandir 800ha</div>
+        <span class="pbadge b-ar">AgroRate</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">SmartAgroOS</span><span class="ch">Contador</span><span class="ch">BB Agro</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"Tenho capacidade de pagar, minha operação é sólida — mas o banco não consegue enxergar isso olhando meu CPF."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>LTV real não reconhecido pelo sistema bancário</li>
+            <li><span>·</span>Processo lento vs oportunidade de expansão</li>
+            <li><span>·</span>Garantias pedidas além do razoável</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Score que reflita a operação completa</li>
+            <li><span>·</span>Financiadores com taxas competitivas</li>
+            <li><span>·</span>AgroToken para antecipar recebíveis</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Quanto tempo leva para meu score ficar pronto e uma proposta de crédito aparecer?"</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁG 7: AgroRate Recuperação + legenda -->
+<div class="page">
+  <div class="ph"><span class="ph-label" style="color:#065f46">AgroRate · Recuperação de Crédito</span><span class="ph-num">Persona 11 de 11</span></div>
+  <div class="cards">
+    <div class="card t-ar" style="height:135mm">
+      <div class="cs">
+        <div class="av" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">RC</div>
+        <div class="ptype">Recuperação de Crédito</div>
+        <div class="pname">Roberto Campos</div>
+        <div class="pmeta">52 anos · Campo Grande/MS<br>600 ha pecuária · CPF negativado<br>Seca 2021 · Em recuperação</div>
+        <span class="pbadge b-ar2">AgroRate</span>
+        <div class="ch-lbl">Canais</div>
+        <div class="ch-wrap"><span class="ch">Sindicato</span><span class="ch">SENAR</span><span class="ch">Contador</span></div>
+      </div>
+      <div class="cb">
+        <div class="quote">"A seca de 2021 quebrou minha operação, mas eu sei que tenho capacidade de me recuperar. Só preciso de uma chance — e de alguém que conte a minha história direito."</div>
+        <div class="grid2">
+          <div class="sec"><h5>Principais Dores</h5><ul>
+            <li><span>·</span>Score comprometido por evento climático</li>
+            <li><span>·</span>Nenhum banco abre crédito para negativados</li>
+            <li><span>·</span>Vergonha de expor a situação financeira</li>
+            <li><span>·</span>Ciclo vicioso — sem crédito não recupera</li>
+          </ul></div>
+          <div class="sec"><h5>Motivações</h5><ul>
+            <li><span>·</span>Regularização com plano estruturado</li>
+            <li><span>·</span>Linhas especiais de crédito de recuperação</li>
+            <li><span>·</span>Score que contextualiza o evento climático</li>
+            <li><span>·</span>Dignidade e discrição em todo o processo</li>
+          </ul></div>
+        </div>
+        <div class="obj"><div class="obj-lbl">⚠ Objeção Principal</div><div class="obj-txt">"Vou ter que expor toda minha situação antes de saber se vai funcionar? Tenho vergonha disso."</div></div>
+      </div>
+    </div>
+  </div>
+  <!-- Legenda -->
+  <div style="padding:5mm 9mm;border-top:1.5px solid #f0f0f0;margin-top:auto">
+    <p style="font-size:8px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Plataformas do Ecossistema</p>
+    <div style="display:flex;gap:16mm;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:50%;background:#679d3f;flex-shrink:0"></div><span style="font-size:9px;color:#374151"><strong>AgroCore</strong> — Marketplace de serviços agrícolas · agrocore.live</span></div>
+      <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0"></div><span style="font-size:9px;color:#374151"><strong>SmartAgroOS</strong> — Sistema operacional da fazenda · agroos.site</span></div>
+      <div style="display:flex;align-items:center;gap:7px"><div style="width:9px;height:9px;border-radius:50%;background:#10b981;flex-shrink:0"></div><span style="font-size:9px;color:#374151"><strong>AgroRate</strong> — Score e crédito rural · agrorate.app</span></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

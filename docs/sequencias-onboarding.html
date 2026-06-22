@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Sequências de Onboarding — Ecossistema Agro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4 portrait;margin:0}
+  body{background:white}
+  .page{margin:0;box-shadow:none}
+}
+.page{width:210mm;min-height:297mm;background:white;margin:0 auto 8mm;page-break-after:always;display:flex;flex-direction:column}
+
+/* COVER */
+.cover{background:linear-gradient(150deg,#052e16 0%,#104e27 50%,#15803d 100%);align-items:center;justify-content:center;text-align:center;padding:20mm 20mm;position:relative;overflow:hidden}
+.cc{position:absolute;border-radius:50%;background:rgba(255,255,255,0.04)}
+.cc1{width:220px;height:220px;bottom:-70px;right:-70px}
+.cc2{width:130px;height:130px;top:20px;left:-50px}
+.cv-tag{display:inline-block;background:rgba(134,239,172,0.15);border:1px solid rgba(134,239,172,0.3);color:#86efac;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:20px}
+.cover h1{font-size:48px;font-weight:800;color:white;line-height:1.05;margin-bottom:6px}
+.cover h1 em{font-style:normal;color:#86efac}
+.cv-sub{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.65;max-width:130mm;margin:0 auto 32px}
+.cv-div{width:36px;height:3px;background:#86efac;border-radius:2px;margin:0 auto 24px}
+.cv-stats{display:flex;gap:40px;justify-content:center;margin-bottom:32px}
+.cst-n{font-size:36px;font-weight:800;color:white;line-height:1}
+.cst-l{font-size:8.5px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.cv-legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.cv-leg-item{display:flex;align-items:center;gap:7px;font-size:10px;color:rgba(255,255,255,0.75)}
+.cv-leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* PAGE HEADER */
+.ph{padding:6mm 11mm 4mm;border-bottom:2px solid;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ph-left h2{font-size:16px;font-weight:800;margin-bottom:2px}
+.ph-left p{font-size:9px;color:#6b7280;font-weight:500}
+.ph-badge{padding:5px 14px;border-radius:20px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+
+/* TIMELINE */
+.timeline{padding:5mm 9mm;flex:1;display:flex;flex-direction:column;gap:3mm}
+
+.tl-item{display:flex;gap:4mm;align-items:flex-start;position:relative}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:6.5mm;top:14mm;bottom:-3mm;width:2px;background:#e5e7eb;z-index:0}
+
+.tl-day{width:13mm;height:13mm;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;z-index:1;position:relative}
+
+.tl-card{flex:1;border:1.5px solid #e5e7eb;border-radius:8px;padding:3mm 4mm;display:flex;gap:4mm;align-items:flex-start}
+
+.tl-channel{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+.tl-content{flex:1}
+.tl-title{font-size:11px;font-weight:700;color:#111827;margin-bottom:3px}
+.tl-goal{font-size:9px;color:#6b7280;line-height:1.5;margin-bottom:4px}
+.tl-cta{display:inline-block;font-size:8px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px}
+
+.tl-trigger{margin-left:17mm;padding:2.5mm 3.5mm;border-radius:6px;font-size:9px;line-height:1.4;display:flex;align-items:center;gap:6px;font-weight:500}
+
+/* AgroCore Prestador */
+.ac-p .ph{border-color:#679d3f}
+.ac-p .ph-left h2{color:#15803d}
+.ac-p .ph-badge{background:#d1fae5;color:#065f46}
+.ac-p .tl-day{background:#d1fae5;color:#065f46;border:2px solid #679d3f}
+.ac-p .tl-day.upgrade{background:#fef3c7;color:#92400e;border-color:#f59e0b}
+.ac-p .tl-cta{background:#d1fae5;color:#065f46}
+.ac-p .tl-cta.upgrade{background:#fef3c7;color:#92400e}
+.ac-p .tl-trigger{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12}
+
+/* AgroCore Produtor */
+.ac-prod .ph{border-color:#679d3f}
+.ac-prod .ph-left h2{color:#15803d}
+.ac-prod .ph-badge{background:#d1fae5;color:#065f46}
+.ac-prod .tl-day{background:#d1fae5;color:#065f46;border:2px solid #679d3f}
+.ac-prod .tl-day.upgrade{background:#fef3c7;color:#92400e;border-color:#f59e0b}
+.ac-prod .tl-cta{background:#d1fae5;color:#065f46}
+.ac-prod .tl-cta.upgrade{background:#fef3c7;color:#92400e}
+.ac-prod .tl-trigger{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12}
+
+/* SmartAgroOS */
+.os .ph{border-color:#16a34a}
+.os .ph-left h2{color:#15803d}
+.os .ph-badge{background:#dcfce7;color:#15803d}
+.os .tl-day{background:#dcfce7;color:#15803d;border:2px solid #16a34a}
+.os .tl-day.upgrade{background:#fef3c7;color:#92400e;border-color:#f59e0b}
+.os .tl-cta{background:#dcfce7;color:#15803d}
+.os .tl-cta.upgrade{background:#fef3c7;color:#92400e}
+.os .tl-trigger{background:#fefce8;border:1px solid #fde68a;color:#78350f}
+
+/* AgroRate */
+.ar .ph{border-color:#10b981}
+.ar .ph-left h2{color:#065f46}
+.ar .ph-badge{background:#a7f3d0;color:#065f46}
+.ar .tl-day{background:#a7f3d0;color:#065f46;border:2px solid #10b981}
+.ar .tl-day.upgrade{background:#fef3c7;color:#92400e;border-color:#f59e0b}
+.ar .tl-cta{background:#a7f3d0;color:#065f46}
+.ar .tl-cta.upgrade{background:#fef3c7;color:#92400e}
+.ar .tl-trigger{background:#fff7ed;border:1px solid #fcd34d;color:#78350f}
+
+.ch-email{background:#eff6ff}
+.ch-wpp{background:#f0fdf4}
+.ch-app{background:#f5f3ff}
+.ch-push{background:#fff7ed}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="page cover" style="display:flex">
+  <div class="cc cc1"></div>
+  <div class="cc cc2"></div>
+  <div class="cv-tag">Ecossistema Agro · 2025</div>
+  <h1>Sequências de<br><em>Onboarding</em></h1>
+  <div class="cv-div"></div>
+  <p class="cv-sub">Touchpoints de email, WhatsApp e in-app para os primeiros 60 dias de cada tipo de usuário — com momentos de upgrade e cross-sell.</p>
+  <div class="cv-stats">
+    <div><div class="cst-n">4</div><div class="cst-l">Jornadas</div></div>
+    <div><div class="cst-n">7</div><div class="cst-l">Touchpoints / jornada</div></div>
+    <div><div class="cst-n">60</div><div class="cst-l">Dias cobertos</div></div>
+  </div>
+  <div class="cv-legend">
+    <div class="cv-leg-item"><div class="cv-leg-dot" style="background:#3b82f6"></div>📧 Email</div>
+    <div class="cv-leg-item"><div class="cv-leg-dot" style="background:#22c55e"></div>💬 WhatsApp</div>
+    <div class="cv-leg-item"><div class="cv-leg-dot" style="background:#8b5cf6"></div>📱 In-App</div>
+    <div class="cv-leg-item"><div class="cv-leg-dot" style="background:#f59e0b"></div>⚡ Trigger de Upgrade</div>
+  </div>
+</div>
+
+<!-- PÁG 2: AgroCore Prestador -->
+<div class="page ac-p">
+  <div class="ph">
+    <div class="ph-left"><h2>Prestador de Serviço</h2><p>AgroCore · Plano Free → Pro (R$79/mês)</p></div>
+    <span class="ph-badge">AgroCore</span>
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-day">D0</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Boas-vindas + Ação Imediata</div>
+          <div class="tl-goal">Assunto: "Marcos, você entrou no AgroCore. Veja o que fazer agora." — Guia de 3 passos: completar perfil, adicionar serviços, definir área de atuação.</div>
+          <span class="tl-cta">→ Completar perfil agora</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D1</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Urgência de Completar Perfil</div>
+          <div class="tl-goal">WhatsApp: "Oi! Seu perfil está 40% completo. Prestadores com perfil 100% recebem 4× mais matches. Leva só 5 minutos."</div>
+          <span class="tl-cta">→ Link direto ao perfil</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D3</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-app">📱</div>
+        <div class="tl-content">
+          <div class="tl-title">Primeiro Match Disponível</div>
+          <div class="tl-goal">In-app + Push: "Você tem um match! Produtor a 12km precisa de pulverização. Aceite em até 2h." — Introdução ao fluxo de aceite/proposta.</div>
+          <span class="tl-cta">→ Ver match e aceitar</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D7</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Pós-Primeiro Serviço</div>
+          <div class="tl-goal">Assunto: "Como foi seu primeiro serviço?" — Solicita avaliação do produtor, explica importância do score para receber mais matches, mostra ranking de prestadores.</div>
+          <span class="tl-cta">→ Ver meu score agora</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D14</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Dica de Destaque + NPS</div>
+          <div class="tl-goal">WhatsApp: "Você recebeu X matches e aceitou Y. Sabia que prestadores Pro têm prioridade no algoritmo? Como está sua experiência com o AgroCore?"</div>
+          <span class="tl-cta">→ Responder NPS (1-10)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day upgrade">D30</div>
+      <div class="tl-card" style="border-color:#f59e0b">
+        <div class="tl-channel ch-push">⚡</div>
+        <div class="tl-content">
+          <div class="tl-title">Gatilho de Upgrade — Limite Free Atingido</div>
+          <div class="tl-goal">Email + WhatsApp: "Você atingiu o limite de matches do plano Free este mês. Prestadores Pro recebem até 3× mais oportunidades. Seu primeiro mês Pro é R$39."</div>
+          <span class="tl-cta upgrade">→ Ativar Pro com 50% OFF</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-trigger">⚡ <strong>Trigger automático:</strong> disparado quando o prestador atinge 5 matches/mês (limite Free) ou fica 10 dias sem nenhum match — indica necessidade de impulsionamento Pro.</div>
+
+    <div class="tl-item">
+      <div class="tl-day">D60</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Cross-sell AgroRate</div>
+          <div class="tl-goal">Assunto: "Você está faturando pelo AgroCore. Sabia que pode usar esse histórico para acessar crédito rural?" — Apresenta AgroRate, score baseado em histórico de serviços.</div>
+          <span class="tl-cta">→ Conhecer AgroRate</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 3: AgroCore Produtor -->
+<div class="page ac-prod">
+  <div class="ph">
+    <div class="ph-left"><h2>Produtor via AgroCore</h2><p>AgroCore · Plano Free → Pro (R$89/mês)</p></div>
+    <span class="ph-badge">AgroCore</span>
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-day">D0</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Boas-vindas + Primeira Solicitação</div>
+          <div class="tl-goal">Assunto: "Pronto para contratar seu primeiro serviço?" — Tutorial de 3 passos: nome do serviço, data, localização. Explica que o match é automático.</div>
+          <span class="tl-cta">→ Solicitar serviço agora</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D1</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Guia de Solicitação Rápida</div>
+          <div class="tl-goal">WhatsApp: "Contratar serviço no AgroCore leva 3 minutos. Veja como Beatriz de MT contratou pulverização em 20 minutos." — Link para vídeo curto.</div>
+          <span class="tl-cta">→ Ver demonstração</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D3</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-app">📱</div>
+        <div class="tl-content">
+          <div class="tl-title">Match Encontrado — Ação Urgente</div>
+          <div class="tl-goal">Push + In-App: "Encontramos 3 prestadores qualificados para seu serviço. Veja perfis, avaliações e preços. Proposta válida por 24h."</div>
+          <span class="tl-cta">→ Ver propostas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D7</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Pós-Serviço — Avaliação e Recibo</div>
+          <div class="tl-goal">Assunto: "Seu serviço foi concluído. Avalie o prestador." — Recibo do serviço, formulário de avaliação 5 estrelas, quanto você pagou vs preço médio de mercado.</div>
+          <span class="tl-cta">→ Avaliar prestador</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D14</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Relatório de Economia + NPS</div>
+          <div class="tl-goal">WhatsApp: "Você economizou R$X comparado à média do mercado local. Como está sendo sua experiência?" — NPS rápido + destaque de próximos serviços disponíveis.</div>
+          <span class="tl-cta">→ Responder (30 seg)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day upgrade">D30</div>
+      <div class="tl-card" style="border-color:#f59e0b">
+        <div class="tl-channel ch-push">⚡</div>
+        <div class="tl-content">
+          <div class="tl-title">Gatilho de Upgrade — Mais Serviços Disponíveis</div>
+          <div class="tl-goal">Email: "Você usou 2 solicitações. No Pro você tem solicitações ilimitadas, filtros avançados de prestador e contrato digital automático. Invista R$89/mês."</div>
+          <span class="tl-cta upgrade">→ Upgrade para Pro</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-trigger">⚡ <strong>Trigger automático:</strong> disparado na 3ª solicitação (limite Free) ou quando produtor vê prestador Pro que ele não consegue acessar no Free.</div>
+
+    <div class="tl-item">
+      <div class="tl-day">D60</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Cross-sell SmartAgroOS</div>
+          <div class="tl-goal">Assunto: "Você já gerencia serviços. E se gerenciasse toda a fazenda assim?" — Apresenta SmartAgroOS, integração com AgroCore, módulo financeiro vinculado a serviços.</div>
+          <span class="tl-cta">→ Testar SmartAgroOS grátis</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 4: SmartAgroOS -->
+<div class="page os">
+  <div class="ph">
+    <div class="ph-left"><h2>Produtor via SmartAgroOS</h2><p>SmartAgroOS · Starter Free → Pro (R$97/mês) → Enterprise (R$397/mês)</p></div>
+    <span class="ph-badge">SmartAgroOS</span>
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-day">D0</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Boas-vindas + Criar Primeira Safra</div>
+          <div class="tl-goal">Assunto: "Bem-vindo ao SmartAgroOS. Sua fazenda começa aqui." — Tutorial de cadastro do primeiro talhão, cultivo e data de plantio. Vídeo de 2 min.</div>
+          <span class="tl-cta">→ Cadastrar meu primeiro talhão</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D1</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-app">📱</div>
+        <div class="tl-content">
+          <div class="tl-title">Onboarding In-App — Módulo Safra</div>
+          <div class="tl-goal">Checklist guiado: criar talhão → registrar plantio → configurar alertas. Barra de progresso visível. Ao completar: "Parabéns! Sua safra está monitorada."</div>
+          <span class="tl-cta">→ Continuar configuração</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D7</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Dica Semanal — AgroGPT</div>
+          <div class="tl-goal">Assunto: "Pergunta ao AgroGPT e surpreenda sua equipe." — Exemplo de pergunta útil: "Qual o risco de fusariose no meu talhão essa semana?" + Demonstração da resposta.</div>
+          <span class="tl-cta">→ Testar AgroGPT agora</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D14</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Marco de Uso + Conquista</div>
+          <div class="tl-goal">WhatsApp: "Você cadastrou X talhões e acompanhou Y dias de safra. Sua fazenda já tem dados reais. Veja seu primeiro relatório de desempenho."</div>
+          <span class="tl-cta">→ Ver relatório</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day upgrade">D30</div>
+      <div class="tl-card" style="border-color:#f59e0b">
+        <div class="tl-channel ch-push">⚡</div>
+        <div class="tl-content">
+          <div class="tl-title">Gatilho de Upgrade — Módulo Financeiro Bloqueado</div>
+          <div class="tl-goal">In-App: "Seus dados de safra estão prontos para o módulo financeiro — mas ele é Pro. Veja quanto sua fazenda faturou este mês por R$97/mês."</div>
+          <span class="tl-cta upgrade">→ Desbloquear módulo financeiro</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-trigger">⚡ <strong>Trigger automático:</strong> disparado quando usuário clica em "Financeiro" ou "DRE" no menu (recurso Pro) — apresenta o upgrade no contexto certo.</div>
+
+    <div class="tl-item">
+      <div class="tl-day">D45</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Análise da Safra + Relatório IA</div>
+          <div class="tl-goal">Assunto: "AgroGPT analisou sua safra dos últimos 45 dias." — Insights automáticos: produtividade estimada, alertas climáticos, comparativo com benchmarks regionais.</div>
+          <span class="tl-cta">→ Ver análise completa</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D60</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Cross-sell AgroRate</div>
+          <div class="tl-goal">Assunto: "Você tem 60 dias de dados da fazenda. Isso vale crédito rural." — Apresenta AgroRate: score gerado a partir do histórico do SmartAgroOS, sem burocracia bancária.</div>
+          <span class="tl-cta">→ Gerar meu AgroRate Score</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 5: AgroRate -->
+<div class="page ar">
+  <div class="ph">
+    <div class="ph-left"><h2>Produtor no AgroRate</h2><p>AgroRate · Starter → Pro (R$49/mês) → Enterprise (R$149/mês)</p></div>
+    <span class="ph-badge">AgroRate</span>
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-day">D0</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Boas-vindas + Iniciar Score</div>
+          <div class="tl-goal">Assunto: "Seu AgroRate Score está sendo calculado. Veja o que você precisa fazer." — Checklist de documentos: DAP, CAR, certidão negativa, extratos bancários. Barra de progresso.</div>
+          <span class="tl-cta">→ Enviar documentos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D1</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Suporte Proativo — Documentação</div>
+          <div class="tl-goal">WhatsApp: "Oi! Estamos calculando seu score. Falta só o CAR e a certidão negativa rural. Posso te ajudar a encontrar esses documentos?" — Link para guia passo a passo.</div>
+          <span class="tl-cta">→ Ver guia de documentos</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D3</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-app">📱</div>
+        <div class="tl-content">
+          <div class="tl-title">Score Pronto — Primeiro Resultado</div>
+          <div class="tl-goal">Push: "Seu AgroRate Score está pronto! Veja sua nota e o que influenciou cada fator." — Mostra gauge de score, fatores positivos e negativos, plano de melhoria.</div>
+          <span class="tl-cta">→ Ver meu score</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D7</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Parceiros Disponíveis para Você</div>
+          <div class="tl-goal">Assunto: "3 parceiros financeiros querem te conhecer." — Lista de instituições com taxa estimada e prazo, baseadas no seu score. Incentivo para consentir compartilhamento.</div>
+          <span class="tl-cta">→ Ver ofertas de crédito</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day upgrade">D14</div>
+      <div class="tl-card" style="border-color:#f59e0b">
+        <div class="tl-channel ch-push">⚡</div>
+        <div class="tl-content">
+          <div class="tl-title">Gatilho de Upgrade — Relatório Completo Bloqueado</div>
+          <div class="tl-goal">In-App: "Seu score está no top 30% da região. Para ver o relatório completo e acessar taxas especiais de parceiros, assine o Pro por R$49/mês."</div>
+          <span class="tl-cta upgrade">→ Ver relatório completo</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-trigger">⚡ <strong>Trigger automático:</strong> disparado quando usuário tenta acessar relatório detalhado ou quando parceiro envia proposta que requer score completo verificado.</div>
+
+    <div class="tl-item">
+      <div class="tl-day">D30</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-email">📧</div>
+        <div class="tl-content">
+          <div class="tl-title">Evolução do Score + Dicas de Melhoria</div>
+          <div class="tl-goal">Assunto: "Seu score subiu X pontos em 30 dias. Veja o que fazer para subir mais." — Análise mensal, ações recomendadas pelo AgroGPT financeiro, comparativo com média do segmento.</div>
+          <span class="tl-cta">→ Ver plano de melhoria</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-day">D60</div>
+      <div class="tl-card">
+        <div class="tl-channel ch-wpp">💬</div>
+        <div class="tl-content">
+          <div class="tl-title">Oferta de Renovação Anual</div>
+          <div class="tl-goal">WhatsApp: "Você tem 2 meses de histórico de crédito construído. No plano anual você garante esse histórico por R$44/mês (desconto de 10%) e desbloqueia relatório Enterprise."</div>
+          <span class="tl-cta">→ Assinar plano anual</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

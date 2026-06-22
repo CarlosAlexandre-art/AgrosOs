@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Mapa de Churn — Ecossistema Agro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4 portrait;margin:0}
+  body{background:white}
+  .page{margin:0;box-shadow:none}
+}
+.page{width:210mm;min-height:297mm;background:white;margin:0 auto 8mm;page-break-after:always;display:flex;flex-direction:column}
+
+/* COVER */
+.cover{background:linear-gradient(150deg,#1c0533 0%,#3b1359 50%,#7c3aed 100%);align-items:center;justify-content:center;text-align:center;padding:20mm 20mm;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.cc{position:absolute;border-radius:50%;background:rgba(255,255,255,0.04)}
+.cc1{width:200px;height:200px;bottom:-50px;right:-50px}
+.cc2{width:120px;height:120px;top:30px;left:-40px}
+.cv-tag{display:inline-block;background:rgba(196,181,253,0.15);border:1px solid rgba(196,181,253,0.3);color:#c4b5fd;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:20px}
+.cover h1{font-size:50px;font-weight:800;color:white;line-height:1.05;margin-bottom:6px}
+.cover h1 em{font-style:normal;color:#c4b5fd}
+.cv-sub{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.65;max-width:130mm;margin:0 auto 32px}
+.cv-div{width:36px;height:3px;background:#c4b5fd;border-radius:2px;margin:0 auto 24px}
+.cv-stats{display:flex;gap:44px;justify-content:center;margin-bottom:36px}
+.cst-n{font-size:36px;font-weight:800;color:white;line-height:1}
+.cst-l{font-size:8.5px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.risk-legend{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.rl-item{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(255,255,255,0.8)}
+.rl-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+
+/* PAGE HEADER */
+.ph{padding:6mm 11mm 4mm;border-bottom:2px solid;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ph-left h2{font-size:16px;font-weight:800;margin-bottom:2px}
+.ph-left p{font-size:9px;color:#6b7280}
+.ph-badge{padding:5px 14px;border-radius:20px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+
+/* CONTENT */
+.content{padding:5mm 9mm;flex:1;display:flex;flex-direction:column;gap:4mm}
+
+.profile-section{border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.ps-header{padding:3mm 4mm;display:flex;align-items:center;justify-content:space-between}
+.ps-title{font-size:12px;font-weight:700}
+.ps-sub{font-size:8.5px;color:#6b7280;margin-top:1px}
+
+.signals-table{width:100%;border-collapse:collapse}
+.signals-table th{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#9ca3af;padding:2.5mm 4mm;text-align:left;border-bottom:1px solid #f0f0f0;background:#fafafa}
+.signals-table td{font-size:9px;color:#374151;padding:2.5mm 4mm;border-bottom:1px solid #f0f0f0;vertical-align:top;line-height:1.4}
+.signals-table tr:last-child td{border-bottom:none}
+.signals-table td:first-child{font-weight:600;white-space:nowrap}
+
+.risk-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.r-high{background:#fee2e2;color:#991b1b}
+.r-med{background:#fef3c7;color:#92400e}
+.r-low{background:#dcfce7;color:#15803d}
+
+.recovery-tag{display:inline-block;font-size:8px;background:#f3f4f6;color:#374151;padding:2px 7px;border-radius:4px;font-weight:600;margin-top:2px}
+
+/* Platform themes */
+.t-ac .ph{border-color:#679d3f}
+.t-ac .ph-left h2{color:#15803d}
+.t-ac .ph-badge{background:#d1fae5;color:#065f46}
+.t-ac .ps-header{background:linear-gradient(90deg,#f0fdf4,#dcfce7)}
+
+.t-os .ph{border-color:#16a34a}
+.t-os .ph-left h2{color:#15803d}
+.t-os .ph-badge{background:#dcfce7;color:#15803d}
+.t-os .ps-header{background:linear-gradient(90deg,#f0fdf4,#bbf7d0)}
+
+.t-ar .ph{border-color:#10b981}
+.t-ar .ph-left h2{color:#065f46}
+.t-ar .ph-badge{background:#a7f3d0;color:#065f46}
+.t-ar .ps-header{background:linear-gradient(90deg,#ecfdf5,#a7f3d0)}
+
+/* Summary page */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm;padding:5mm 9mm;flex:1}
+.sum-card{border:1.5px solid #e5e7eb;border-radius:10px;padding:4mm 5mm}
+.sum-card h3{font-size:12px;font-weight:800;margin-bottom:2px}
+.sum-card p{font-size:8.5px;color:#6b7280;margin-bottom:3mm}
+.sum-list{list-style:none}
+.sum-list li{font-size:9px;color:#374151;padding:1.5px 0;display:flex;align-items:flex-start;gap:5px;line-height:1.4}
+.sum-list li::before{content:'→';color:#9ca3af;flex-shrink:0;font-weight:600}
+.metric-row{display:flex;gap:3mm;margin-top:3mm}
+.metric-box{flex:1;background:#f9fafb;border-radius:6px;padding:3mm;text-align:center}
+.metric-num{font-size:20px;font-weight:800;line-height:1}
+.metric-lbl{font-size:7.5px;color:#6b7280;margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="page cover">
+  <div class="cc cc1"></div>
+  <div class="cc cc2"></div>
+  <div class="cv-tag">Ecossistema Agro · 2025</div>
+  <h1>Mapa de<br><em>Churn</em></h1>
+  <div class="cv-div"></div>
+  <p class="cv-sub">Sinais de alerta por perfil de usuário — identifique quem está em risco antes que cancele e acione o playbook de retenção certo.</p>
+  <div class="cv-stats">
+    <div><div class="cst-n">3</div><div class="cst-l">Plataformas</div></div>
+    <div><div class="cst-n">6</div><div class="cst-l">Perfis mapeados</div></div>
+    <div><div class="cst-n">3</div><div class="cst-l">Níveis de risco</div></div>
+  </div>
+  <div class="risk-legend">
+    <div class="rl-item"><div class="rl-dot" style="background:#ef4444"></div>🔴 Alto — Agir em 24h</div>
+    <div class="rl-item"><div class="rl-dot" style="background:#f59e0b"></div>🟡 Médio — Agir em 7 dias</div>
+    <div class="rl-item"><div class="rl-dot" style="background:#22c55e"></div>🟢 Baixo — Monitorar</div>
+  </div>
+</div>
+
+<!-- PÁG 2: AgroCore -->
+<div class="page t-ac">
+  <div class="ph">
+    <div class="ph-left"><h2>AgroCore — Sinais de Churn</h2><p>Marketplace de serviços agrícolas · agrocore.live</p></div>
+    <span class="ph-badge">AgroCore</span>
+  </div>
+  <div class="content">
+
+    <!-- Prestador -->
+    <div class="profile-section">
+      <div class="ps-header">
+        <div><div class="ps-title">Prestador de Serviço</div><div class="ps-sub">Free e Pro — foco em matches e faturamento</div></div>
+      </div>
+      <table class="signals-table">
+        <tr><th>Sinal de Alerta</th><th>Janela</th><th>Risco</th><th>Ação de Retenção</th></tr>
+        <tr>
+          <td>Perfil menos de 70% completo</td>
+          <td>D0 – D7</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>WhatsApp proativo: "Faltam só 2 itens para você receber matches." <span class="recovery-tag">Suporte ativo</span></td>
+        </tr>
+        <tr>
+          <td>Zero matches aceitos em 14 dias</td>
+          <td>D8 – D30</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Revisão manual do perfil pela equipe CS. Sugestão de preço e área de cobertura. <span class="recovery-tag">CS proativo</span></td>
+        </tr>
+        <tr>
+          <td>Score de avaliação abaixo de 3,5★</td>
+          <td>D15+</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Ligação de suporte + guia de boas práticas. Prestador ruim perde matches automaticamente. <span class="recovery-tag">Qualidade</span></td>
+        </tr>
+        <tr>
+          <td>Sem login há 20 dias (Pro)</td>
+          <td>D31+</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email "Você tem X matches esperando" + oferta de pausa de 1 mês no Pro sem cancelar. <span class="recovery-tag">Pausa Pro</span></td>
+        </tr>
+        <tr>
+          <td>Cancelamento de assinatura Pro</td>
+          <td>Qualquer</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Pop-up de winback: 1 mês grátis + pesquisa de motivo. Oferta de downgrade sem perder histórico. <span class="recovery-tag">Winback</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Produtor -->
+    <div class="profile-section">
+      <div class="ps-header">
+        <div><div class="ps-title">Produtor Contratante</div><div class="ps-sub">Free e Pro — foco em solicitações e matches realizados</div></div>
+      </div>
+      <table class="signals-table">
+        <tr><th>Sinal de Alerta</th><th>Janela</th><th>Risco</th><th>Ação de Retenção</th></tr>
+        <tr>
+          <td>Nenhuma solicitação criada em 7 dias</td>
+          <td>D0 – D7</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>WhatsApp: "Teste criar uma solicitação agora — é grátis e leva 3 minutos." + vídeo demo. <span class="recovery-tag">Ativação</span></td>
+        </tr>
+        <tr>
+          <td>Cancelou match sem avaliação</td>
+          <td>D8 – D30</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email perguntando o motivo do cancelamento. Se for preço: mostrar outros prestadores da faixa. <span class="recovery-tag">Pesquisa</span></td>
+        </tr>
+        <tr>
+          <td>Sem acesso há 30 dias</td>
+          <td>D31+</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email "Sua próxima safra está chegando — os melhores prestadores já estão sendo reservados." <span class="recovery-tag">Urgência</span></td>
+        </tr>
+        <tr>
+          <td>Disputa de serviço aberta</td>
+          <td>Qualquer</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Intervenção CS em até 2h. Resolução favorável ao produtor preserva LTV mesmo a custo de margem. <span class="recovery-tag">CS urgente</span></td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 3: SmartAgroOS -->
+<div class="page t-os">
+  <div class="ph">
+    <div class="ph-left"><h2>SmartAgroOS — Sinais de Churn</h2><p>Sistema operacional da fazenda · agroos.site</p></div>
+    <span class="ph-badge">SmartAgroOS</span>
+  </div>
+  <div class="content">
+
+    <div class="profile-section">
+      <div class="ps-header">
+        <div><div class="ps-title">Produtor Gestor (Starter / Pro)</div><div class="ps-sub">Foco em uso recorrente, módulos ativos e integração com equipe</div></div>
+      </div>
+      <table class="signals-table">
+        <tr><th>Sinal de Alerta</th><th>Janela</th><th>Risco</th><th>Ação de Retenção</th></tr>
+        <tr>
+          <td>Nenhum talhão cadastrado em 3 dias</td>
+          <td>D0 – D3</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>In-app: checklist de onboarding bloqueando outras funcionalidades até criar o 1º talhão. <span class="recovery-tag">Onboarding forçado</span></td>
+        </tr>
+        <tr>
+          <td>Usa apenas 1 módulo nos primeiros 14 dias</td>
+          <td>D7 – D14</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email "Você está perdendo o módulo mais poderoso para a sua cultura" — mostra módulo relevante com vídeo de 60 segundos. <span class="recovery-tag">Ativação módulo</span></td>
+        </tr>
+        <tr>
+          <td>Sem safra ativa cadastrada</td>
+          <td>D30+</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>WhatsApp: "Sua safra de [cultura estimada pela região] está começando. Veja como cadastrar em 2 min." <span class="recovery-tag">Contextual</span></td>
+        </tr>
+        <tr>
+          <td>Sem login há 15 dias (Pro pago)</td>
+          <td>D15+ pós-Pro</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Email + ligação CS: "Percebemos que você não acessou. Tem algo que posso te ajudar?" — oferta de sessão de onboarding 1:1. <span class="recovery-tag">CS 1:1</span></td>
+        </tr>
+        <tr>
+          <td>Reduziu módulos ativos em 50%</td>
+          <td>Qualquer</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>CS identifica motivo. Se for complexidade: agendamento de treinamento. Se for preço: oferta de plano customizado. <span class="recovery-tag">CS diagnóstico</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="profile-section">
+      <div class="ps-header">
+        <div><div class="ps-title">Consultor / Gestor Contratado</div><div class="ps-sub">Risco de churn indireto: se o consultor abandona, o produtor cancela junto</div></div>
+      </div>
+      <table class="signals-table">
+        <tr><th>Sinal de Alerta</th><th>Janela</th><th>Risco</th><th>Ação de Retenção</th></tr>
+        <tr>
+          <td>Consultor não adicionou clientes em 30 dias</td>
+          <td>D30+</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email para o consultor: programa de parceria com comissão por cliente indicado. <span class="recovery-tag">Programa parceiro</span></td>
+        </tr>
+        <tr>
+          <td>Cliente do consultor fica inativo</td>
+          <td>Qualquer</td>
+          <td><span class="risk-badge r-low">🟢 Baixo</span></td>
+          <td>Notificar o consultor: "Um dos seus clientes não acessa há X dias. Deseja entrar em contato?" <span class="recovery-tag">Alerta consultor</span></td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 4: AgroRate -->
+<div class="page t-ar">
+  <div class="ph">
+    <div class="ph-left"><h2>AgroRate — Sinais de Churn</h2><p>Score e crédito rural · agrorate.app</p></div>
+    <span class="ph-badge">AgroRate</span>
+  </div>
+  <div class="content">
+
+    <div class="profile-section">
+      <div class="ps-header">
+        <div><div class="ps-title">Produtor em Busca de Crédito (Starter / Pro)</div><div class="ps-sub">Foco em documentação, score gerado e proposta de crédito recebida</div></div>
+      </div>
+      <table class="signals-table">
+        <tr><th>Sinal de Alerta</th><th>Janela</th><th>Risco</th><th>Ação de Retenção</th></tr>
+        <tr>
+          <td>Nenhum documento enviado em 3 dias</td>
+          <td>D0 – D3</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>WhatsApp com suporte para localizar documentos + link para guia simplificado. Reduz fricção burocrática que é o principal motivo de abandono. <span class="recovery-tag">Suporte docs</span></td>
+        </tr>
+        <tr>
+          <td>Score gerado mas sem ação por 7 dias</td>
+          <td>D3 – D10</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Push + Email: "Seu score está pronto. 3 parceiros querem te fazer uma proposta — você tem 48h para ver antes que outras fazendas preencham as cotas." <span class="recovery-tag">Urgência</span></td>
+        </tr>
+        <tr>
+          <td>Parceiro recusou a proposta de crédito</td>
+          <td>Qualquer</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>CS liga em até 4h: explica o motivo da recusa, apresenta plano de melhoria de score e indica parceiro alternativo com critérios diferentes. <span class="recovery-tag">CS imediato</span></td>
+        </tr>
+        <tr>
+          <td>Score estagnado por 30 dias (sem melhora)</td>
+          <td>D30+</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email AgroGPT: análise automática dos fatores tracionáveis + checklist de ações rápidas de melhoria de score. <span class="recovery-tag">IA reengajamento</span></td>
+        </tr>
+        <tr>
+          <td>Sem consultas de crédito em 45 dias</td>
+          <td>D45+</td>
+          <td><span class="risk-badge r-med">🟡 Médio</span></td>
+          <td>Email: "Novas linhas de crédito rural disponíveis com as menores taxas dos últimos 6 meses. Veja o que você se qualifica." <span class="recovery-tag">Oportunidade</span></td>
+        </tr>
+        <tr>
+          <td>Cancelamento Pro / não renova anual</td>
+          <td>Renovação</td>
+          <td><span class="risk-badge r-high">🔴 Alto</span></td>
+          <td>Oferta: 2 meses grátis na renovação anual + relatório de crédito do período como PDF para guardar. <span class="recovery-tag">Winback anual</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Métricas de retenção -->
+    <div style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:10px;padding:4mm 5mm">
+      <p style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#9ca3af;margin-bottom:3mm">Benchmarks de Retenção — Referência do Setor Fintech Rural</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3mm">
+        <div style="background:white;border-radius:8px;padding:3mm;text-align:center;border:1px solid #e5e7eb">
+          <div style="font-size:22px;font-weight:800;color:#065f46;line-height:1">85%</div>
+          <div style="font-size:8px;color:#6b7280;margin-top:3px">Retenção mês 1<br>meta mínima</div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:3mm;text-align:center;border:1px solid #e5e7eb">
+          <div style="font-size:22px;font-weight:800;color:#d97706;line-height:1">48h</div>
+          <div style="font-size:8px;color:#6b7280;margin-top:3px">SLA máximo de<br>resposta CS</div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:3mm;text-align:center;border:1px solid #e5e7eb">
+          <div style="font-size:22px;font-weight:800;color:#7c3aed;line-height:1">60%</div>
+          <div style="font-size:8px;color:#6b7280;margin-top:3px">Taxa de winback<br>com oferta certa</div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:3mm;text-align:center;border:1px solid #e5e7eb">
+          <div style="font-size:22px;font-weight:800;color:#dc2626;line-height:1">D7</div>
+          <div style="font-size:8px;color:#6b7280;margin-top:3px">Janela crítica de<br>primeiro churn</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

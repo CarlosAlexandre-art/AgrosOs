@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Matriz de Objeções — Ecossistema Agro</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4 portrait;margin:0}
+  body{background:white}
+  .page{margin:0;box-shadow:none}
+}
+.page{width:210mm;min-height:297mm;background:white;margin:0 auto 8mm;page-break-after:always;display:flex;flex-direction:column}
+
+/* COVER */
+.cover{background:linear-gradient(150deg,#1c1917 0%,#292524 50%,#44403c 100%);align-items:center;justify-content:center;text-align:center;padding:20mm 20mm;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.cc{position:absolute;border-radius:50%;background:rgba(255,255,255,0.04)}
+.cc1{width:200px;height:200px;bottom:-50px;right:-50px}
+.cc2{width:120px;height:120px;top:30px;left:-40px}
+.cv-tag{display:inline-block;background:rgba(253,186,116,0.15);border:1px solid rgba(253,186,116,0.3);color:#fbbf24;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:20px}
+.cover h1{font-size:48px;font-weight:800;color:white;line-height:1.05;margin-bottom:6px}
+.cover h1 em{font-style:normal;color:#fbbf24}
+.cv-sub{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.65;max-width:130mm;margin:0 auto 32px}
+.cv-div{width:36px;height:3px;background:#fbbf24;border-radius:2px;margin:0 auto 24px}
+.cv-stats{display:flex;gap:44px;justify-content:center;margin-bottom:36px}
+.cst-n{font-size:36px;font-weight:800;color:white;line-height:1}
+.cst-l{font-size:8.5px;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.cv-note{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6;max-width:140mm;margin:0 auto;padding:4mm 5mm;border:1px solid rgba(255,255,255,0.1);border-radius:8px}
+
+/* PAGE HEADER */
+.ph{padding:6mm 11mm 4mm;border-bottom:2px solid;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ph-left h2{font-size:15px;font-weight:800;margin-bottom:2px}
+.ph-left p{font-size:9px;color:#6b7280}
+.ph-badge{padding:5px 14px;border-radius:20px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+
+/* CONTENT */
+.content{padding:5mm 9mm;flex:1;display:flex;flex-direction:column;gap:4mm}
+
+/* Objection cards */
+.obj-card{border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.obj-header{padding:3mm 4mm;display:flex;align-items:flex-start;gap:3mm}
+.obj-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:white;margin-top:1px}
+.obj-q{font-size:11.5px;font-weight:700;color:#111827;line-height:1.3;font-style:italic}
+.obj-q::before{content:'"'}
+.obj-q::after{content:'"'}
+
+.obj-body{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1.5px solid #f0f0f0}
+.obj-col{padding:3mm 4mm;border-right:1px solid #f0f0f0}
+.obj-col:last-child{border-right:none}
+.obj-col-label{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:3px}
+.obj-col-text{font-size:9px;color:#374151;line-height:1.5}
+.obj-col-text strong{color:#111827;display:block;margin-bottom:2px}
+
+.timing-tag{display:inline-block;font-size:7.5px;padding:2px 8px;border-radius:4px;font-weight:600;margin-top:3px;background:#f3f4f6;color:#374151}
+
+/* Platform themes */
+.t-ac .ph{border-color:#679d3f}
+.t-ac .ph-left h2{color:#15803d}
+.t-ac .ph-badge{background:#d1fae5;color:#065f46}
+.t-ac .obj-header{background:linear-gradient(90deg,#f0fdf4,#fafafa)}
+.t-ac .obj-num{background:#679d3f}
+.t-ac .obj-col-label{color:#15803d}
+
+.t-os .ph{border-color:#16a34a}
+.t-os .ph-left h2{color:#15803d}
+.t-os .ph-badge{background:#dcfce7;color:#15803d}
+.t-os .obj-header{background:linear-gradient(90deg,#f0fdf4,#fafafa)}
+.t-os .obj-num{background:#16a34a}
+.t-os .obj-col-label{color:#15803d}
+
+.t-ar .ph{border-color:#10b981}
+.t-ar .ph-left h2{color:#065f46}
+.t-ar .ph-badge{background:#a7f3d0;color:#065f46}
+.t-ar .obj-header{background:linear-gradient(90deg,#ecfdf5,#fafafa)}
+.t-ar .obj-num{background:#10b981}
+.t-ar .obj-col-label{color:#065f46}
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<div class="page cover">
+  <div class="cc cc1"></div>
+  <div class="cc cc2"></div>
+  <div class="cv-tag">Ecossistema Agro · 2025</div>
+  <h1>Matriz de<br><em>Objeções</em></h1>
+  <div class="cv-div"></div>
+  <p class="cv-sub">Para cada objeção real do cliente: o medo por trás dela, o argumento certo, a prova social ideal e o momento exato de usar.</p>
+  <div class="cv-stats">
+    <div><div class="cst-n">14</div><div class="cst-l">Objeções mapeadas</div></div>
+    <div><div class="cst-n">3</div><div class="cst-l">Plataformas</div></div>
+    <div><div class="cst-n">4</div><div class="cst-l">Perfis cobertos</div></div>
+  </div>
+  <p class="cv-note">Como usar: ao ouvir a objeção do cliente, localize-a neste documento, identifique o medo subjacente e use o argumento e a prova indicados. O momento certo maximiza a conversão.</p>
+</div>
+
+<!-- PÁG 2: AgroCore Prestador -->
+<div class="page t-ac">
+  <div class="ph">
+    <div class="ph-left"><h2>AgroCore — Prestador de Serviço</h2><p>Objeções de prospecção e upgrade para o plano Pro (R$79/mês)</p></div>
+    <span class="ph-badge">AgroCore</span>
+  </div>
+  <div class="content">
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">1</div><div class="obj-q">R$79/mês é caro se eu não tiver garantia de serviço todo mês.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Custo sem retorno garantido. Sazonalidade já faz a renda ser incerta — não quer mais um fixo.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>ROI direto:</strong> Prestadores Pro recebem em média 8 matches/mês vs 2 no Free. Um único serviço de pulverização (R$400–800) já cobre o plano. No Pro, o plano se paga com o 1º match.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Marcos de Sorriso/MT pagou o plano com o primeiro match e ainda faturou R$600 no mês 1." <span class="timing-tag">⏱ Usar: na tela de upgrade</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">2</div><div class="obj-q">Já tenho minha carteira de clientes. Por que pagar plataforma se os meus já me conhecem?</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Perder autonomia. Tornar-se dependente de uma plataforma que pode subir o preço ou mudar as regras.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Adição, não substituição:</strong> Você não perde seus clientes atuais — ganha acesso a produtores fora da sua rede hoje. É expansão geográfica sem contratar vendedor.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Bruno de Cascavel expandiu para 3 municípios sem sair da cidade — só via matches do AgroCore." <span class="timing-tag">⏱ Usar: na prospecção inicial</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">3</div><div class="obj-q">Não sei se posso confiar em receber o pagamento de um produtor desconhecido.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Calote. Já aconteceu antes com clientes informais — dificuldade de cobrar sem contrato.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Pagamento protegido:</strong> O Stripe retém o valor antes do serviço começar. O prestador recebe automaticamente após o produtor confirmar a conclusão. Nunca há inadimplência.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Mostrar fluxo de pagamento na demo. Citar iFood como analogia — prestador nunca corre risco de calote. <span class="timing-tag">⏱ Usar: na demo</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">4</div><div class="obj-q">Não tenho tempo de aprender uma ferramenta nova agora.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Investimento de tempo incerto numa rotina já cheia. Complexidade percebida antes de experimentar.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>3 minutos por match:</strong> Você só precisa: aceitar o match, confirmar data, aguardar pagamento. Não precisa fazer nada mais. O app notifica tudo.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Vídeo de 90 segundos mostrando o fluxo completo. <span class="timing-tag">⏱ Usar: quando hesitar em criar conta</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 3: AgroCore Produtor + SmartAgroOS -->
+<div class="page t-ac">
+  <div class="ph">
+    <div class="ph-left"><h2>AgroCore — Produtor Contratante</h2><p>Objeções de adoção e upgrade para Pro (R$89/mês)</p></div>
+    <span class="ph-badge">AgroCore</span>
+  </div>
+  <div class="content" style="gap:3.5mm">
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">1</div><div class="obj-q">Prefiro contratar quem já conheço. Com desconhecido é arriscado.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Risco operacional com alguém sem histórico comprovado com ele especificamente.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Confiança verificada:</strong> Todos os prestadores têm CNPJ verificado, histórico de avaliações reais e seguro de responsabilidade civil. É como o Uber — você vê quem vem antes de confirmar.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Mostrar perfil de prestador com avaliações. "Beatriz de MT contratou 12 prestadores novos com 4,8★ de média." <span class="timing-tag">⏱ Usar: na apresentação</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">2</div><div class="obj-q">Parece complicado. Não tenho tempo de aprender isso agora.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Tempo escasso na época de safra. Prefere o processo conhecido, mesmo que ineficiente.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Mais simples do que ligar:</strong> Solicitar um serviço leva 3 minutos — você digita o nome do serviço, data e localização. O match vem sozinho. Nenhuma ligação, nenhuma negociação.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Demo ao vivo: criar solicitação do zero em 3 minutos durante a conversa. <span class="timing-tag">⏱ Usar: na objeção</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 4: SmartAgroOS -->
+<div class="page t-os">
+  <div class="ph">
+    <div class="ph-left"><h2>SmartAgroOS — Produtor</h2><p>Objeções de adoção, upgrade Pro (R$97/mês) e Enterprise (R$397/mês)</p></div>
+    <span class="ph-badge">SmartAgroOS</span>
+  </div>
+  <div class="content">
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">1</div><div class="obj-q">R$97/mês é caro. Não sei se o ROI compensa para a minha operação.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">ROI intangível — difícil calcular quanto "organização" ou "dados" valem em reais.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Custo de um erro é maior:</strong> Um erro de defensivo numa área de 100ha pode custar R$15–50k. O AgroGPT previne isso com alertas antecipados. 1 alerta útil por safra já paga 5 anos de plano.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Carlos de Rio Verde evitou perda de R$12k com alerta de fusariose 10 dias antes da colheita." <span class="timing-tag">⏱ Usar: no upgrade</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">2</div><div class="obj-q">Minha equipe de campo não vai usar. Eles não gostam de tecnologia.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Resistência interna. Se a equipe não adota, o gestor perde o valor do investimento e fica sozinho usando.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>App offline e simples:</strong> O app mobile funciona sem internet no campo. Registro de atividade com 2 toques. Interface pensada para quem não gosta de tecnologia — testada com produtores de 60+ anos.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Vídeo: Seu Antônio (58 anos) registrando safra em 30 segundos no celular. <span class="timing-tag">⏱ Usar: na venda</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">3</div><div class="obj-q">Já uso planilha Excel. Para que mudar se já funciona?</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Status quo. Mudança significa aprender algo novo e arriscar perder dados históricos do Excel.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>O Excel não alerta, não cruza dados, não tem IA:</strong> Você continua usando como quiser, mas o SmartAgroOS monitora, cruza clima + safra + financeiro e te avisa quando algo sai do padrão.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Mostrar alerta automático que o Excel nunca emitiria. "Uma planilha não te liga às 6h da manhã avisando de geada." <span class="timing-tag">⏱ Usar: na apresentação</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">4</div><div class="obj-q">Tenho 58 anos. Não sei se vou conseguir aprender a usar.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Vergonha de não conseguir + não querer depender do filho ou de suporte constante.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Onboarding 1:1 incluído:</strong> No plano Pro você tem sessão de configuração com um especialista por chamada de vídeo. Configuramos tudo junto em 1h, depois é só acompanhar no celular.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Antônio de Uberlândia aprendeu em 1 sessão de 45 minutos. Hoje registra tudo sozinho." <span class="timing-tag">⏱ Usar: no medo inicial</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PÁG 5: AgroRate -->
+<div class="page t-ar">
+  <div class="ph">
+    <div class="ph-left"><h2>AgroRate — Produtor em Busca de Crédito</h2><p>Objeções de adoção e upgrade Pro (R$49/mês) e Enterprise (R$149/mês)</p></div>
+    <span class="ph-badge">AgroRate</span>
+  </div>
+  <div class="content">
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">1</div><div class="obj-q">Mais um app que vai pedir meus dados e no final não vai me dar crédito de verdade.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Frustração acumulada com burocracia bancária. Já foi prometido crédito antes e foi decepcionado.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Não somos banco — somos o seu dossiê:</strong> O AgroRate não concede crédito, constrói a narrativa que faz o banco te entender. Você controla quem vê seu score. Parceiros são reais com taxas publicadas.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">Mostrar lista de parceiros com taxa e prazo. "Fernanda de Patrocínio recebeu proposta em 5 dias úteis após o score." <span class="timing-tag">⏱ Usar: no cadastro</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">2</div><div class="obj-q">Quanto tempo leva para meu score ficar pronto e uma proposta aparecer?</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Urgência real — janela de safra não espera. Qualquer processo lento é abandono.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>SLA claro:</strong> Score básico em 24h. Score completo (com documentos) em 72h. Primeira proposta de crédito em até 5 dias úteis após score completo. Total: menos de 1 semana.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Jonas de Sinop teve proposta de expansão em 4 dias úteis. Antes levava 45 dias no banco." <span class="timing-tag">⏱ Usar: quando perguntar prazo</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">3</div><div class="obj-q">Tenho o CPF negativado. Não adianta nada para mim.</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Vergonha + resignação. Acredita que CPF negativado significa porta fechada para sempre.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Contexto importa:</strong> O AgroRate diferencia dívida de consumo de evento climático rural. Parceiros especializados em recuperação de crédito rural aceitam negativados com histórico contextualizado.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Roberto de Campo Grande, negativado pela seca de 2021, recebeu proposta de linha especial de recuperação." <span class="timing-tag">⏱ Usar: quando mencionar restrição</span></div></div>
+      </div>
+    </div>
+
+    <div class="obj-card">
+      <div class="obj-header"><div class="obj-num">4</div><div class="obj-q">O banco que eu já uso vai me dar condições melhores. Para que mudar?</div></div>
+      <div class="obj-body">
+        <div class="obj-col"><div class="obj-col-label">Medo por trás</div><div class="obj-col-text">Lealdade ao relacionamento bancário existente. Medo de comprometer a relação com o banco ao buscar alternativas.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Argumento</div><div class="obj-col-text"><strong>Alavancagem, não troca:</strong> Use o AgroRate Score para negociar taxas melhores no seu banco atual. Produtores que chegam ao banco com score documentado conseguem spreads 0,5–1,5% menores.</div></div>
+        <div class="obj-col"><div class="obj-col-label">Prova + Momento</div><div class="obj-col-text">"Jonas usou o relatório AgroRate para renegociar com o BB e reduziu a taxa em 1,2% ao ano." <span class="timing-tag">⏱ Usar: na prospecção</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
