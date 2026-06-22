@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linhas do Tempo — Ecossistema Agro</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --core-dark:   #104e27;
+    --core-green:  #679d3f;
+    --core-cream:  #dad6ca;
+    --smart-green: #16a34a;
+    --smart-dark:  #14532d;
+    --rate-dark:   #065f46;
+    --rate-light:  #10b981;
+    --rate-gold:   #d97706;
+    --upgrade:     #d97706;
+    --upgrade-bg:  #fef3c7;
+    --cross:       #7c3aed;
+    --cross-bg:    #ede9fe;
+    --danger:      #dc2626;
+    --slate:       #64748b;
+    --border:      #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  @media print {
+    body { background: white; font-size: 11px; }
+    .page { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    @page { size: A4 landscape; margin: 0; }
+  }
+
+  /* ─── PAGE ─── */
+  .page {
+    width: 297mm;
+    min-height: 210mm;
+    background: white;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── COVER ─── */
+  .cover {
+    background: linear-gradient(145deg, #052e16 0%, #104e27 50%, #0f2027 100%);
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    min-height: 210mm;
+    padding: 48px 64px;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #86efac;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; padding: 5px 14px; border-radius: 99px;
+    margin-bottom: 36px;
+  }
+  .cover-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900; font-size: 56px; line-height: 1.0;
+    color: white; letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+  .cover-title span { color: #4ade80; }
+  .cover-sub { font-size: 16px; color: rgba(255,255,255,0.55); max-width: 520px; line-height: 1.6; }
+  .cover-pills { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+  .cover-pill {
+    padding: 7px 18px; border-radius: 99px; font-size: 12px;
+    font-weight: 600; border: 1px solid;
+  }
+  .cover-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-top: 40px;
+  }
+  .legend { display: flex; gap: 20px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: rgba(255,255,255,0.5); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ─── SECTION HEADER ─── */
+  .section-hdr {
+    padding: 20px 36px 16px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .section-badge {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 99px;
+  }
+  .section-hdr-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; font-size: 20px; letter-spacing: -0.5px;
+  }
+  .section-hdr-sub { font-size: 12px; color: var(--slate); margin-top: 2px; }
+
+  /* ─── TIMELINE ─── */
+  .timeline-wrap { padding: 0 24px 28px; }
+  .timeline-row {
+    display: flex; align-items: flex-start; gap: 0;
+    position: relative; overflow-x: auto;
+    padding: 8px 0 12px;
+  }
+
+  /* Phase node */
+  .phase {
+    flex: 0 0 auto;
+    display: flex; flex-direction: column; align-items: center;
+    width: 128px;
+    position: relative;
+  }
+  .phase-circle {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px;
+    color: white; z-index: 2; position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+  .phase-label {
+    font-family: 'Montserrat', sans-serif; font-weight: 700;
+    font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+    margin-top: 6px; text-align: center; line-height: 1.3;
+    max-width: 100px;
+  }
+  .phase-card {
+    margin-top: 10px; padding: 10px 10px;
+    border: 1px solid var(--border); border-radius: 10px;
+    width: 116px; background: white;
+    font-size: 10.5px; line-height: 1.45; color: #334155;
+  }
+  .phase-card-title {
+    font-weight: 700; font-size: 11px; margin-bottom: 5px; color: #1e293b;
+  }
+  .phase-li { display: flex; gap: 5px; margin-bottom: 3px; }
+  .phase-li-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 5px;
+  }
+
+  /* Arrow connector */
+  .arrow {
+    flex: 0 0 auto;
+    display: flex; align-items: center; margin-top: 22px;
+  }
+  .arrow-line {
+    height: 2px; width: 22px;
+    background: linear-gradient(90deg, #cbd5e1, #94a3b8);
+  }
+  .arrow-head {
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid #94a3b8;
+  }
+
+  /* Upgrade phase — special */
+  .phase.upgrade .phase-circle { background: var(--upgrade) !important; }
+  .phase.upgrade .phase-card {
+    background: #fffbeb; border-color: #fde68a;
+  }
+  .phase.upgrade .phase-label { color: var(--upgrade); }
+  .arrow.upgrade .arrow-line { background: linear-gradient(90deg, #fde68a, var(--upgrade)); }
+  .arrow.upgrade .arrow-head { border-left-color: var(--upgrade); }
+
+  /* Cross-platform phase */
+  .phase.cross .phase-circle { background: var(--cross) !important; }
+  .phase.cross .phase-card { background: #f5f3ff; border-color: #c4b5fd; }
+  .phase.cross .phase-label { color: var(--cross); }
+  .arrow.cross .arrow-line { background: linear-gradient(90deg, #c4b5fd, var(--cross)); }
+  .arrow.cross .arrow-head { border-left-color: var(--cross); }
+
+  /* Friction highlight */
+  .friction-tag {
+    display: inline-block; background: #fef2f2; color: #dc2626;
+    border: 1px solid #fca5a5; border-radius: 5px;
+    font-size: 9px; font-weight: 600; padding: 1px 6px; margin-top: 4px;
+  }
+  .unlock-tag {
+    display: inline-block; background: #f0fdf4; color: var(--smart-green);
+    border: 1px solid #86efac; border-radius: 5px;
+    font-size: 9px; font-weight: 600; padding: 1px 6px; margin-top: 4px;
+  }
+
+  /* Plan badge */
+  .plan-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 8px;
+    font-size: 11px; font-weight: 700;
+    margin-bottom: 6px; width: 100%;
+  }
+  .price-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600;
+    padding: 4px 8px; border-radius: 6px;
+    display: block; margin-top: 6px;
+  }
+
+  /* ─── MINI TABLE ─── */
+  .plan-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10.5px; }
+  .plan-table th {
+    background: #f8fafc; font-family: 'Montserrat', sans-serif;
+    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 6px 8px; border-bottom: 2px solid var(--border);
+    text-align: left;
+  }
+  .plan-table td { padding: 5px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .plan-table tr:last-child td { border-bottom: none; }
+  .check { color: #16a34a; font-weight: 700; }
+  .lock { color: #94a3b8; }
+
+  /* ─── ECOSYSTEM MAP (last page) ─── */
+  .eco-map { padding: 28px 36px; }
+  .eco-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+  .eco-card {
+    border-radius: 14px; padding: 20px;
+    border: 1.5px solid;
+  }
+  .eco-card-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; margin-bottom: 4px; }
+  .eco-card-sub { font-size: 11px; margin-bottom: 14px; }
+  .eco-flow { display: flex; flex-direction: column; gap: 6px; }
+  .eco-flow-item { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .eco-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── TWO-COLUMN LAYOUT ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .col-divider { border-right: 2px dashed #e2e8f0; }
+
+  /* Color utilities */
+  .bg-core  { background: var(--core-dark); }
+  .bg-smart { background: var(--smart-green); }
+  .bg-rate  { background: var(--rate-dark); }
+  .text-core  { color: var(--core-dark); }
+  .text-smart { color: var(--smart-green); }
+  .text-rate  { color: var(--rate-dark); }
+  .text-upgrade { color: var(--upgrade); }
+  .text-cross { color: var(--cross); }
+
+  .badge-core  { background: #dcfce7; color: var(--core-dark); }
+  .badge-smart { background: #d1fae5; color: var(--smart-dark); }
+  .badge-rate  { background: #d1fae5; color: var(--rate-dark); }
+
+  .rule { height: 3px; border-radius: 99px; margin-bottom: 0; }
+
+  /* Subscription comparison mini */
+  .sub-compare { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 12px; }
+  .sub-card {
+    border-radius: 10px; padding: 12px; border: 1.5px solid;
+    font-size: 11px;
+  }
+  .sub-card-name { font-family:'Montserrat',sans-serif; font-weight:800; font-size:13px; }
+  .sub-card-price { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; margin: 4px 0; }
+  .sub-card-period { font-size:9px; color: var(--slate); }
+  .sub-feat { display:flex; gap:5px; margin-top:5px; font-size:10.5px; }
+  .sub-feat-icon { flex-shrink:0; }
+  .upgrade-arrow {
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 4px; font-size: 9px; font-weight:700;
+    color: var(--upgrade); text-transform:uppercase; letter-spacing:1px;
+  }
+  .trigger-box {
+    background: var(--upgrade-bg); border: 1.5px solid #fde68a;
+    border-radius: 10px; padding: 12px 14px; margin: 10px 0;
+  }
+  .trigger-title { font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color: #92400e; margin-bottom:6px; }
+  .trigger-item { display:flex; gap:6px; font-size:11px; color:#78350f; margin-bottom:3px; }
+
+  /* AgroToken special */
+  .token-path {
+    background: linear-gradient(135deg, #0f0f23, #1e1b4b);
+    border-radius: 12px; padding: 14px; margin-top: 8px;
+    color: white;
+  }
+  .token-step { display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:11px; }
+  .token-num { width:22px;height:22px; border-radius:50%; background: rgba(139,92,246,0.3); border:1px solid #7c3aed; display:flex;align-items:center;justify-content:center; font-size:10px;font-weight:700;flex-shrink:0; color:#a78bfa; }
+
+  /* note */
+  .note { font-size:10px; color: var(--slate); font-style:italic; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     CAPA
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="cover">
+    <div>
+      <div class="cover-badge">Ecossistema Agro · Documento Estratégico</div>
+      <div class="cover-title">Linhas do<br><span>Tempo</span><br>do Cliente</div>
+      <div class="cover-sub">Jornada completa de cada perfil — da descoberta ao pagamento, da primeira sessão à renovação anual — em todas as plataformas do ecossistema.</div>
+      <div class="cover-pills">
+        <div class="cover-pill" style="background:rgba(103,157,63,0.15);border-color:#679d3f;color:#86efac">🚜 Prestador · AgroCore</div>
+        <div class="cover-pill" style="background:rgba(22,163,74,0.12);border-color:#16a34a;color:#86efac">🌾 Produtor · AgroCore</div>
+        <div class="cover-pill" style="background:rgba(22,163,74,0.12);border-color:#10b981;color:#6ee7b7">📱 Produtor · SmartAgroOS</div>
+        <div class="cover-pill" style="background:rgba(16,185,129,0.1);border-color:#10b981;color:#6ee7b7">💰 Produtor · AgroRate</div>
+        <div class="cover-pill" style="background:rgba(124,58,237,0.15);border-color:#7c3aed;color:#c4b5fd">🔗 AgroToken · Tokenização</div>
+      </div>
+    </div>
+    <div class="cover-bottom">
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#679d3f"></div>Fase de engajamento</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>Momento de upgrade</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Transição entre plataformas</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Ponto de fricção</div>
+      </div>
+      <div style="color:rgba(255,255,255,0.3);font-size:11px;font-family:monospace">v1.0 · Junho 2026</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     TIMELINE 1 · PRESTADOR DE SERVIÇO
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-hdr" style="background:linear-gradient(135deg,#052e16,#104e27);color:white;">
+    <span class="section-badge" style="background:rgba(103,157,63,0.25);color:#86efac">AgroCore · Lado da Oferta</span>
+    <div>
+      <div class="section-hdr-title">🚜 Linha do Tempo — Prestador de Serviço</div>
+      <div class="section-hdr-sub" style="color:rgba(255,255,255,0.5)">Da descoberta ao primeiro serviço executado → upgrade Pro → acesso ao AgroRate</div>
+    </div>
+  </div>
+  <div class="rule bg-core" style="height:4px"></div>
+
+  <div class="timeline-wrap" style="padding-top:20px">
+    <div class="timeline-row">
+
+      <!-- 1 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">1</div>
+        <div class="phase-label text-core">Descoberta</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🔍 Como chega</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>WhatsApp grupos de produtores</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Facebook Marketplace agro</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Stand Agrishow / Tecnoshow</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Colega operador que já usa</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Google: "trabalho colheita maquina"</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 2 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">2</div>
+        <div class="phase-label text-core">Site AgroCore</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🌐 Exploração</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Landing page com 41 serviços disponíveis</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Vídeo/demo de como funciona</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Depoimentos de prestadores</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>CTA: "Cadastrar como Prestador"</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 3 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">3</div>
+        <div class="phase-label text-core">Cadastro</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📋 Onboarding</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Nome, localização, raio de atuação</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Seleciona serviços oferecidos (8 categorias, 41 serviços)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Define disponibilidade</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Conecta Stripe (receber pagamento)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Plano FREE ativado</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 4 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">4</div>
+        <div class="phase-label text-core">Primeiro Serviço</div>
+        <div class="phase-card">
+          <div class="phase-card-title">⚡ Ativação</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Notificação: serviço próximo aparece no feed</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Avalia detalhes (área, urgência, localização)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Envia proposta de preço e prazo</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Aguarda aceite do produtor</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 5 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">5</div>
+        <div class="phase-label text-core">Execução & Pagamento</div>
+        <div class="phase-card">
+          <div class="phase-card-title">✅ Match completo</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Rota em tempo real para o produtor</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Executa o serviço</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Fotos comprovantes enviadas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Pagamento liberado via Stripe (95%)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Primeira avaliação recebida ⭐</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 6 -->
+      <div class="phase">
+        <div class="phase-circle" style="background:#dc2626">6</div>
+        <div class="phase-label" style="color:#dc2626">Fricção</div>
+        <div class="phase-card" style="background:#fff5f5;border-color:#fca5a5">
+          <div class="phase-card-title" style="color:#dc2626">🚫 Limitações do FREE</div>
+          <div class="friction-tag">Não aparece primeiro</div>
+          <div class="phase-li" style="margin-top:5px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Perde serviços para Pros mais visíveis</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:#dc2626"></div><div>Sem banner de destaque no resultado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:#dc2626"></div><div>Suporte só por FAQ</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:#dc2626"></div><div>Máquina parada no período seco</div></div>
+        </div>
+      </div>
+      <div class="arrow upgrade"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 7 — UPGRADE -->
+      <div class="phase upgrade">
+        <div class="phase-circle">⭐</div>
+        <div class="phase-label">Upgrade PRO</div>
+        <div class="phase-card">
+          <div class="plan-badge" style="background:#fef3c7;color:#92400e">⚡ PRO Prestador</div>
+          <div class="price-badge" style="background:#fef9ef;color:#92400e">R$ 79/mês</div>
+          <div style="font-size:9.5px;color:#78350f;margin-top:2px">ou R$ 800/ano (2 meses grátis)</div>
+          <div class="unlock-tag" style="margin-top:6px;display:block">🔓 Destaque na busca</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Banner na plataforma</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Melhores oportunidades primeiro</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Suporte e-mail &lt;24h</div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 8 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">8</div>
+        <div class="phase-label text-core">Retenção & Crescimento</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📈 Ciclo virtuoso</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Volume de serviços cresce</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Avaliações acumulam → mais propostas aceitas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Renovação anual (economia de 2 meses)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Indicação orgânica de outros prestadores</div></div>
+        </div>
+      </div>
+      <div class="arrow cross"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 9 — CROSS -->
+      <div class="phase cross">
+        <div class="phase-circle">→</div>
+        <div class="phase-label">AgroRate</div>
+        <div class="phase-card" style="background:#f5f3ff;border-color:#c4b5fd">
+          <div class="phase-card-title" style="color:var(--cross)">💳 Crédito para crescer</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Quer comprar nova máquina / expandir frota</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Acessa AgroRate pelo dashboard do AgroCore</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Score de crédito rural gerado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Compartilha com banco parceiro</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Trigger box -->
+    <div class="trigger-box">
+      <div class="trigger-title">⚡ Gatilhos de Upgrade — quando o Prestador decide assinar Pro</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div><div class="trigger-item"><span>🚜</span><div>Máquina parada no vazio sazonal — Pro aparece mais e gera trabalho off-peak</div></div></div>
+        <div><div class="trigger-item"><span>🏆</span><div>Perdeu um serviço bom para um prestador Pro mais visível no resultado</div></div></div>
+        <div><div class="trigger-item"><span>📊</span><div>Volume de serviços estabilizou — Pro "paga-se" com um único serviço/mês a mais</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     TIMELINE 2 · PRODUTOR via AgroCore (Path A)
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-hdr" style="background:linear-gradient(135deg,#052e16,#104e27);color:white;">
+    <span class="section-badge" style="background:rgba(103,157,63,0.25);color:#86efac">AgroCore · Lado da Demanda</span>
+    <div>
+      <div class="section-hdr-title">🌾 Linha do Tempo — Produtor via AgroCore (entrada direta)</div>
+      <div class="section-hdr-sub" style="color:rgba(255,255,255,0.5)">Descobre o AgroCore → cadasto como Produtor → contrata serviços → upgrade → expande para SmartAgroOS e AgroRate</div>
+    </div>
+  </div>
+  <div class="rule bg-core" style="height:4px"></div>
+
+  <div class="timeline-wrap" style="padding-top:20px">
+    <div class="timeline-row">
+
+      <!-- 1 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">1</div>
+        <div class="phase-label text-core">Descoberta</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🔍 Canais de entrada</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Indicação de colega produtor</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Facebook / Instagram agro</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Cooperativa ou EMATER indica</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Agrishow, Tecnoshow, feiras</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>YouTube agro</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 2 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">2</div>
+        <div class="phase-label text-core">Site & Cadastro</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📋 Registro</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Cadastra como PRODUTOR</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Localização da propriedade (GPS)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Tamanho da área e culturas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Plano FREE ativado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>AgroBot disponível para dúvidas</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 3 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">3</div>
+        <div class="phase-label text-core">Pedido de Serviço</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📤 Publica serviço</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Escolhe categoria (ex: Mecanização)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Seleciona serviço (ex: Pulverização)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Define área, urgência (FREE = BAIXA ou MEDIA)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>IA sugere descrição + preço de referência</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Publica → status PROCURANDO</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 4 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">4</div>
+        <div class="phase-label text-core">Proposta & Match</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🤝 Seleção</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Recebe propostas de prestadores próximos</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Vê perfil, avaliações e preço</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Aceita proposta → MATCH_ENCONTRADO</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Pagamento em escrow via Stripe</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 5 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">5</div>
+        <div class="phase-label text-core">Acompanhamento</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📍 Rastreio em tempo real</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Rastreia rota do prestador</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Status: EM_ROTA → EXECUTANDO → CONCLUIDO</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Fotos-prova recebidas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Avalia prestador ⭐ e pagamento liberado</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 6 — Fricção -->
+      <div class="phase">
+        <div class="phase-circle" style="background:#dc2626">6</div>
+        <div class="phase-label" style="color:#dc2626">Fricção FREE</div>
+        <div class="phase-card" style="background:#fff5f5;border-color:#fca5a5">
+          <div class="phase-card-title" style="color:#dc2626">🚫 Limites do plano</div>
+          <div class="friction-tag">1 serviço ativo apenas</div>
+          <div class="phase-li" style="margin-top:5px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Precisa de 2ª pulverização agora → BLOQUEADO</div></div>
+          <div class="friction-tag">Sem urgência ALTA</div>
+          <div class="phase-li" style="margin-top:5px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Praga urgente → não pode marcar ALTA</div></div>
+          <div class="friction-tag">Sem equipe IA</div>
+          <div class="phase-li" style="margin-top:5px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Agentes IA bloqueados</div></div>
+        </div>
+      </div>
+      <div class="arrow upgrade"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 7 — Upgrade -->
+      <div class="phase upgrade">
+        <div class="phase-circle">⭐</div>
+        <div class="phase-label">Upgrade PRO</div>
+        <div class="phase-card">
+          <div class="plan-badge" style="background:#fef3c7;color:#92400e">🌿 PRO Produtor</div>
+          <div class="price-badge" style="background:#fef9ef;color:#92400e">R$ 89/mês</div>
+          <div style="font-size:9px;color:#78350f">ou R$ 900/ano (2 meses grátis)</div>
+          <div class="unlock-tag" style="margin-top:6px;display:block">🔓 5 serviços simultâneos</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Urgência ALTA liberada</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Histórico completo</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Equipe IA com agentes</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Gestor dedicado</div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 8 -->
+      <div class="phase">
+        <div class="phase-circle bg-core">8</div>
+        <div class="phase-label text-core">Loop de Retenção</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🔁 Safra a safra</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Publica múltiplos serviços por safra</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Prestadores favoritos salvos</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Histórico de custos por serviço</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--core-green)"></div><div>Renovação anual sugerida automaticamente</div></div>
+        </div>
+      </div>
+      <div class="arrow cross"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 9 — Cross SmartAgro -->
+      <div class="phase cross">
+        <div class="phase-circle">🌿</div>
+        <div class="phase-label">→ SmartAgroOS</div>
+        <div class="phase-card" style="background:#f5f3ff;border-color:#c4b5fd">
+          <div class="phase-card-title" style="color:var(--cross)">Quer gestão completa</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Cresce e precisa gerenciar safra/financeiro</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Link no dashboard → agroos.site</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Serviços AgroCore aparecem no SmartAgro</div></div>
+        </div>
+      </div>
+      <div class="arrow cross"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 10 — Cross AgroRate -->
+      <div class="phase cross">
+        <div class="phase-circle">💰</div>
+        <div class="phase-label">→ AgroRate</div>
+        <div class="phase-card" style="background:#f5f3ff;border-color:#c4b5fd">
+          <div class="phase-card-title" style="color:var(--cross)">Precisa de crédito</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Acessa AgroRate via dashboard</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Score gerado com histórico de serviços</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Crédito para insumos da próxima safra</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="trigger-box">
+      <div class="trigger-title">⚡ Gatilhos de Upgrade — quando o Produtor assina Pro no AgroCore</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div class="trigger-item"><span>🐛</span><div>Praga urgente mas urgência ALTA bloqueada no FREE</div></div>
+        <div class="trigger-item"><span>🌾</span><div>Safra demanda plantio + aplicação simultâneos → 1 serviço não basta</div></div>
+        <div class="trigger-item"><span>🤖</span><div>Quer agentes IA analisando propostas — feature Pro que impacta qualidade de decisão</div></div>
+        <div class="trigger-item"><span>📂</span><div>Precisa de histórico completo para declarar custos ao contador</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     TIMELINE 3 · PRODUTOR via SmartAgroOS
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-hdr" style="background:linear-gradient(135deg,#14532d,#16a34a);color:white;">
+    <span class="section-badge" style="background:rgba(255,255,255,0.12);color:#86efac">SmartAgroOS · Sistema Operacional</span>
+    <div>
+      <div class="section-hdr-title">📱 Linha do Tempo — Produtor via SmartAgroOS</div>
+      <div class="section-hdr-sub" style="color:rgba(255,255,255,0.5)">Entra direto no OS da fazenda → Starter gratuito → Pro → Enterprise → AgroToken e crédito</div>
+    </div>
+  </div>
+  <div class="rule bg-smart" style="height:4px"></div>
+
+  <div class="timeline-wrap" style="padding-top:20px">
+    <div class="timeline-row">
+
+      <!-- 1 -->
+      <div class="phase">
+        <div class="phase-circle bg-smart">1</div>
+        <div class="phase-label text-smart">Descoberta</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🔍 Canais</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>YouTube (agrônomos, fazendeiros influencers)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>LinkedIn (conteúdo técnico)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Agrishow / Tecnoshow Comigo</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Filho do produtor que pesquisou</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Google: "sistema gestão fazenda celular"</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 2 -->
+      <div class="phase">
+        <div class="phase-circle bg-smart">2</div>
+        <div class="phase-label text-smart">Site & Cadastro</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📋 Onboarding</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Cadastro (email ou Google)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Cria propriedade no mapa</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Define culturas e talhões</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>STARTER gratuito ativado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>48 módulos disponíveis parcialmente</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 3 — Starter -->
+      <div class="phase">
+        <div class="phase-circle bg-smart">3</div>
+        <div class="phase-label text-smart">Starter Gratuito</div>
+        <div class="phase-card">
+          <div class="phase-card-title">✅ Módulos livres</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Dashboard geral</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Operações e Financeiro básico</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Clima e alertas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Mapa interativo</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--smart-green)"></div><div>Controle bovino básico</div></div>
+          <div class="friction-tag">Satélite/NDVI bloqueado</div>
+          <div class="friction-tag">AgroToken bloqueado</div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 4 — Fricção -->
+      <div class="phase">
+        <div class="phase-circle" style="background:#dc2626">4</div>
+        <div class="phase-label" style="color:#dc2626">Fricção</div>
+        <div class="phase-card" style="background:#fff5f5;border-color:#fca5a5">
+          <div class="phase-card-title" style="color:#dc2626">🚫 Quer ir mais fundo</div>
+          <div class="friction-tag">NDVI bloqueado</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Quer ver vigor da lavoura por satélite</div></div>
+          <div class="friction-tag">Solo Embrapa IA</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Análise de solo avançada indisponível</div></div>
+          <div class="friction-tag">AgroToken bloqueado</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Quer tokenizar recebível agrícola</div></div>
+        </div>
+      </div>
+      <div class="arrow upgrade"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 5 — Pro SmartAgro -->
+      <div class="phase upgrade">
+        <div class="phase-circle">⭐</div>
+        <div class="phase-label">Upgrade PRO</div>
+        <div class="phase-card">
+          <div class="plan-badge" style="background:#fef3c7;color:#92400e">🌿 PRO SmartAgroOS</div>
+          <div class="price-badge" style="background:#fef9ef;color:#92400e">R$ 97/mês</div>
+          <div class="unlock-tag" style="margin-top:6px;display:block">🔓 Imagens satélite + NDVI</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Grade UTM + LiDAR</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Solo Embrapa IA</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 AgroToken (básico)</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Equipe + integração AgroCore</div>
+        </div>
+      </div>
+      <div class="arrow cross"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 6 — AgroCore via SmartAgro -->
+      <div class="phase cross">
+        <div class="phase-circle">🚜</div>
+        <div class="phase-label">→ AgroCore</div>
+        <div class="phase-card" style="background:#f5f3ff;border-color:#c4b5fd">
+          <div class="phase-card-title" style="color:var(--cross)">Serviços integrados</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Clica "AgroCore" no SmartAgroOS</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Pedido de serviço criado de dentro do OS</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Serviço rastreado como operação na fazenda</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Custo lançado no financeiro automaticamente</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 7 — Fricção Enterprise -->
+      <div class="phase">
+        <div class="phase-circle" style="background:#dc2626">7</div>
+        <div class="phase-label" style="color:#dc2626">Fricção Pro</div>
+        <div class="phase-card" style="background:#fff5f5;border-color:#fca5a5">
+          <div class="phase-card-title" style="color:#dc2626">🚫 Cresceu demais pro Pro</div>
+          <div class="friction-tag">Múltiplas propriedades</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>2ª fazenda → Pro não suporta ilimitado</div></div>
+          <div class="friction-tag">KPIs executivos</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Dashboard executivo requer Enterprise</div></div>
+          <div class="friction-tag">Agentes IA autônomos</div>
+        </div>
+      </div>
+      <div class="arrow upgrade"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 8 — Enterprise -->
+      <div class="phase upgrade">
+        <div class="phase-circle">👑</div>
+        <div class="phase-label">Upgrade Enterprise</div>
+        <div class="phase-card">
+          <div class="plan-badge" style="background:#fef3c7;color:#92400e">👑 Enterprise SmartAgroOS</div>
+          <div class="price-badge" style="background:#fef9ef;color:#92400e">R$ 397/mês</div>
+          <div class="unlock-tag" style="margin-top:6px;display:block">🔓 Propriedades ilimitadas</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Financeiro avançado / DRE</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Dashboard KPIs executivo</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Equipe IA agentes autônomos</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Suporte 24/7 WhatsApp</div>
+        </div>
+      </div>
+      <div class="arrow cross"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 9 — AgroRate -->
+      <div class="phase cross">
+        <div class="phase-circle">💰</div>
+        <div class="phase-label">→ AgroRate</div>
+        <div class="phase-card" style="background:#f5f3ff;border-color:#c4b5fd">
+          <div class="phase-card-title" style="color:var(--cross)">Crédito e Jurídico</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Ecosistema → AgroRate (link nativo)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Dados SmartAgroOS alimentam o score</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>ORYON Legal: consultoria jurídica rural</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--cross)"></div><div>Score + crédito para expandir fazenda</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AgroToken path -->
+    <div style="margin-top: 16px; background: linear-gradient(135deg, #0f0f23, #1a1050); border-radius: 14px; padding: 18px 24px; display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start;">
+      <div>
+        <div style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:13px; color:#a78bfa; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px;">🔗 AgroToken</div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.6); line-height:1.5;">Tokenização de recebíveis rurais via blockchain. Disponível para produtores qualificados no plano <strong style="color:#c4b5fd">Pro e Enterprise</strong>. Conecta investidores a ativos agrícolas reais.</div>
+        <div style="margin-top:10px;font-size:10px;color:rgba(255,255,255,0.4)">Taxa aprovação: 2% · Compra: 2% · Resgate: 3%</div>
+        <div style="margin-top:6px;font-size:9px;color:rgba(255,255,255,0.3)">Status: Fase Piloto · Polygon ERC-1155 em integração</div>
+      </div>
+      <div style="display:flex;gap:0;align-items:center">
+        <div class="token-step"><div class="token-num">1</div><div style="font-size:11px;color:rgba(255,255,255,0.75)"><strong style="color:white">Cria token</strong> — define tipo (safra/material/máquina), valor e detalhes</div></div>
+        <div style="color:#7c3aed;font-size:18px;margin:0 8px">→</div>
+        <div class="token-step"><div class="token-num">2</div><div style="font-size:11px;color:rgba(255,255,255,0.75)"><strong style="color:white">Aprovação</strong> — laudo de capacidade gerado por IA + KYC AgroRate</div></div>
+        <div style="color:#7c3aed;font-size:18px;margin:0 8px">→</div>
+        <div class="token-step"><div class="token-num">3</div><div style="font-size:11px;color:rgba(255,255,255,0.75)"><strong style="color:white">Marketplace</strong> — listado publicamente para investidores</div></div>
+        <div style="color:#7c3aed;font-size:18px;margin:0 8px">→</div>
+        <div class="token-step"><div class="token-num">4</div><div style="font-size:11px;color:rgba(255,255,255,0.75)"><strong style="color:white">Captação</strong> — investidores compram cotas</div></div>
+        <div style="color:#7c3aed;font-size:18px;margin:0 8px">→</div>
+        <div class="token-step"><div class="token-num">5</div><div style="font-size:11px;color:rgba(255,255,255,0.75)"><strong style="color:white">Resgate</strong> — produtor resgata ao fim do período</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     TIMELINE 4 · PRODUTOR no AgroRate
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-hdr" style="background:linear-gradient(135deg,#022c22,#065f46);color:white;">
+    <span class="section-badge" style="background:rgba(16,185,129,0.2);color:#6ee7b7">AgroRate · Score de Crédito Rural</span>
+    <div>
+      <div class="section-hdr-title">💰 Linha do Tempo — Produtor no AgroRate</div>
+      <div class="section-hdr-sub" style="color:rgba(255,255,255,0.5)">Chega do site, AgroCore ou SmartAgroOS → constrói score → acessa crédito rural</div>
+    </div>
+  </div>
+  <div class="rule bg-rate" style="height:4px"></div>
+
+  <div class="timeline-wrap" style="padding-top:20px">
+    <div class="timeline-row">
+
+      <!-- 1 -->
+      <div class="phase">
+        <div class="phase-circle bg-rate">1</div>
+        <div class="phase-label text-rate">Chegada</div>
+        <div class="phase-card">
+          <div class="phase-card-title">🔍 Origens</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Google: "como melhorar score rural"</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Link no AgroCore dashboard</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>SmartAgroOS → Ecosistema → AgroRate</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Indicação de cooperativa ou banco parceiro</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Negativa de crédito no banco → pesquisa solução</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 2 -->
+      <div class="phase">
+        <div class="phase-circle bg-rate">2</div>
+        <div class="phase-label text-rate">Cadastro Starter</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📋 Registro gratuito</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>CPF criptografado e validado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Score interno básico calculado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Vê score mas sem contexto de fatores</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Consentimento LGPD (dados nunca saem sem aceite)</div></div>
+          <div class="friction-tag">Histórico bloqueado</div>
+          <div class="friction-tag">Bureau QUOD bloqueado</div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 3 -->
+      <div class="phase">
+        <div class="phase-circle bg-rate">3</div>
+        <div class="phase-label text-rate">Organiza Docs</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📂 Documentação</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Upload de documentos da propriedade</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Certidões negativas automáticas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Cadastro de garantias (imóvel, máquinas)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Verifica CAR e matrícula do imóvel</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 4 — Fricção -->
+      <div class="phase">
+        <div class="phase-circle" style="background:#dc2626">4</div>
+        <div class="phase-label" style="color:#dc2626">Fricção Starter</div>
+        <div class="phase-card" style="background:#fff5f5;border-color:#fca5a5">
+          <div class="phase-card-title" style="color:#dc2626">🚫 Precisa mais</div>
+          <div class="friction-tag">Sem histórico de score</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Quer ver evolução para apresentar ao banco</div></div>
+          <div class="friction-tag">Sem QUOD</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Precisa de consulta bureau para completar dossiê</div></div>
+          <div class="friction-tag">Sem PDF exportável</div>
+          <div class="friction-tag">Não pode compartilhar</div>
+        </div>
+      </div>
+      <div class="arrow upgrade"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 5 — Pro -->
+      <div class="phase upgrade">
+        <div class="phase-circle">⭐</div>
+        <div class="phase-label">Upgrade PRO</div>
+        <div class="phase-card">
+          <div class="plan-badge" style="background:#fef3c7;color:#92400e">PRO AgroRate</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
+            <div class="price-badge" style="background:#fef9ef;color:#92400e;font-size:11px">R$49/mês</div>
+            <div class="price-badge" style="background:#fef9ef;color:#78350f;font-size:11px">R$44/mês trim.</div>
+          </div>
+          <div style="font-size:9px;color:#78350f;margin-bottom:4px">ou anual com desconto</div>
+          <div class="unlock-tag" style="display:block;margin-top:4px">🔓 Histórico de score completo</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 QUOD 1x/mês</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Simulações ilimitadas</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 Agente financeiro IA</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 PDF + compartilhar com bancos</div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 6 -->
+      <div class="phase">
+        <div class="phase-circle bg-rate">6</div>
+        <div class="phase-label text-rate">Score & Dossiê</div>
+        <div class="phase-card">
+          <div class="phase-card-title">📊 Score pronto</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Score com todos os fatores visíveis</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Relatório PDF gerado</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Simulação de crédito (PRONAF, Pronamp...)</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Comparativo com benchmarking do setor</div></div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 7 — Fricção Enterprise -->
+      <div class="phase">
+        <div class="phase-circle" style="background:#dc2626">7</div>
+        <div class="phase-label" style="color:#dc2626">Quer completo</div>
+        <div class="phase-card" style="background:#fff5f5;border-color:#fca5a5">
+          <div class="phase-card-title" style="color:#dc2626">🚫 Pro não basta</div>
+          <div class="friction-tag">CAFIR (INCRA)</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Banco exige verificação fundiária</div></div>
+          <div class="friction-tag">DAP PRONAF</div>
+          <div class="phase-li" style="margin-top:4px"><div class="phase-li-dot" style="background:#dc2626"></div><div>Precisa DAP para acessar PRONAF</div></div>
+          <div class="friction-tag">QUOD 360° Dossier</div>
+        </div>
+      </div>
+      <div class="arrow upgrade"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 8 — Enterprise -->
+      <div class="phase upgrade">
+        <div class="phase-circle">👑</div>
+        <div class="phase-label">Enterprise</div>
+        <div class="phase-card">
+          <div class="plan-badge" style="background:#fef3c7;color:#92400e">👑 Enterprise AgroRate</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px">
+            <div class="price-badge" style="background:#fef9ef;color:#92400e;font-size:11px">R$149/mês</div>
+            <div class="price-badge" style="background:#fef9ef;color:#78350f;font-size:11px">R$134/mês trim.</div>
+          </div>
+          <div class="unlock-tag" style="display:block;margin-top:4px">🔓 CAFIR (INCRA) 1x/ano</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 CAR ambiental 1x/ano</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 DAP PF/PJ 1x/6 meses</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 QUOD Dossiê 360°</div>
+          <div class="unlock-tag" style="display:block;margin-top:3px">🔓 API integração bancária</div>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- 9 -->
+      <div class="phase">
+        <div class="phase-circle bg-rate">9</div>
+        <div class="phase-label text-rate">Crédito Aprovado</div>
+        <div class="phase-card">
+          <div class="phase-card-title">✅ Acessa crédito</div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Compartilha score com banco parceiro</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Recebe propostas de crédito personalizadas</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Contrato digital via ClickSign</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>ORYON Legal se precisar de suporte jurídico</div></div>
+          <div class="phase-li"><div class="phase-li-dot" style="background:var(--rate-light)"></div><div>Renovação anual com histórico consolidado</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="trigger-box">
+      <div class="trigger-title">⚡ Gatilhos de Upgrade no AgroRate — quando o produtor assina</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div class="trigger-item"><span>🏦</span><div>Vai ao banco e precisa do relatório PDF completo para apresentar ao gerente</div></div>
+        <div class="trigger-item"><span>📉</span><div>Score baixo e quer entender cada fator em detalhe + plano de melhoria da IA</div></div>
+        <div class="trigger-item"><span>🌾</span><div>Vai pedir PRONAF e precisa da verificação DAP — só no Enterprise</div></div>
+        <div class="trigger-item"><span>📅</span><div>Recorrência: pagamento de custeio todo ano justifica plano anual com desconto</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PÁGINA FINAL · MAPA COMPLETO DO ECOSSISTEMA
+════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-hdr" style="background:linear-gradient(135deg,#052e16,#0f2027);color:white;">
+    <span class="section-badge" style="background:rgba(255,255,255,0.1);color:#86efac">Visão Consolidada</span>
+    <div>
+      <div class="section-hdr-title">🗺️ Mapa de Transições & Comparativo de Planos</div>
+      <div class="section-hdr-sub" style="color:rgba(255,255,255,0.5)">Todos os caminhos entre plataformas e todos os planos de assinatura em uma só visão</div>
+    </div>
+  </div>
+  <div style="height:4px;background:linear-gradient(90deg,var(--core-green),var(--smart-green),var(--rate-light))"></div>
+
+  <div class="eco-map">
+
+    <!-- Mapa de fluxos -->
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--slate);margin-bottom:12px">Fluxos entre plataformas</div>
+
+    <div style="display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr;gap:0;align-items:center;margin-bottom:24px">
+
+      <!-- AgroCore -->
+      <div style="border:2px solid var(--core-dark);border-radius:14px;padding:16px;">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--core-dark);margin-bottom:8px">🌿 AgroCore</div>
+        <div style="font-size:11px;color:var(--slate);margin-bottom:10px">Marketplace de serviços agrícolas</div>
+        <div class="eco-flow">
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--core-green)"></div><div>PRODUTOR → publica serviços</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--core-green)"></div><div>PRESTADOR → recebe e executa</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:#fbbf24"></div><div>Ambos → AgroRate para crédito</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--cross)"></div><div>Produtor → SmartAgroOS (gestão)</div></div>
+        </div>
+        <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--core-dark);margin-bottom:5px">Planos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px">
+            <div style="background:#f8fafc;border-radius:6px;padding:6px"><div style="font-weight:700">FREE</div><div style="color:var(--slate)">Produtor: R$0</div><div style="color:var(--slate)">Prestador: R$0</div></div>
+            <div style="background:#fef9ef;border:1px solid #fde68a;border-radius:6px;padding:6px"><div style="font-weight:700;color:#92400e">PRO</div><div style="color:#78350f">Produtor: R$89/mês</div><div style="color:#78350f">Prestador: R$79/mês</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seta -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;color:var(--cross);font-weight:700">
+        <div>↔</div>
+        <div style="font-size:9px;text-align:center;color:var(--slate)">integração<br>nativa</div>
+      </div>
+
+      <!-- SmartAgroOS -->
+      <div style="border:2px solid var(--smart-green);border-radius:14px;padding:16px;">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--smart-dark);margin-bottom:8px">📱 SmartAgroOS</div>
+        <div style="font-size:11px;color:var(--slate);margin-bottom:10px">OS da fazenda — hub central do ecossistema</div>
+        <div class="eco-flow">
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--smart-green)"></div><div>Produtor gere toda operação aqui</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--core-green)"></div><div>→ AgroCore (serviços terceirizados)</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--rate-light)"></div><div>→ AgroRate (score e crédito)</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:#7c3aed)"></div><div>AgroToken (tokenização)</div></div>
+        </div>
+        <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--smart-dark);margin-bottom:5px">Planos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:10px">
+            <div style="background:#f8fafc;border-radius:6px;padding:5px"><div style="font-weight:700">STARTER</div><div style="color:var(--slate)">Grátis</div></div>
+            <div style="background:#fef9ef;border:1px solid #fde68a;border-radius:6px;padding:5px"><div style="font-weight:700;color:#92400e">PRO</div><div style="color:#78350f">R$97/mês</div></div>
+            <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:6px;padding:5px"><div style="font-weight:700;color:#d97706">ENTERPRISE</div><div style="color:#92400e">R$397/mês</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seta -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;color:var(--cross);font-weight:700">
+        <div>↔</div>
+        <div style="font-size:9px;text-align:center;color:var(--slate)">banco de<br>dados compartilhado</div>
+      </div>
+
+      <!-- AgroRate -->
+      <div style="border:2px solid var(--rate-dark);border-radius:14px;padding:16px;">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--rate-dark);margin-bottom:8px">💰 AgroRate</div>
+        <div style="font-size:11px;color:var(--slate);margin-bottom:10px">Score de crédito rural + acesso a financiamento</div>
+        <div class="eco-flow">
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--rate-light)"></div><div>Score calculado com dados do ecossistema</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--rate-light)"></div><div>ORYON Legal (jurídico rural)</div></div>
+          <div class="eco-flow-item"><div class="eco-dot" style="background:var(--rate-gold)"></div><div>Produtor compartilha com bancos parceiros</div></div>
+          <div class="eco-flow-item" style="opacity:0.5"><div class="eco-dot" style="background:#94a3b8"></div><div>Prestador: acesso limitado (crédito)</div></div>
+        </div>
+        <div style="margin-top:10px;border-top:1px dashed var(--border);padding-top:10px">
+          <div style="font-size:10px;font-weight:700;color:var(--rate-dark);margin-bottom:5px">Planos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:10px">
+            <div style="background:#f8fafc;border-radius:6px;padding:5px"><div style="font-weight:700">STARTER</div><div style="color:var(--slate)">Grátis</div></div>
+            <div style="background:#fef9ef;border:1px solid #fde68a;border-radius:6px;padding:5px"><div style="font-weight:700;color:#92400e">PRO</div><div style="color:#78350f">R$49/mês<br>R$44 trim.</div></div>
+            <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:6px;padding:5px"><div style="font-weight:700;color:#d97706">ENTERPRISE</div><div style="color:#92400e">R$149/mês<br>R$134 trim.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quem acessa o quê -->
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--slate);margin-bottom:10px">Acesso por tipo de usuário</div>
+    <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:20px">
+      <thead>
+        <tr style="background:#f8fafc">
+          <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Usuário</th>
+          <th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--core-dark);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">AgroCore</th>
+          <th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--smart-dark);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">SmartAgroOS</th>
+          <th style="padding:8px 12px;text-align:center;border-bottom:2px solid var(--border);color:var(--rate-dark);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">AgroRate</th>
+          <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Jornada de Upgrade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9">
+          <td style="padding:9px 12px;font-weight:600">🌾 Produtor Rural</td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">✓ FREE + PRO</span></td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">✓ START+PRO+ENT</span></td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">✓ START+PRO+ENT</span></td>
+          <td style="padding:9px 12px;font-size:11px;color:var(--slate)">FREE → PRO AgroCore → SmartAgroOS PRO → Enterprise → AgroRate PRO/ENT</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;background:#fafff7">
+          <td style="padding:9px 12px;font-weight:600">🚜 Prestador de Serviço</td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">✓ FREE + PRO</span></td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#f1f5f9;color:#94a3b8;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">✗ Não acessa</span></td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">△ Crédito apenas</span></td>
+          <td style="padding:9px 12px;font-size:11px;color:var(--slate)">FREE Prestador → PRO Prestador → AgroRate (crédito p/ equipamento)</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 12px;font-weight:600">👁️ Visitante Curioso</td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">Site apenas</span></td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">Site apenas</span></td>
+          <td style="padding:9px 12px;text-align:center"><span style="background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700">Site apenas</span></td>
+          <td style="padding:9px 12px;font-size:11px;color:var(--slate)">Landing page → trial free → onboarding → converte em Produtor ou Prestador</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Sugestões estratégicas -->
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--slate);margin-bottom:10px">Sugestões para maximizar tempo e retenção na plataforma</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
+        <div style="font-size:18px;margin-bottom:6px">🎯</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--core-dark);margin-bottom:5px">Trial com fricção inteligente</div>
+        <div style="font-size:10.5px;color:#166534;line-height:1.5">No FREE, mostrar preview bloqueado das funcionalidades Pro com "desbloquear" ao invés de esconder. Usuário vê o que perde.</div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px">
+        <div style="font-size:18px;margin-bottom:6px">📅</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:#92400e;margin-bottom:5px">Oferta sazonal de upgrade</div>
+        <div style="font-size:10.5px;color:#78350f;line-height:1.5">Push de upgrade Pro 30 dias antes do plantio. Timing certo: produtor sabe que vai precisar de múltiplos serviços.</div>
+      </div>
+      <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:12px">
+        <div style="font-size:18px;margin-bottom:6px">🔗</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--cross);margin-bottom:5px">Recompensa por cross-platform</div>
+        <div style="font-size:10.5px;color:#5b21b6;line-height:1.5">Desconto ou mês grátis para quem conecta SmartAgroOS + AgroRate. Mantém usuário dentro do ecossistema.</div>
+      </div>
+      <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:12px">
+        <div style="font-size:18px;margin-bottom:6px">🏆</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--rate-dark);margin-bottom:5px">Gamificação de score</div>
+        <div style="font-size:10.5px;color:#065f46;line-height:1.5">No AgroRate, barra de progresso "Seu score pode chegar a X" com passos concretos. Mantém o usuário voltando mensalmente.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
