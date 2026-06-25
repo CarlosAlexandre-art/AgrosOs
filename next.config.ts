@@ -7,9 +7,6 @@ const securityHeaders = [
   { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self)' },
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
-  // Necessário para SharedArrayBuffer (ffmpeg WASM threading)
-  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-  { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
   {
     key: 'Content-Security-Policy',
     value: [
@@ -17,8 +14,29 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
       "font-src 'self' https://fonts.gstatic.com https://unpkg.com",
-      "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://*.openstreetmap.org https://unpkg.com",
+      "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://*.openstreetmap.org https://unpkg.com https://server.arcgisonline.com https://*.arcgisonline.com https://*.tile.openstreetmap.org",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://nominatim.openstreetmap.org https://api.open-meteo.com https://api.openweathermap.org",
+      "frame-src 'none'",
+      "worker-src 'self' blob:",
+      "script-src-elem 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net blob:",
+    ].join('; '),
+  },
+]
+
+// COOP/COEP são necessários apenas para o AgroVision (ffmpeg WASM + SharedArrayBuffer)
+// Aplicar globalmente quebra os tiles de mapa do Esri/ArcGIS e OSM
+const agroVisionHeaders = [
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+      "font-src 'self' https://fonts.gstatic.com https://unpkg.com",
+      "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.open-meteo.com https://api.openweathermap.org",
       "frame-src 'none'",
       "worker-src 'self' blob:",
       "script-src-elem 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net blob:",
@@ -49,6 +67,15 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: securityHeaders,
+      },
+      // COOP/COEP apenas no AgroVision — necessário para ffmpeg WASM
+      {
+        source: '/dashboard/agrovision',
+        headers: agroVisionHeaders,
+      },
+      {
+        source: '/dashboard/agrovision/:path*',
+        headers: agroVisionHeaders,
       },
       {
         source: '/api/:path*',
