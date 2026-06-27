@@ -14,12 +14,15 @@ export interface KpisLote {
   gmd: number                   // kg/dia — Ganho Médio Diário
   conversaoAlimentar: number    // kg MS / kg ganho — ideal 6–8
   eficienciaAlimentar: number   // kg ganho / kg MS
+  eficienciaBiologica: number   // kg MS/@ produzida — quanto MS por arroba; menor é melhor
+  ganhoTotalKg: number          // kg/animal no ciclo até agora
   custoArroba: number           // R$/@ produzida
   arrobasProduzidasLote: number
   diasRestantesAbate: number
   dataPrevisaoAbate: Date | null
   margemEstimadaReais: number   // simplificada (sem cotação externa)
   scorePerformance: number      // 0–100
+  classificacaoOryon: 'EXCELENTE' | 'BOA' | 'ATENÇÃO' | 'CRÍTICO'
   alertas: string[]
 }
 
@@ -45,6 +48,8 @@ export function calcularKpisLote(d: DadosLote): KpisLote {
 
   const arrobasProduzidasLote = (ganhoTotal * d.cabecas) * BENCHMARK.arrobas_por_kg
   const custoArroba = arrobasProduzidasLote > 0 ? d.custoTotalReais / arrobasProduzidasLote : 0
+  const eficienciaBiologica = arrobasProduzidasLote > 0 ? d.consumoRacaoKgTotal / arrobasProduzidasLote : 0
+  const ganhoTotalKg = ganhoTotal
 
   const diasRestantesAbate = gmd > 0 ? Math.ceil((pesoMeta - d.pesoAtual) / gmd) : 999
   const dataPrevisaoAbate = gmd > 0 && diasRestantesAbate < 365
@@ -69,16 +74,23 @@ export function calcularKpisLote(d: DadosLote): KpisLote {
   if (diasRestantesAbate < 10 && diasRestantesAbate > 0)
     alertas.push(`Lote próximo do peso de abate (${diasRestantesAbate} dias)`)
 
+  const scoreFinal = Math.max(0, Math.min(100, score))
+  const classificacaoOryon: KpisLote['classificacaoOryon'] =
+    scoreFinal >= 80 ? 'EXCELENTE' : scoreFinal >= 65 ? 'BOA' : scoreFinal >= 45 ? 'ATENÇÃO' : 'CRÍTICO'
+
   return {
     gmd: +gmd.toFixed(3),
     conversaoAlimentar: +conversaoAlimentar.toFixed(2),
     eficienciaAlimentar: +eficienciaAlimentar.toFixed(3),
+    eficienciaBiologica: +eficienciaBiologica.toFixed(1),
+    ganhoTotalKg: +ganhoTotalKg.toFixed(1),
     custoArroba: +custoArroba.toFixed(2),
     arrobasProduzidasLote: +arrobasProduzidasLote.toFixed(1),
     diasRestantesAbate,
     dataPrevisaoAbate,
     margemEstimadaReais: +margemEstimadaReais.toFixed(2),
-    scorePerformance: Math.max(0, Math.min(100, score)),
+    scorePerformance: scoreFinal,
+    classificacaoOryon,
     alertas,
   }
 }

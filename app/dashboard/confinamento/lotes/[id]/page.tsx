@@ -14,14 +14,28 @@ interface LoteDetalhe {
 }
 interface Kpis {
   gmd: number; conversaoAlimentar: number; eficienciaAlimentar: number
+  eficienciaBiologica: number; ganhoTotalKg: number
   custoArroba: number; arrobasProduzidasLote: number
   diasRestantesAbate: number; dataPrevisaoAbate?: string
-  margemEstimadaReais: number; scorePerformance: number; alertas: string[]
+  margemEstimadaReais: number; scorePerformance: number
+  classificacaoOryon: 'EXCELENTE' | 'BOA' | 'ATENÇÃO' | 'CRÍTICO'
+  alertas: string[]
 }
 interface Tendencia { tendencia: 'subindo' | 'estavel' | 'caindo'; gmdUltimos7d: number }
 
 const TENDENCIA_ICON = { subindo: '↑', estavel: '→', caindo: '↓' }
-const TENDENCIA_COLOR = { subindo: '#10b981', estavel: '#fbbf24', caindo: '#f87171' }
+
+const CLASS_COLOR: Record<string, string> = {
+  EXCELENTE: '#10b981', BOA: '#60a5fa', ATENÇÃO: '#fbbf24', CRÍTICO: '#f87171',
+}
+
+// Benchmarks regionais BR para comparação visual
+const BENCH = {
+  gmd:    { regional: 1.32, top10: 1.62, label: 'GMD (kg/dia)', unit: 'kg/dia', higherBetter: true },
+  ca:     { regional: 7.4,  top10: 6.0,  label: 'Conv. Alimentar', unit: 'kg MS/kg', higherBetter: false },
+  custo:  { regional: 1580, top10: 1290, label: 'Custo/cabeça (R$)', unit: 'R$', higherBetter: false },
+  efBio:  { regional: 178,  top10: 155,  label: 'Ef. Biológica (kg MS/@)', unit: 'kg MS/@', higherBetter: false },
+}
 
 export default function LoteDashboardPage() {
   const params = useParams()
@@ -31,6 +45,8 @@ export default function LoteDashboardPage() {
   const [showDiario, setShowDiario] = useState(false)
   const [saving, setSaving] = useState(false)
   const [diario, setDiario] = useState({ consumoRacaoKg: '', consumoAguaL: '', pesoMedio: '', mortalidade: '0', medicacao: '', observacoes: '', custoDia: '' })
+  const [iaAnalise, setIaAnalise] = useState('')
+  const [iaLoading, setIaLoading] = useState(false)
 
   const carregar = useCallback(() => {
     if (!id) return
@@ -55,6 +71,42 @@ export default function LoteDashboardPage() {
     setSaving(false)
   }
 
+  async function gerarAnaliseIA() {
+    if (!id || iaLoading) return
+    setIaLoading(true)
+    setIaAnalise('')
+    try {
+      const res = await fetch('/api/ai/copiloto-confinamento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          loteId: id,
+          messages: [{ role: 'user', content: 'Faça uma análise executiva deste lote em exatamente 3 bullets: ✅ ponto forte principal, ⚠️ ponto de atenção crítico, 💡 recomendação mais importante para o próximo ciclo. Seja direto e cite números.' }],
+        }),
+      })
+      const reader = res.body?.getReader()
+      const dec = new TextDecoder()
+      if (!reader) return
+      let full = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const chunk = dec.decode(value)
+        for (const line of chunk.split('\n')) {
+          if (line.startsWith('data: ')) {
+            const raw = line.slice(6).trim()
+            if (raw === '[DONE]') break
+            try {
+              const delta = JSON.parse(raw)?.choices?.[0]?.delta?.content
+              if (delta) { full += delta; setIaAnalise(full) }
+            } catch { /* skip */ }
+          }
+        }
+      }
+    } catch { setIaAnalise('Não foi possível gerar análise. Tente novamente.') }
+    setIaLoading(false)
+  }
+
   if (loading) return <div style={{ padding: 40, color: '#64748b', textAlign: 'center' }}>Carregando...</div>
   if (!data) return <div style={{ padding: 40, color: '#f87171', textAlign: 'center' }}>Lote não encontrado</div>
 
@@ -65,6 +117,10 @@ export default function LoteDashboardPage() {
   }))
 
   const scoreColor = kpis.scorePerformance >= 75 ? '#10b981' : kpis.scorePerformance >= 50 ? '#fbbf24' : '#f87171'
+  const classColor = CLASS_COLOR[kpis.classificacaoOryon] ?? '#64748b'
+
+  // Custo por cabeça (total / cabecas)
+  const custoCabeca = lote.cabecas > 0 ? lote.custoTotal / lote.cabecas : 0
 
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '24px', color: '#f1f5f9' }}>
@@ -76,23 +132,26 @@ export default function LoteDashboardPage() {
             <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5 }}>{lote.nome}</h1>
             <p style={{ fontSize: 12, color: '#64748b' }}>{lote.cabecas} cabeças · {lote.racaPredominante || 'Mista'} · {diasConfinamento} dias</p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setShowDiario(true)}
-              style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-              + Registro Diário
-            </button>
-          </div>
+          <button onClick={() => setShowDiario(true)}
+            style={{ background: '#10b981', color: '#fff', border: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            + Registro Diário
+          </button>
         </div>
       </div>
 
-      {/* Score geral */}
+      {/* Score + Classificação ORYON */}
       <div style={{ background: '#111827', border: `2px solid ${scoreColor}30`, borderRadius: 14, padding: '16px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
         <div style={{ width: 60, height: 60, borderRadius: '50%', background: `${scoreColor}20`, border: `3px solid ${scoreColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <span style={{ fontSize: 18, fontWeight: 900, color: scoreColor }}>{kpis.scorePerformance}</span>
         </div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>Score de Performance</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, fontWeight: 700 }}>Score de Performance</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 20, background: `${classColor}18`, color: classColor, border: `1px solid ${classColor}40` }}>
+              {kpis.classificacaoOryon}
+            </span>
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
             Tendência {TENDENCIA_ICON[tendencia.tendencia]} {tendencia.gmdUltimos7d > 0 ? `GMD 7d: ${tendencia.gmdUltimos7d} kg/dia` : ''}
           </div>
           {kpis.alertas.length > 0 && (
@@ -105,22 +164,85 @@ export default function LoteDashboardPage() {
         </div>
       </div>
 
-      {/* KPIs grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 16 }}>
+      {/* KPIs grid — 8 cards (4 colunas × 2 linhas) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'GMD', valor: `${kpis.gmd} kg/dia`, sub: 'Ganho Médio Diário', color: '#10b981' },
           { label: 'Conv. Alimentar', valor: `${kpis.conversaoAlimentar}`, sub: 'kg MS / kg ganho', color: '#60a5fa' },
           { label: 'Custo / @', valor: `R$${kpis.custoArroba.toFixed(0)}`, sub: 'Por arroba produzida', color: '#fbbf24' },
           { label: 'Previsão abate', valor: kpis.diasRestantesAbate < 999 ? `${kpis.diasRestantesAbate} dias` : '—', sub: kpis.dataPrevisaoAbate ? new Date(kpis.dataPrevisaoAbate).toLocaleDateString('pt-BR') : 'Sem peso atual', color: '#a78bfa' },
           { label: 'Arrobas produzidas', valor: `${kpis.arrobasProduzidasLote.toFixed(1)} @`, sub: 'Total do lote', color: '#34d399' },
-          { label: 'Margem estimada', valor: `R$${kpis.margemEstimadaReais.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, sub: `Ref: R$320/@`, color: kpis.margemEstimadaReais >= 0 ? '#10b981' : '#f87171' },
+          { label: 'Margem estimada', valor: `R$${kpis.margemEstimadaReais.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, sub: 'Ref: R$320/@', color: kpis.margemEstimadaReais >= 0 ? '#10b981' : '#f87171' },
+          { label: 'Ef. Biológica', valor: kpis.eficienciaBiologica > 0 ? `${kpis.eficienciaBiologica} kg MS/@` : '—', sub: 'MS consumida/arroba', color: '#f97316' },
+          { label: 'Ganho total', valor: kpis.ganhoTotalKg > 0 ? `${kpis.ganhoTotalKg} kg/animal` : '—', sub: 'No ciclo até agora', color: '#38bdf8' },
         ].map(k => (
           <div key={k.label} style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 12, padding: '14px 16px' }}>
             <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.8 }}>{k.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: k.color }}>{k.valor}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: k.color, lineHeight: 1.2 }}>{k.valor}</div>
             <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>{k.sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* Benchmark ORYON */}
+      <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 16 }}>
+        <h3 style={{ fontSize: 13, fontWeight: 700, marginBottom: 14, color: '#94a3b8' }}>📊 Benchmark ORYON — Seu lote vs mercado</h3>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {[
+            { key: 'gmd', seu: kpis.gmd, ...BENCH.gmd },
+            { key: 'ca', seu: kpis.conversaoAlimentar, ...BENCH.ca },
+            { key: 'custo', seu: custoCabeca, ...BENCH.custo },
+            { key: 'efBio', seu: kpis.eficienciaBiologica, ...BENCH.efBio },
+          ].map(b => {
+            const melhorQueRegional = b.higherBetter ? b.seu > b.regional : (b.seu > 0 && b.seu < b.regional)
+            const indicatorColor = melhorQueRegional ? '#10b981' : '#fbbf24'
+            return (
+              <div key={b.key} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 8, alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #1e293b' }}>
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>{b.label}</span>
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: indicatorColor }}>
+                    {b.seu > 0 ? (b.unit === 'R$' ? `R$${b.seu.toFixed(0)}` : `${b.seu.toFixed(b.key === 'gmd' ? 2 : 0)} ${b.unit}`) : '—'}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#475569' }}>Seu lote</div>
+                </div>
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 13, color: '#64748b' }}>
+                    {b.unit === 'R$' ? `R$${b.regional}` : `${b.regional} ${b.unit}`}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#475569' }}>Regional</div>
+                </div>
+                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                  <div style={{ fontSize: 13, color: 'rgba(255,205,0,0.8)' }}>
+                    {b.unit === 'R$' ? `R$${b.top10}` : `${b.top10} ${b.unit}`}
+                  </div>
+                  <div style={{ fontSize: 10, color: '#475569' }}>Top 10%</div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Análise IA inline */}
+      <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 14, padding: '16px 20px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: iaAnalise ? 14 : 0 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>🤖 Análise IA do Lote</h3>
+          <button
+            onClick={gerarAnaliseIA}
+            disabled={iaLoading}
+            style={{ background: iaLoading ? '#1e293b' : 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: iaLoading ? '#475569' : '#10b981', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 600, cursor: iaLoading ? 'not-allowed' : 'pointer' }}
+          >
+            {iaLoading ? 'Analisando...' : iaAnalise ? 'Reanalisar' : 'Gerar análise'}
+          </button>
+        </div>
+        {iaAnalise && (
+          <div style={{ background: '#0f172a', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: '#cbd5e1', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            {iaAnalise}
+          </div>
+        )}
+        {!iaAnalise && !iaLoading && (
+          <p style={{ fontSize: 12, color: '#475569', marginTop: 8 }}>Clique em "Gerar análise" para obter pontos fortes, atenção e recomendação deste lote via IA.</p>
+        )}
       </div>
 
       {/* Gráfico evolução de peso */}
