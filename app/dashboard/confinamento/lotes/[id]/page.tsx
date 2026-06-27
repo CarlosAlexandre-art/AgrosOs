@@ -124,6 +124,16 @@ export default function LoteDashboardPage() {
 
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '24px', color: '#f1f5f9' }}>
+      <style>{`
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+        .bench-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #1e293b; }
+        .bench-col-top10 { text-align: center; min-width: 80px; }
+        @media (max-width: 640px) {
+          .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+          .bench-row { grid-template-columns: 1fr auto auto; }
+          .bench-col-top10 { display: none; }
+        }
+      `}</style>
       {/* Breadcrumb + Header */}
       <div style={{ marginBottom: 20 }}>
         <Link href="/dashboard/confinamento" style={{ fontSize: 12, color: '#64748b', textDecoration: 'none' }}>← Confinamento</Link>
@@ -164,8 +174,8 @@ export default function LoteDashboardPage() {
         </div>
       </div>
 
-      {/* KPIs grid — 8 cards (4 colunas × 2 linhas) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
+      {/* KPIs grid — 4 colunas desktop / 2 colunas mobile */}
+      <div className="kpi-grid">
         {[
           { label: 'GMD', valor: `${kpis.gmd} kg/dia`, sub: 'Ganho Médio Diário', color: '#10b981' },
           { label: 'Conv. Alimentar', valor: `${kpis.conversaoAlimentar}`, sub: 'kg MS / kg ganho', color: '#60a5fa' },
@@ -197,21 +207,21 @@ export default function LoteDashboardPage() {
             const melhorQueRegional = b.higherBetter ? b.seu > b.regional : (b.seu > 0 && b.seu < b.regional)
             const indicatorColor = melhorQueRegional ? '#10b981' : '#fbbf24'
             return (
-              <div key={b.key} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 8, alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #1e293b' }}>
+              <div key={b.key} className="bench-row">
                 <span style={{ fontSize: 12, color: '#94a3b8' }}>{b.label}</span>
-                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div style={{ textAlign: 'center', minWidth: 72 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: indicatorColor }}>
                     {b.seu > 0 ? (b.unit === 'R$' ? `R$${b.seu.toFixed(0)}` : `${b.seu.toFixed(b.key === 'gmd' ? 2 : 0)} ${b.unit}`) : '—'}
                   </div>
                   <div style={{ fontSize: 10, color: '#475569' }}>Seu lote</div>
                 </div>
-                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div style={{ textAlign: 'center', minWidth: 72 }}>
                   <div style={{ fontSize: 13, color: '#64748b' }}>
                     {b.unit === 'R$' ? `R$${b.regional}` : `${b.regional} ${b.unit}`}
                   </div>
                   <div style={{ fontSize: 10, color: '#475569' }}>Regional</div>
                 </div>
-                <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div className="bench-col-top10">
                   <div style={{ fontSize: 13, color: 'rgba(255,205,0,0.8)' }}>
                     {b.unit === 'R$' ? `R$${b.top10}` : `${b.top10} ${b.unit}`}
                   </div>
