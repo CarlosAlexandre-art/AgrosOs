@@ -449,6 +449,8 @@ enum ObjetivoLote {
   LEITE
   REPRODUCAO
   RECRIA
+  ENGORDA
+  RECRIA_ENGORDA
 }
 
 enum StatusLote {
@@ -489,6 +491,14 @@ model Lote {
   dataEncerramento  DateTime?
   custoTotal        Float        @default(0)
   status            StatusLote   @default(ATIVO)
+  faseAtual         String?
+  metaGMD           Float?
+  pesoInicioEngorda Float?
+  dataInicioEngorda DateTime?
+  sistemaProducao   String?
+  numPiquetes       Int?
+  areaHectares      Float?
+  regiao            String?
   animais              Animal[]
   registrosDiarios     LoteDiario[]
   planosNutricionais   PlanoNutricional[]
