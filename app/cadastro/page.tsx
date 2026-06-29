@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
 import AgroOSLogo from '@/components/AgroOSLogo'
 import GoogleButton from '@/components/GoogleButton'
 
 export default function CadastroPage() {
-  const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,30 +18,20 @@ export default function CadastroPage() {
     setLoading(true)
     setError('')
 
-    const supabase = createClient()
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-      },
+    const res = await fetch('/api/auth/cadastrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
     })
 
-    if (signUpError) {
-      setError(signUpError.message)
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error || 'Erro ao criar conta. Tente novamente.')
       setLoading(false)
       return
     }
 
-    // Se a confirmação de e-mail está desativada no Supabase, a sessão já vem aqui
-    if (data.session) {
-      router.push('/onboarding')
-      router.refresh()
-      return
-    }
-
-    // Se email confirmation está ativada, mostrar mensagem para checar o e-mail
     setEmailSent(true)
     setLoading(false)
   }
@@ -64,12 +51,22 @@ export default function CadastroPage() {
         <div className="bg-white rounded-2xl border border-[#e2e8f0] p-8 shadow-sm">
           {emailSent ? (
             <div className="text-center space-y-4">
-              <div className="text-4xl">📧</div>
+              <div className="text-5xl">📧</div>
               <h2 className="text-lg font-bold text-slate-900">Verifique seu e-mail</h2>
-              <p className="text-sm text-slate-500">
-                Enviamos um link de confirmação para <strong>{email}</strong>. Clique no link para ativar sua conta e começar.
+              <p className="text-sm text-slate-500 leading-relaxed">
+                Enviamos um link de confirmação para{' '}
+                <strong className="text-slate-800">{email}</strong>.
+                Clique no link para ativar sua conta.
               </p>
-              <p className="text-xs text-slate-400">Não recebeu? Verifique sua caixa de spam.</p>
+              <p className="text-xs text-slate-400">
+                Não recebeu? Verifique a pasta de spam.
+              </p>
+              <Link
+                href="/login"
+                className="inline-block mt-2 text-sm font-semibold text-[#16a34a] hover:underline"
+              >
+                Ir para o login →
+              </Link>
             </div>
           ) : (
             <>
