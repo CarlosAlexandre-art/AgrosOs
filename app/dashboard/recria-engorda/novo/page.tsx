@@ -223,11 +223,11 @@ export default function NovoLotePage() {
             <div className="grid grid-cols-3 gap-2">
               {SISTEMAS.map(s => (
                 <button key={s.value} type="button" onClick={() => setSistema(s.value)}
-                  className={`flex flex-col items-center gap-1 px-3 py-4 rounded-xl border text-xs font-medium transition-all ${
+                  className={`flex flex-col items-center justify-center gap-1 px-2 py-4 rounded-xl border text-xs font-medium text-center transition-all ${
                     sistema === s.value ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}>
                   <span className="text-xl">{s.icon}</span>
-                  {s.label}
+                  <span className="leading-tight">{s.label}</span>
                 </button>
               ))}
             </div>
