@@ -142,38 +142,46 @@ export default async function DashboardPage() {
         <>
           {/* KPI cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              {
-                label: 'Em andamento', value: inProgress, icon: (
+            {/* Em andamento */}
+            <Link href="/dashboard/operacoes?status=IN_PROGRESS" className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all group">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Em andamento</span>
+                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center group-hover:scale-110 transition-transform" style={{ color: '#15803d' }}>
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                ), color: 'text-green-700', bg: 'bg-green-50', href: '/dashboard/operacoes?status=IN_PROGRESS',
-              },
-              {
-                label: 'Atrasadas', value: late, icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                ), color: 'text-red-600', bg: 'bg-red-50', href: '/dashboard/operacoes?status=LATE',
-              },
-              {
-                label: 'Custo total', value: `R$ ${totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                ), color: 'text-green-700', bg: 'bg-green-50', href: '/dashboard/financeiro',
-              },
-              {
-                label: 'Concluídas', value: done, icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                ), color: 'text-green-700', bg: 'bg-green-50', href: '/dashboard/operacoes?status=DONE',
-              },
-            ].map(card => (
-              <Link key={card.label} href={card.href} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all group">
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`text-xs font-semibold text-slate-500 uppercase tracking-wide`}>{card.label}</span>
-                  <div className={`w-9 h-9 rounded-xl ${card.bg} ${card.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    {card.icon}
-                  </div>
                 </div>
-                <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
-              </Link>
-            ))}
+              </div>
+              <div className="text-2xl font-bold" style={{ color: '#15803d' }}>{inProgress}</div>
+            </Link>
+            {/* Atrasadas */}
+            <Link href="/dashboard/operacoes?status=LATE" className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all group">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Atrasadas</span>
+                <div className="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-red-600">{late}</div>
+            </Link>
+            {/* Custo total */}
+            <Link href="/dashboard/financeiro" className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all group">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Custo total</span>
+                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center group-hover:scale-110 transition-transform" style={{ color: '#15803d' }}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+              </div>
+              <div className="text-2xl font-bold" style={{ color: '#15803d' }}>R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</div>
+            </Link>
+            {/* Concluídas */}
+            <Link href="/dashboard/operacoes?status=DONE" className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all group">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Concluídas</span>
+                <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center group-hover:scale-110 transition-transform" style={{ color: '#15803d' }}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+              </div>
+              <div className="text-2xl font-bold" style={{ color: '#15803d' }}>{done}</div>
+            </Link>
           </div>
 
           {/* Grid principal */}
@@ -243,10 +251,10 @@ export default async function DashboardPage() {
                 <h3 className="font-semibold text-slate-900 text-sm mb-4">Status das atividades</h3>
                 <div className="space-y-2.5">
                   {[
-                    { label: 'Em andamento', count: inProgress, total: allActivities.length, color: 'bg-green-600' },
-                    { label: 'Pendentes', count: pending, total: allActivities.length, color: 'bg-yellow-400' },
-                    { label: 'Concluídas', count: done, total: allActivities.length, color: 'bg-green-500' },
-                    { label: 'Atrasadas', count: late, total: allActivities.length, color: 'bg-red-500' },
+                    { label: 'Em andamento', count: inProgress, total: allActivities.length, color: '#16a34a' },
+                    { label: 'Pendentes', count: pending, total: allActivities.length, color: '#facc15' },
+                    { label: 'Concluídas', count: done, total: allActivities.length, color: '#22c55e' },
+                    { label: 'Atrasadas', count: late, total: allActivities.length, color: '#ef4444' },
                   ].map(s => (
                     <div key={s.label}>
                       <div className="flex items-center justify-between text-xs mb-1">
@@ -255,8 +263,8 @@ export default async function DashboardPage() {
                       </div>
                       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full ${s.color} rounded-full transition-all`}
-                          style={{ width: s.total > 0 ? `${(s.count / s.total) * 100}%` : '0%' }}
+                          className="h-full rounded-full transition-all"
+                          style={{ width: s.total > 0 ? `${(s.count / s.total) * 100}%` : '0%', background: s.color }}
                         />
                       </div>
                     </div>
@@ -294,12 +302,12 @@ export default async function DashboardPage() {
           {/* Ações rápidas */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { href: '/dashboard/operacoes/nova', label: 'Nova atividade', icon: '📋', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
-              { href: '/dashboard/financeiro/novo', label: 'Lançar custo', icon: '💰', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
-              { href: '/dashboard/equipe/novo', label: 'Adicionar membro', icon: '👷', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
-              { href: '/dashboard/propriedades/nova', label: 'Nova propriedade', icon: '🌾', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
+              { href: '/dashboard/operacoes/nova', label: 'Nova atividade', icon: '📋' },
+              { href: '/dashboard/financeiro/novo', label: 'Lançar custo', icon: '💰' },
+              { href: '/dashboard/equipe/novo', label: 'Adicionar membro', icon: '👷' },
+              { href: '/dashboard/propriedades/nova', label: 'Nova propriedade', icon: '🌾' },
             ].map(action => (
-              <Link key={action.href} href={action.href} className={`bg-white border-2 rounded-2xl p-4 flex items-center gap-3 transition-all ${action.color}`}>
+              <Link key={action.href} href={action.href} className="bg-white border-2 rounded-2xl p-4 flex items-center gap-3 transition-all" style={{ borderColor: '#bbf7d0' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#4ade80'; (e.currentTarget as HTMLElement).style.background = '#f0fdf4'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#bbf7d0'; (e.currentTarget as HTMLElement).style.background = 'white'; }}>
                 <span className="text-2xl">{action.icon}</span>
                 <span className="text-sm font-medium text-slate-700">{action.label}</span>
               </Link>
