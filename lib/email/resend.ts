@@ -4,11 +4,15 @@ export function getResend() {
   return new Resend(process.env.RESEND_API_KEY!)
 }
 
+function fromAddress(platform = 'SmartAgroOS') {
+  return process.env.RESEND_FROM ?? `${platform} <noreply@oryonag.com.br>`
+}
+
 export async function sendEmailConfirmation(name: string, email: string, confirmationUrl: string) {
   const resend = getResend()
   const firstName = name.split(' ')[0]
   await resend.emails.send({
-    from: 'SmartAgroOS <noreply@parceirosdeproposito.com>',
+    from: fromAddress(),
     to: email,
     subject: 'Confirme seu e-mail para acessar o SmartAgroOS',
     html: `
@@ -74,7 +78,7 @@ export async function sendEmailConfirmation(name: string, email: string, confirm
 export async function sendWelcomeEmail(name: string, email: string) {
   const resend = getResend()
   await resend.emails.send({
-    from: 'SmartAgroOS <noreply@parceirosdeproposito.com>',
+    from: fromAddress(),
     to: email,
     subject: 'Bem-vindo ao SmartAgroOS 🌾',
     html: `
@@ -138,7 +142,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
 export async function sendPromotionalEmail(email: string, name: string, subject: string, title: string, body: string, cta: string, url: string) {
   const resend = getResend()
   await resend.emails.send({
-    from: 'SmartAgroOS <noreply@parceirosdeproposito.com>',
+    from: fromAddress(),
     to: email,
     subject: subject,
     html: `
