@@ -15,11 +15,18 @@ async function handle(req: NextRequest, method: string, pathSegments?: string[],
 
   try {
     const token = await getEmbrapaToken()
-    const res = await fetch(url, {
+    const fetchOpts = {
       method,
-      headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) } as Record<string, string>,
       ...(body ? { body: JSON.stringify(body) } : {}),
-    })
+    }
+    let res = await fetch(url, fetchOpts)
+    if (res.status === 401) {
+      clearEmbrapaTokenCache()
+      const freshToken = await getEmbrapaToken()
+      fetchOpts.headers['Authorization'] = `Bearer ${freshToken}`
+      res = await fetch(url, fetchOpts)
+    }
     if (!res.ok) return NextResponse.json({ error: await res.text() }, { status: res.status })
 
     const data = await res.json()

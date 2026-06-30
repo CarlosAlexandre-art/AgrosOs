@@ -34,13 +34,17 @@ export async function groq(messages: Msg[], maxTokens = 1024, modelOverride?: st
         body: JSON.stringify({ model: GROQ_FALLBACK, messages, temperature: 0.7, max_tokens: maxTokens }),
       })
       if (!r2.ok) throw new Error(`LLM ${r2.status}: ${await r2.text()}`)
-      const d2 = await r2.json()
-      return d2.choices[0].message.content as string
+      const b2 = await r2.text()
+      let d2: any
+      try { d2 = JSON.parse(b2) } catch { throw new Error('IA indisponível temporariamente') }
+      return (d2.choices?.[0]?.message?.content ?? '') as string
     }
     throw new Error(`LLM ${res.status}: ${txt}`)
   }
-  const data = await res.json()
-  return data.choices[0].message.content as string
+  const body = await res.text()
+  let data: any
+  try { data = JSON.parse(body) } catch { throw new Error('IA indisponível temporariamente') }
+  return (data.choices?.[0]?.message?.content ?? '') as string
 }
 
 export async function groqStream(messages: Msg[]): Promise<ReadableStream<Uint8Array>> {
