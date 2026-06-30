@@ -127,7 +127,7 @@ export default function AnalisarDocumento() {
 
       {/* Modal */}
       {modalAberto && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/60">
+        <div className="fixed inset-0 z-[1500] flex items-end sm:items-center justify-center p-4 bg-black/60">
           <div
             className="w-full max-w-lg rounded-2xl overflow-hidden"
             style={{

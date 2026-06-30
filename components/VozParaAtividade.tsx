@@ -190,7 +190,7 @@ export default function VozParaAtividade() {
 
       {/* Modal */}
       {modalAberto && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/60">
+        <div className="fixed inset-0 z-[1500] flex items-end sm:items-center justify-center p-4 bg-black/60">
           <div className="w-full max-w-md rounded-2xl overflow-hidden"
             style={{ background: 'linear-gradient(180deg,#0f172a 0%,#0b1628 100%)', border: '1px solid rgba(255,255,255,.1)', boxShadow: '0 24px 64px rgba(0,0,0,.6)' }}>
 

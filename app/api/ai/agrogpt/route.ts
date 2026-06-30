@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
             teamMembers: { select: { name: true, role: true } },
             fields: { select: { name: true, sizeHectares: true } },
             alerts: {
-              where: { read: false },
+              where: { isRead: false },
               orderBy: { createdAt: 'desc' },
               take: 5,
               select: { message: true, type: true },
