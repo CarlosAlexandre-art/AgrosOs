@@ -671,8 +671,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </header>
 
-        {/* Page content — pr-20 no mobile reserva espaço para os FABs da direita */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden pr-20 md:pr-0">
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-20 md:pb-0">
           {children}
         </main>
       </div>
