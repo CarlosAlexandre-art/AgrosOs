@@ -146,7 +146,7 @@ export default async function DashboardPage() {
               {
                 label: 'Em andamento', value: inProgress, icon: (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                ), color: 'text-blue-600', bg: 'bg-blue-50', href: '/dashboard/operacoes?status=IN_PROGRESS',
+                ), color: 'text-green-700', bg: 'bg-green-50', href: '/dashboard/operacoes?status=IN_PROGRESS',
               },
               {
                 label: 'Atrasadas', value: late, icon: (
@@ -156,12 +156,12 @@ export default async function DashboardPage() {
               {
                 label: 'Custo total', value: `R$ ${totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`, icon: (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                ), color: 'text-purple-600', bg: 'bg-purple-50', href: '/dashboard/financeiro',
+                ), color: 'text-green-700', bg: 'bg-green-50', href: '/dashboard/financeiro',
               },
               {
                 label: 'Concluídas', value: done, icon: (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                ), color: 'text-green-600', bg: 'bg-green-50', href: '/dashboard/operacoes?status=DONE',
+                ), color: 'text-green-700', bg: 'bg-green-50', href: '/dashboard/operacoes?status=DONE',
               },
             ].map(card => (
               <Link key={card.label} href={card.href} className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-sm hover:border-slate-300 transition-all group">
@@ -243,7 +243,7 @@ export default async function DashboardPage() {
                 <h3 className="font-semibold text-slate-900 text-sm mb-4">Status das atividades</h3>
                 <div className="space-y-2.5">
                   {[
-                    { label: 'Em andamento', count: inProgress, total: allActivities.length, color: 'bg-blue-500' },
+                    { label: 'Em andamento', count: inProgress, total: allActivities.length, color: 'bg-green-600' },
                     { label: 'Pendentes', count: pending, total: allActivities.length, color: 'bg-yellow-400' },
                     { label: 'Concluídas', count: done, total: allActivities.length, color: 'bg-green-500' },
                     { label: 'Atrasadas', count: late, total: allActivities.length, color: 'bg-red-500' },
@@ -294,9 +294,9 @@ export default async function DashboardPage() {
           {/* Ações rápidas */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { href: '/dashboard/operacoes/nova', label: 'Nova atividade', icon: '📋', color: 'border-blue-200 hover:border-blue-400 hover:bg-blue-50' },
-              { href: '/dashboard/financeiro/novo', label: 'Lançar custo', icon: '💰', color: 'border-purple-200 hover:border-purple-400 hover:bg-purple-50' },
-              { href: '/dashboard/equipe/novo', label: 'Adicionar membro', icon: '👷', color: 'border-orange-200 hover:border-orange-400 hover:bg-orange-50' },
+              { href: '/dashboard/operacoes/nova', label: 'Nova atividade', icon: '📋', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
+              { href: '/dashboard/financeiro/novo', label: 'Lançar custo', icon: '💰', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
+              { href: '/dashboard/equipe/novo', label: 'Adicionar membro', icon: '👷', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
               { href: '/dashboard/propriedades/nova', label: 'Nova propriedade', icon: '🌾', color: 'border-green-200 hover:border-green-400 hover:bg-green-50' },
             ].map(action => (
               <Link key={action.href} href={action.href} className={`bg-white border-2 rounded-2xl p-4 flex items-center gap-3 transition-all ${action.color}`}>

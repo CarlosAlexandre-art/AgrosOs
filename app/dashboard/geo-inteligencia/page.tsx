@@ -458,10 +458,10 @@ function GeoIntelContent() {
           </div>
         </div>
 
-        {/* Side panel */}
+        {/* Side panel — full-screen overlay on mobile, sidebar on desktop */}
         {panelOpen && fields.length > 0 && (
           <div
-            className="w-72 flex flex-col flex-shrink-0 overflow-hidden"
+            className="absolute inset-0 sm:relative sm:inset-auto sm:w-72 flex flex-col flex-shrink-0 overflow-hidden z-[800]"
             style={{
               background: 'rgba(2,12,20,0.97)',
               borderLeft: '1px solid rgba(52,211,153,0.15)',
