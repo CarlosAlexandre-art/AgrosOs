@@ -307,7 +307,7 @@ export default async function DashboardPage() {
               { href: '/dashboard/equipe/novo', label: 'Adicionar membro', icon: '👷' },
               { href: '/dashboard/propriedades/nova', label: 'Nova propriedade', icon: '🌾' },
             ].map(action => (
-              <Link key={action.href} href={action.href} className="bg-white border-2 rounded-2xl p-4 flex items-center gap-3 transition-all" style={{ borderColor: '#bbf7d0' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#4ade80'; (e.currentTarget as HTMLElement).style.background = '#f0fdf4'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#bbf7d0'; (e.currentTarget as HTMLElement).style.background = 'white'; }}>
+              <Link key={action.href} href={action.href} className="bg-white border-2 border-green-200 rounded-2xl p-4 flex items-center gap-3 transition-all hover:border-green-400 hover:bg-green-50">
                 <span className="text-2xl">{action.icon}</span>
                 <span className="text-sm font-medium text-slate-700">{action.label}</span>
               </Link>
