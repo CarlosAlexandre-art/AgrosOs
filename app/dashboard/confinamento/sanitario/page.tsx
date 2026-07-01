@@ -130,10 +130,11 @@ export default function MonitorSanitarioPage() {
     setLoading(true); setErro(''); setSolicitado(true)
     try {
       const res = await fetch('/api/ai/monitor-sanitario', { method: 'POST' })
-      const json = await res.json()
+      let json: any
+      try { json = await res.json() } catch { setErro('Serviço de IA indisponível. Tente novamente em instantes.'); return }
       if (!res.ok || !json.ok) { setErro(json.error ?? 'Erro na análise'); return }
       setData(json)
-    } catch (e: any) { setErro(e.message) }
+    } catch { setErro('Não foi possível conectar ao servidor. Verifique sua conexão.') }
     finally { setLoading(false) }
   }
 

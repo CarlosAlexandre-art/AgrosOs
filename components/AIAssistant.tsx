@@ -125,6 +125,14 @@ export default function AIAssistant() {
           } catch { /* chunk parcial, ignorar */ }
         }
       }
+
+      if (!accumulated) {
+        setMessages(prev => {
+          const updated = [...prev]
+          updated[updated.length - 1] = { role: 'assistant', content: 'A IA não retornou resposta. Tente novamente.' }
+          return updated
+        })
+      }
     } catch (e: any) {
       if (e.name === 'AbortError') return
       setMessages(prev => {
