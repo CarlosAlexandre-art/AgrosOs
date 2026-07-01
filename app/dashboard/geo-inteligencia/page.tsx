@@ -429,6 +429,8 @@ function GeoIntelContent() {
                     <p className="text-[9px] leading-relaxed" style={{ color: 'rgba(148,163,184,0.4)' }}>{result.meta.note}</p>
                   </div>
                 )}
+                {/* Espaço para os FABs não cobrirem o último item */}
+                <div className="h-24" />
               </>
             )}
           </div>
