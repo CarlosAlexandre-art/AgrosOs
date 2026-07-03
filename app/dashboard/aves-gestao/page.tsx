@@ -6,15 +6,29 @@ type Lote = {
   id: string; nome: string; especie: string; linhagem: string | null; instalacao: string | null
   quantidadeInicial: number; quantidadeAtual: number; faseProducao: string; status: string
   dataAlojamento: string; dataInicioPostura: string | null
+  areaM2: number | null; peDireitoM: number | null
+  numBebedouros: number | null; tipoBebedouro: string | null
+  numComedouros: number | null; tipoComedouro: string | null; capacidadeComedouroKg: number | null
+  horasLuzMeta: number | null; horasLuzNaturalMeta: number | null; horasLuzArtificialMeta: number | null
+  horaAcenderLuz: string | null; horaApagarLuz: string | null
   producoesOvos: { ovosColetados: number; data: string }[]
   _count: { mortalidades: number; sanidades: number }
 }
-type Kpis = { totalLotes: number; lotesAtivos: number; totalAves: number; lotesEmPostura: number }
+type Kpis = { totalLotes: number; lotesAtivos: number; totalAves: number; lotesEmPostura: number; densidadeMedia: number | null }
 
 const ESPECIES = ['Galinha Poedeira', 'Codorna', 'Galinha Caipira/Corte', 'Pato', 'Peru/Perua', 'Ganso', 'Outro']
 const FASES = ['CRIA', 'RECRIA', 'POSTURA', 'DESCARTE']
 const FASE_LABEL: Record<string, string> = { CRIA: 'Cria', RECRIA: 'Recria', POSTURA: 'Postura', DESCARTE: 'Descarte' }
 const FASE_COR: Record<string, string> = { CRIA: '#38bdf8', RECRIA: '#a78bfa', POSTURA: '#f59e0b', DESCARTE: '#64748b' }
+
+// Referência para dimensionamento: ~6 aves/m², ninho com 25cm de profundidade
+// e 30cm de largura, testeira baixa para os ovos rolarem já limpos para fora.
+const LINHAGENS_REFERENCIA = [
+  { nome: 'Isa Brown', duziasPorCiclo: 21250 },
+  { nome: 'Hy-Line Brown', duziasPorCiclo: 20709 },
+  { nome: 'Postura Creme', duziasPorCiclo: 19584 },
+  { nome: 'Embrapa 051', duziasPorCiclo: 12500 },
+]
 
 export default function AvesGestaoPage() {
   const [lotes, setLotes] = useState<Lote[]>([])
@@ -25,6 +39,10 @@ export default function AvesGestaoPage() {
   const [form, setForm] = useState({
     nome: '', especie: 'Galinha Poedeira', linhagem: '', instalacao: '', quantidadeInicial: '',
     idadeInicialDias: '', dataAlojamento: '', faseProducao: 'CRIA', observacao: '',
+    areaM2: '', peDireitoM: '', numBebedouros: '', tipoBebedouro: 'Pendular',
+    numComedouros: '', tipoComedouro: 'Tubular', capacidadeComedouroKg: '',
+    horasLuzMeta: '16', horasLuzNaturalMeta: '12', horasLuzArtificialMeta: '4',
+    horaAcenderLuz: '', horaApagarLuz: '',
   })
 
   const carregar = useCallback(() => {
@@ -42,7 +60,14 @@ export default function AvesGestaoPage() {
     e.preventDefault(); setSaving(true)
     await fetch('/api/aves-gestao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'lote', ...form }) })
     setSaving(false); setModal(false)
-    setForm({ nome: '', especie: 'Galinha Poedeira', linhagem: '', instalacao: '', quantidadeInicial: '', idadeInicialDias: '', dataAlojamento: '', faseProducao: 'CRIA', observacao: '' })
+    setForm({
+      nome: '', especie: 'Galinha Poedeira', linhagem: '', instalacao: '', quantidadeInicial: '',
+      idadeInicialDias: '', dataAlojamento: '', faseProducao: 'CRIA', observacao: '',
+      areaM2: '', peDireitoM: '', numBebedouros: '', tipoBebedouro: 'Pendular',
+      numComedouros: '', tipoComedouro: 'Tubular', capacidadeComedouroKg: '',
+      horasLuzMeta: '16', horasLuzNaturalMeta: '12', horasLuzArtificialMeta: '4',
+      horaAcenderLuz: '', horaApagarLuz: '',
+    })
     carregar()
   }
 
@@ -81,6 +106,7 @@ export default function AvesGestaoPage() {
             { label: 'Lotes Ativos', value: kpis.lotesAtivos, sub: `${kpis.totalLotes} no total`, color: '#d97706' },
             { label: 'Total de Aves', value: kpis.totalAves.toLocaleString('pt-BR'), sub: 'no plantel', color: '#f59e0b' },
             { label: 'Em Postura', value: kpis.lotesEmPostura, sub: 'lotes produzindo', color: '#fbbf24' },
+            ...(kpis.densidadeMedia != null ? [{ label: 'Densidade Média', value: `${kpis.densidadeMedia}/m²`, sub: 'referência: ~6 aves/m²', color: kpis.densidadeMedia > 7 ? '#ef4444' : '#34d399' }] : []),
           ].map(k => (
             <div key={k.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
               <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{k.label}</div>
@@ -121,9 +147,20 @@ export default function AvesGestaoPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
                 <div style={{ fontSize: 12, color: '#64748b' }}>Plantel: <span style={{ color: '#94a3b8' }}>{l.quantidadeAtual.toLocaleString('pt-BR')} aves</span></div>
                 {l.instalacao && <div style={{ fontSize: 12, color: '#64748b' }}>Local: <span style={{ color: '#94a3b8' }}>{l.instalacao}</span></div>}
+                {l.areaM2 && <div style={{ fontSize: 12, color: '#64748b' }}>Área: <span style={{ color: '#94a3b8' }}>{l.areaM2}m² ({(l.quantidadeAtual / l.areaM2).toFixed(1)} aves/m²)</span></div>}
+                {l.peDireitoM && <div style={{ fontSize: 12, color: '#64748b' }}>Pé direito: <span style={{ color: '#94a3b8' }}>{l.peDireitoM}m</span></div>}
+                {l.numBebedouros && <div style={{ fontSize: 12, color: '#64748b' }}>Bebedouros: <span style={{ color: '#94a3b8' }}>{l.numBebedouros}{l.tipoBebedouro ? ` (${l.tipoBebedouro})` : ''}</span></div>}
+                {l.numComedouros && <div style={{ fontSize: 12, color: '#64748b' }}>Comedouros: <span style={{ color: '#94a3b8' }}>{l.numComedouros}{l.capacidadeComedouroKg ? ` (${l.capacidadeComedouroKg}kg)` : ''}</span></div>}
                 <div style={{ fontSize: 12, color: '#64748b' }}>Mortes: <span style={{ color: '#94a3b8' }}>{l._count.mortalidades}</span></div>
                 <div style={{ fontSize: 12, color: '#64748b' }}>Sanidade: <span style={{ color: '#94a3b8' }}>{l._count.sanidades} registros</span></div>
               </div>
+              {(l.horasLuzMeta || l.horaAcenderLuz) && (
+                <div style={{ fontSize: 12, color: '#64748b', marginBottom: 10, padding: '8px 10px', background: 'rgba(245,158,11,0.08)', borderRadius: 8 }}>
+                  💡 Programa de luz: <span style={{ color: '#fbbf24', fontWeight: 700 }}>{l.horasLuzMeta ?? 16}h/dia</span>
+                  {l.horasLuzNaturalMeta && l.horasLuzArtificialMeta ? ` (${l.horasLuzNaturalMeta}h natural + ${l.horasLuzArtificialMeta}h artificial)` : ''}
+                  {l.horaAcenderLuz && l.horaApagarLuz ? ` · timer ${l.horaAcenderLuz}–${l.horaApagarLuz}` : ''}
+                </div>
+              )}
               {l.producoesOvos[0] && (
                 <div style={{ fontSize: 12, color: '#475569', marginBottom: 12 }}>
                   Última postura: <span style={{ color: '#fbbf24', fontWeight: 700 }}>{l.producoesOvos[0].ovosColetados} ovos</span>
@@ -170,6 +207,38 @@ export default function AvesGestaoPage() {
                 </div>
               </div>
               <div><label style={labelStyle}>Observação</label><textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }} value={form.observacao} onChange={e => setForm(p => ({ ...p, observacao: e.target.value }))} /></div>
+
+              <div style={{ borderTop: '1px solid #1e293b', paddingTop: 14, marginTop: 4 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 }}>Instalação / Galpão (opcional)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                  <div><label style={labelStyle}>Área (m²)</label><input style={inputStyle} type="number" step="0.01" value={form.areaM2} onChange={e => setForm(p => ({ ...p, areaM2: e.target.value }))} placeholder="78" /></div>
+                  <div><label style={labelStyle}>Pé direito (m)</label><input style={inputStyle} type="number" step="0.1" value={form.peDireitoM} onChange={e => setForm(p => ({ ...p, peDireitoM: e.target.value }))} placeholder="3" /></div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                  <div><label style={labelStyle}>Bebedouros</label><input style={inputStyle} type="number" value={form.numBebedouros} onChange={e => setForm(p => ({ ...p, numBebedouros: e.target.value }))} placeholder="8" /></div>
+                  <div><label style={labelStyle}>Tipo de bebedouro</label><input style={inputStyle} value={form.tipoBebedouro} onChange={e => setForm(p => ({ ...p, tipoBebedouro: e.target.value }))} placeholder="Pendular" /></div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                  <div><label style={labelStyle}>Comedouros</label><input style={inputStyle} type="number" value={form.numComedouros} onChange={e => setForm(p => ({ ...p, numComedouros: e.target.value }))} placeholder="15" /></div>
+                  <div><label style={labelStyle}>Tipo de comedouro</label><input style={inputStyle} value={form.tipoComedouro} onChange={e => setForm(p => ({ ...p, tipoComedouro: e.target.value }))} placeholder="Tubular" /></div>
+                  <div><label style={labelStyle}>Capacidade (kg)</label><input style={inputStyle} type="number" step="0.1" value={form.capacidadeComedouroKg} onChange={e => setForm(p => ({ ...p, capacidadeComedouroKg: e.target.value }))} placeholder="10" /></div>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid #1e293b', paddingTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 }}>Programa de Luz (opcional)</div>
+                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 10 }}>Poedeiras precisam de ~16h de luz/dia. Complete a luz natural com luz artificial via timer, sempre no mesmo horário — mudanças de rotina derrubam a produção.</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
+                  <div><label style={labelStyle}>Meta total (h)</label><input style={inputStyle} type="number" step="0.5" value={form.horasLuzMeta} onChange={e => setForm(p => ({ ...p, horasLuzMeta: e.target.value }))} placeholder="16" /></div>
+                  <div><label style={labelStyle}>Luz natural (h)</label><input style={inputStyle} type="number" step="0.5" value={form.horasLuzNaturalMeta} onChange={e => setForm(p => ({ ...p, horasLuzNaturalMeta: e.target.value }))} placeholder="12" /></div>
+                  <div><label style={labelStyle}>Luz artificial (h)</label><input style={inputStyle} type="number" step="0.5" value={form.horasLuzArtificialMeta} onChange={e => setForm(p => ({ ...p, horasLuzArtificialMeta: e.target.value }))} placeholder="4" /></div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div><label style={labelStyle}>Timer acende às</label><input style={inputStyle} type="time" value={form.horaAcenderLuz} onChange={e => setForm(p => ({ ...p, horaAcenderLuz: e.target.value }))} /></div>
+                  <div><label style={labelStyle}>Timer apaga às</label><input style={inputStyle} type="time" value={form.horaApagarLuz} onChange={e => setForm(p => ({ ...p, horaApagarLuz: e.target.value }))} /></div>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <button type="button" onClick={() => setModal(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                 <button type="submit" disabled={saving} style={{ flex: 1, background: '#d97706', color: '#fff', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Criar Lote'}</button>
@@ -178,6 +247,21 @@ export default function AvesGestaoPage() {
           </div>
         </div>
       )}
+
+      {/* Referência: comparativo de linhagens (base 500 aves/ciclo) */}
+      <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 16, padding: 22 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>📖 Referência: linhagens de poedeiras</h2>
+        <p style={{ fontSize: 12, color: '#64748b', marginBottom: 14 }}>Produção estimada por ciclo completo para um lote de 500 aves — use para comparar antes de escolher a linhagem.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
+          {LINHAGENS_REFERENCIA.map(l => (
+            <div key={l.nome} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0' }}>{l.nome}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: '#f59e0b', marginTop: 2 }}>{l.duziasPorCiclo.toLocaleString('pt-BR')}</div>
+              <div style={{ fontSize: 10, color: '#475569' }}>dúzias/ciclo (500 aves)</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

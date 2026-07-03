@@ -22,7 +22,10 @@ export async function GET() {
     const [lotes, producoes] = await Promise.all([
       (prisma as any).aveLote.findMany({
         where: { propertyId: property.id, status: 'ATIVO' },
-        select: { id: true, nome: true, especie: true, quantidadeAtual: true, faseProducao: true },
+        select: {
+          id: true, nome: true, especie: true, quantidadeAtual: true, faseProducao: true,
+          horasLuzMeta: true, horaAcenderLuz: true, horaApagarLuz: true,
+        },
         orderBy: { nome: 'asc' },
       }),
       (prisma as any).aveProducaoOvos.findMany({

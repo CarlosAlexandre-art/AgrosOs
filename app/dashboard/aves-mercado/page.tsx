@@ -11,6 +11,12 @@ type Venda = {
 type Kpis = { receitaTotal: number; totalVendas: number; precoMedioOvos: number }
 
 const UNIDADES = ['dúzia', 'unidade', 'kg', 'bandeja (30un)']
+const CANAIS_VENDA = [
+  'Feira livre', 'Venda direta ao consumidor', 'Mercadinho de bairro', 'Supermercado',
+  'Distribuidora de ovos', 'Quitanda', 'Cerealista', 'Padaria', 'Cafeteria', 'Açougue',
+  'Indústria', 'Restaurante', 'Bar', 'Hotel/Pousada', 'Academia', 'Refeitório de empresa',
+  'Programa de compra pública (PNAE/PAA)', 'Distribuidora de bebidas', 'Hamburgueria', 'Farmácia',
+]
 
 export default function AvesMercadoPage() {
   const [lotes, setLotes] = useState<LoteResumo[]>([])
@@ -100,7 +106,12 @@ export default function AvesMercadoPage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div><label style={labelStyle}>Comprador</label><input style={inputStyle} value={form.comprador} onChange={e => setForm(p => ({ ...p, comprador: e.target.value }))} /></div>
-              <div><label style={labelStyle}>Canal</label><input style={inputStyle} value={form.canal} onChange={e => setForm(p => ({ ...p, canal: e.target.value }))} placeholder="Feira, atacado, porta a porta..." /></div>
+              <div><label style={labelStyle}>Canal</label>
+                <input style={inputStyle} list="canais-venda" value={form.canal} onChange={e => setForm(p => ({ ...p, canal: e.target.value }))} placeholder="Feira, atacado, porta a porta..." />
+                <datalist id="canais-venda">
+                  {CANAIS_VENDA.map(c => <option key={c} value={c} />)}
+                </datalist>
+              </div>
             </div>
             <div><label style={labelStyle}>Data</label><input style={inputStyle} type="date" value={form.data} onChange={e => setForm(p => ({ ...p, data: e.target.value }))} /></div>
             <div><label style={labelStyle}>Observação</label><textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 50 }} value={form.observacao} onChange={e => setForm(p => ({ ...p, observacao: e.target.value }))} /></div>
@@ -141,6 +152,16 @@ export default function AvesMercadoPage() {
             </div>
           )}
         </div>
+      </div>
+
+      <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 16, padding: 22 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>📖 Regularização e sequência de lotes</h2>
+        <p style={{ fontSize: 12, color: '#64748b' }}>
+          Ovo é produto de origem animal — para vender formalmente (mercados, distribuidoras, indústrias) ele precisa passar por inspeção
+          (agroindústria/registro sanitário). A informalidade vem ficando cada vez mais difícil de sustentar o negócio.
+          Além disso, a produção de um lote único cai ao longo do ciclo (de um pico de ~95% para ~75%) — para manter regularidade de entrega,
+          trabalhe com pelo menos 4 lotes escalonados em vez de um único lote grande.
+        </p>
       </div>
     </div>
   )

@@ -19,7 +19,7 @@ export async function GET() {
     const property = await getProperty(session.user.id)
     if (!property) return NextResponse.json({ error: 'Propriedade não encontrada' }, { status: 404 })
 
-    const [lotes, mortalidades, sanidades] = await Promise.all([
+    const [lotes, mortalidades, sanidades, chocos] = await Promise.all([
       (prisma as any).aveLote.findMany({
         where: { propertyId: property.id, status: 'ATIVO' },
         select: { id: true, nome: true, especie: true, quantidadeAtual: true, quantidadeInicial: true },
@@ -37,6 +37,12 @@ export async function GET() {
         orderBy: { data: 'desc' },
         take: 100,
       }),
+      (prisma as any).aveChoco.findMany({
+        where: { lote: { propertyId: property.id } },
+        include: { lote: { select: { nome: true, especie: true } } },
+        orderBy: { dataInicio: 'desc' },
+        take: 100,
+      }),
     ])
 
     const totalMortalidade = mortalidades.reduce((acc: number, m: any) => acc + m.quantidade, 0)
@@ -51,15 +57,17 @@ export async function GET() {
       fim.setDate(fim.getDate() + s.carenciaDias)
       return fim > hoje
     })
+    const chocasAtivas = chocos.filter((c: any) => !c.dataFim)
 
     const kpis = {
       totalMortalidade,
       taxaMortalidade: Number(taxaMortalidade.toFixed(2)),
       proximasAplicacoes: proximasAplicacoes.length,
       emCarencia: emCarencia.length,
+      emChoco: chocasAtivas.reduce((acc: number, c: any) => acc + c.quantidadeAves, 0),
     }
 
-    return NextResponse.json({ lotes, mortalidades, sanidades, kpis })
+    return NextResponse.json({ lotes, mortalidades, sanidades, chocos, kpis })
   } catch (e: any) {
     console.error('[aves-sanidade GET]', e.message)
     return NextResponse.json({ error: 'Erro ao carregar dados' }, { status: 500 })
@@ -117,6 +125,31 @@ export async function POST(req: NextRequest) {
         },
       })
       return NextResponse.json(registro, { status: 201 })
+    }
+
+    if (action === 'choco') {
+      const { loteId, quantidadeAves, dataInicio, metodo, observacao } = body
+      if (!loteId || !quantidadeAves) return NextResponse.json({ error: 'Lote e quantidade são obrigatórios' }, { status: 400 })
+      const choco = await (prisma as any).aveChoco.create({
+        data: {
+          loteId,
+          quantidadeAves: Number(quantidadeAves),
+          dataInicio: dataInicio ? new Date(dataInicio) : new Date(),
+          metodo: metodo || null,
+          observacao: observacao || null,
+        },
+      })
+      return NextResponse.json(choco, { status: 201 })
+    }
+
+    if (action === 'encerrar_choco') {
+      const { chocoId } = body
+      if (!chocoId) return NextResponse.json({ error: 'Registro de choco é obrigatório' }, { status: 400 })
+      const choco = await (prisma as any).aveChoco.update({
+        where: { id: chocoId },
+        data: { dataFim: new Date() },
+      })
+      return NextResponse.json(choco)
     }
 
     return NextResponse.json({ error: 'Ação inválida' }, { status: 400 })

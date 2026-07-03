@@ -83,7 +83,12 @@ export default function AvesNutricaoPage() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div><label style={labelStyle}>Tipo de ração</label><input style={inputStyle} value={form.tipoRacao} onChange={e => setForm(p => ({ ...p, tipoRacao: e.target.value }))} placeholder="Postura, Recria..." /></div>
-              <div><label style={labelStyle}>Fase</label><input style={inputStyle} value={form.faseAlimentar} onChange={e => setForm(p => ({ ...p, faseAlimentar: e.target.value }))} placeholder="Inicial, crescimento..." /></div>
+              <div><label style={labelStyle}>Fase</label>
+                <input style={inputStyle} list="fases-racao" value={form.faseAlimentar} onChange={e => setForm(p => ({ ...p, faseAlimentar: e.target.value }))} placeholder="Pré-inicial, inicial..." />
+                <datalist id="fases-racao">
+                  <option value="Pré-inicial" /><option value="Inicial" /><option value="Recria 1" /><option value="Recria 2" /><option value="Pré-postura" /><option value="Postura" />
+                </datalist>
+              </div>
             </div>
             <div><label style={labelStyle}>Quantidade (kg) *</label><input style={inputStyle} type="number" step="0.01" value={form.quantidadeKg} onChange={e => setForm(p => ({ ...p, quantidadeKg: e.target.value }))} placeholder="45" required /></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -135,6 +140,15 @@ export default function AvesNutricaoPage() {
             </div>
           )}
         </div>
+      </div>
+
+      <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 16, padding: 22 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>📖 Referência: ração até o início da postura</h2>
+        <p style={{ fontSize: 12, color: '#64748b' }}>
+          Do 1º dia de vida até o início da postura, o consumo médio fica em torno de <strong style={{ color: '#a3e635' }}>8kg de ração por ave</strong>,
+          divididos em 5 formulações (pré-inicial, inicial, recria 1, recria 2, pré-postura) — as rações iniciais custam mais caro e vão baixando de preço ao longo do crescimento.
+          Com ração a R$2,50/kg, um lote de 100 aves custa cerca de <strong style={{ color: '#a3e635' }}>R$2.000</strong> nesse período. Use isso como referência de orçamento antes de alojar um novo lote.
+        </p>
       </div>
     </div>
   )

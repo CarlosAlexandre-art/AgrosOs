@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 
-type LoteResumo = { id: string; nome: string; especie: string; quantidadeAtual: number; faseProducao: string }
+type LoteResumo = {
+  id: string; nome: string; especie: string; quantidadeAtual: number; faseProducao: string
+  horasLuzMeta: number | null; horaAcenderLuz: string | null; horaApagarLuz: string | null
+}
 type Producao = {
   id: string; data: string; ovosColetados: number; ovosQuebrados: number | null; ovosSujos: number | null
   ovosDescartados: number | null; pesoMedioG: number | null; horasLuz: number | null; observacao: string | null
@@ -85,6 +88,16 @@ export default function AvesPosturaPage() {
                 {lotes.map(l => <option key={l.id} value={l.id}>{l.nome} ({l.especie})</option>)}
               </select>
             </div>
+            {(() => {
+              const loteSel = lotes.find(l => l.id === form.loteId)
+              if (!loteSel || !loteSel.horasLuzMeta) return null
+              return (
+                <div style={{ fontSize: 11, color: '#94a3b8', padding: '8px 10px', background: 'rgba(245,158,11,0.08)', borderRadius: 8 }}>
+                  💡 Meta de luz deste lote: <strong style={{ color: '#fbbf24' }}>{loteSel.horasLuzMeta}h/dia</strong>
+                  {loteSel.horaAcenderLuz && loteSel.horaApagarLuz ? ` · timer ${loteSel.horaAcenderLuz}–${loteSel.horaApagarLuz}` : ''} — mantenha sempre no mesmo horário, mudanças de rotina derrubam a postura.
+                </div>
+              )
+            })()}
             <div><label style={labelStyle}>Data</label><input style={inputStyle} type="date" value={form.data} onChange={e => setForm(p => ({ ...p, data: e.target.value }))} /></div>
             <div><label style={labelStyle}>Ovos coletados *</label><input style={inputStyle} type="number" value={form.ovosColetados} onChange={e => setForm(p => ({ ...p, ovosColetados: e.target.value }))} placeholder="420" required /></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

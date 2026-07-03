@@ -9,13 +9,18 @@ type Sanidade = {
   carenciaDias: number | null; proximaAplicacao: string | null; observacao: string | null
   lote: { nome: string; especie: string }
 }
-type Kpis = { totalMortalidade: number; taxaMortalidade: number; proximasAplicacoes: number; emCarencia: number }
+type Choco = {
+  id: string; quantidadeAves: number; dataInicio: string; dataFim: string | null
+  metodo: string | null; observacao: string | null; lote: { nome: string; especie: string }
+}
+type Kpis = { totalMortalidade: number; taxaMortalidade: number; proximasAplicacoes: number; emCarencia: number; emChoco: number }
 
 const TIPOS_SANIDADE = ['VACINA', 'MEDICAMENTO', 'VERMIFUGO', 'BIOSSEGURANCA', 'OUTRO']
 const TIPO_LABEL: Record<string, string> = { VACINA: 'Vacina', MEDICAMENTO: 'Medicamento', VERMIFUGO: 'Vermífugo', BIOSSEGURANCA: 'Biossegurança', OUTRO: 'Outro' }
+const METODOS_CHOCO = ['Separação em ninho à parte', 'Separação + galo no lote', 'Redução da cama de maravalha', 'Ninho com queda de ovo (sem contato)']
 
 export default function AvesSanidadePage() {
-  const [tab, setTab] = useState<'mortalidade' | 'sanidade'>('mortalidade')
+  const [tab, setTab] = useState<'mortalidade' | 'sanidade' | 'choco'>('mortalidade')
   const savedScroll = useRef<number | null>(null)
   const scroller = useRef<HTMLElement | null>(null)
   useLayoutEffect(() => { scroller.current = document.querySelector('main') }, [])
@@ -25,7 +30,7 @@ export default function AvesSanidadePage() {
       savedScroll.current = null
     }
   }, [tab])
-  function changeTab(t: 'mortalidade' | 'sanidade') {
+  function changeTab(t: 'mortalidade' | 'sanidade' | 'choco') {
     if (scroller.current) savedScroll.current = scroller.current.scrollTop
     setTab(t)
   }
@@ -33,19 +38,22 @@ export default function AvesSanidadePage() {
   const [lotes, setLotes] = useState<LoteResumo[]>([])
   const [mortalidades, setMortalidades] = useState<Mortalidade[]>([])
   const [sanidades, setSanidades] = useState<Sanidade[]>([])
+  const [chocos, setChocos] = useState<Choco[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
   const [loading, setLoading] = useState(true)
   const [modalMort, setModalMort] = useState(false)
   const [modalSan, setModalSan] = useState(false)
+  const [modalChoco, setModalChoco] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formMort, setFormMort] = useState({ loteId: '', quantidade: '', causaSuspeita: '', data: '', observacao: '' })
   const [formSan, setFormSan] = useState({ loteId: '', tipo: 'VACINA', produto: '', dosagem: '', viaAplicacao: '', carenciaDias: '', proximaAplicacao: '', data: '', observacao: '' })
+  const [formChoco, setFormChoco] = useState({ loteId: '', quantidadeAves: '', dataInicio: '', metodo: METODOS_CHOCO[0], observacao: '' })
 
   const carregar = useCallback(() => {
     setLoading(true)
     fetch('/api/aves-sanidade')
       .then(r => r.json())
-      .then(d => { setLotes(d.lotes ?? []); setMortalidades(d.mortalidades ?? []); setSanidades(d.sanidades ?? []); setKpis(d.kpis ?? null) })
+      .then(d => { setLotes(d.lotes ?? []); setMortalidades(d.mortalidades ?? []); setSanidades(d.sanidades ?? []); setChocos(d.chocos ?? []); setKpis(d.kpis ?? null) })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
@@ -62,6 +70,17 @@ export default function AvesSanidadePage() {
     e.preventDefault(); setSaving(true)
     await fetch('/api/aves-sanidade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'sanidade', ...formSan }) })
     setSaving(false); setModalSan(false); setFormSan({ loteId: '', tipo: 'VACINA', produto: '', dosagem: '', viaAplicacao: '', carenciaDias: '', proximaAplicacao: '', data: '', observacao: '' }); carregar()
+  }
+
+  async function salvarChoco(e: React.FormEvent) {
+    e.preventDefault(); setSaving(true)
+    await fetch('/api/aves-sanidade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'choco', ...formChoco }) })
+    setSaving(false); setModalChoco(false); setFormChoco({ loteId: '', quantidadeAves: '', dataInicio: '', metodo: METODOS_CHOCO[0], observacao: '' }); carregar()
+  }
+
+  async function encerrarChoco(chocoId: string) {
+    await fetch('/api/aves-sanidade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'encerrar_choco', chocoId }) })
+    carregar()
   }
 
   const inputStyle: React.CSSProperties = { background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, padding: '10px 13px', color: '#f1f5f9', fontSize: 13, width: '100%', outline: 'none' }
@@ -87,6 +106,7 @@ export default function AvesSanidadePage() {
             { label: 'Taxa de Mortalidade', value: `${kpis.taxaMortalidade}%`, sub: 'acumulada', color: '#f87171' },
             { label: 'Próximas Aplicações', value: kpis.proximasAplicacoes, sub: 'agendadas', color: '#fbbf24' },
             { label: 'Em Carência', value: kpis.emCarencia, sub: 'tratamentos ativos', color: '#a78bfa' },
+            { label: 'Em Choco', value: kpis.emChoco, sub: 'aves separadas agora', color: '#fb923c' },
           ].map(k => (
             <div key={k.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
               <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{k.label}</div>
@@ -98,16 +118,20 @@ export default function AvesSanidadePage() {
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {(['mortalidade', 'sanidade'] as const).map(t => (
+        {(['mortalidade', 'sanidade', 'choco'] as const).map(t => (
           <button key={t} onMouseDown={(e) => e.preventDefault()} onClick={() => changeTab(t)} style={{ padding: '8px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: tab === t ? '#dc2626' : '#111827', color: tab === t ? '#fff' : '#64748b', transition: 'all .15s' }}>
-            {t === 'mortalidade' ? 'Mortalidade' : 'Vacinas & Tratamentos'}
+            {t === 'mortalidade' ? 'Mortalidade' : t === 'sanidade' ? 'Vacinas & Tratamentos' : 'Choco'}
           </button>
         ))}
         <div style={{ flex: 1 }} />
-        {tab === 'mortalidade' ? (
+        {tab === 'mortalidade' && (
           <button onClick={() => setModalMort(true)} style={{ background: '#dc2626', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Registrar Morte</button>
-        ) : (
+        )}
+        {tab === 'sanidade' && (
           <button onClick={() => setModalSan(true)} style={{ background: '#dc2626', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Nova Aplicação</button>
+        )}
+        {tab === 'choco' && (
+          <button onClick={() => setModalChoco(true)} style={{ background: '#fb923c', color: '#111827', border: 'none', borderRadius: 10, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ Registrar Choco</button>
         )}
       </div>
 
@@ -138,6 +162,45 @@ export default function AvesSanidadePage() {
               ))}
             </div>
           )
+        )}
+
+        {tab === 'choco' && (
+          <div>
+            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 14, padding: '10px 14px', background: 'rgba(251,146,60,0.08)', borderRadius: 10, border: '1px solid rgba(251,146,60,0.15)' }}>
+              🐣 Sempre vai ter galinhas chocas no lote, independente da linhagem. Prevenção: ninho com queda do ovo (sem contato com a galinha) e cama de maravalha mais fina. Para tirar do choco: separe em um ninho à parte dentro do galpão (vendo as outras aves), com água e ração à vontade e sem acesso ao ninho — em 3–4 dias a maioria sai do choco. Um galo no lote acelera o processo.
+            </div>
+            {chocos.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 60, color: '#475569', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>🐣</div>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>Nenhum registro de choco</div>
+                <div style={{ fontSize: 13 }}>Registre quando separar aves chocas do lote</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {chocos.map(c => (
+                  <div key={c.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1 1 160px' }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#f1f5f9' }}>{c.lote.nome}</div>
+                      <div style={{ fontSize: 11, color: '#64748b' }}>Desde {new Date(c.dataInicio).toLocaleDateString('pt-BR')}{c.metodo ? ` · ${c.metodo}` : ''}</div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 17, fontWeight: 800, color: '#fb923c' }}>{c.quantidadeAves}</div>
+                      <div style={{ fontSize: 10, color: '#475569' }}>aves</div>
+                    </div>
+                    {c.dataFim ? (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: 'rgba(52,211,153,0.15)', color: '#34d399' }}>
+                        Saiu do choco em {new Date(c.dataFim).toLocaleDateString('pt-BR')}
+                      </span>
+                    ) : (
+                      <button onClick={() => encerrarChoco(c.id)} style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 8, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                        Marcar como voltou a produzir
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {tab === 'sanidade' && (
@@ -226,6 +289,36 @@ export default function AvesSanidadePage() {
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                 <button type="button" onClick={() => setModalSan(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
                 <button type="submit" disabled={saving} style={{ flex: 1, background: '#dc2626', color: '#fff', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Registrar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modalChoco && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
+          <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 18, padding: 28, width: '100%', maxWidth: 480 }}>
+            <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 20, color: '#f1f5f9' }}>Registrar Choco</h2>
+            <form onSubmit={salvarChoco} style={{ display: 'grid', gap: 14 }}>
+              <div><label style={labelStyle}>Lote *</label>
+                <select style={inputStyle} value={formChoco.loteId} onChange={e => setFormChoco(p => ({ ...p, loteId: e.target.value }))} required>
+                  <option value="">Selecionar lote...</option>
+                  {lotes.map(l => <option key={l.id} value={l.id}>{l.nome} ({l.especie})</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div><label style={labelStyle}>Quantidade de aves *</label><input style={inputStyle} type="number" value={formChoco.quantidadeAves} onChange={e => setFormChoco(p => ({ ...p, quantidadeAves: e.target.value }))} required /></div>
+                <div><label style={labelStyle}>Data de início</label><input style={inputStyle} type="date" value={formChoco.dataInicio} onChange={e => setFormChoco(p => ({ ...p, dataInicio: e.target.value }))} /></div>
+              </div>
+              <div><label style={labelStyle}>Método usado</label>
+                <select style={inputStyle} value={formChoco.metodo} onChange={e => setFormChoco(p => ({ ...p, metodo: e.target.value }))}>
+                  {METODOS_CHOCO.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div><label style={labelStyle}>Observação</label><textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }} value={formChoco.observacao} onChange={e => setFormChoco(p => ({ ...p, observacao: e.target.value }))} /></div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button type="button" onClick={() => setModalChoco(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #1e293b', borderRadius: 10, padding: 11, color: '#94a3b8', fontSize: 13, cursor: 'pointer' }}>Cancelar</button>
+                <button type="submit" disabled={saving} style={{ flex: 1, background: '#fb923c', color: '#111827', border: 'none', borderRadius: 10, padding: 11, fontSize: 13, fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Salvando...' : 'Registrar'}</button>
               </div>
             </form>
           </div>

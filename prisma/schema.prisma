@@ -1183,31 +1183,60 @@ enum TipoVendaAve {
 }
 
 model AveLote {
-  id                String          @id @default(uuid())
-  propertyId        String
-  property          Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  nome              String
-  especie           String
-  linhagem          String?
-  instalacao        String?
-  quantidadeInicial Int
-  quantidadeAtual   Int
-  idadeInicialDias  Int?
-  dataAlojamento    DateTime        @default(now())
-  faseProducao      FaseProducaoAve @default(CRIA)
-  dataInicioPostura DateTime?
-  dataEncerramento  DateTime?
-  status            StatusLoteAve   @default(ATIVO)
-  observacao        String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  producoesOvos     AveProducaoOvos[]
-  arracoamentos     AveArracoamento[]
-  mortalidades      AveMortalidade[]
-  sanidades         AveSanidade[]
-  vendas            AveVenda[]
+  id                     String          @id @default(uuid())
+  propertyId             String
+  property               Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  nome                   String
+  especie                String
+  linhagem               String?
+  instalacao             String?
+  quantidadeInicial      Int
+  quantidadeAtual        Int
+  idadeInicialDias       Int?
+  dataAlojamento         DateTime        @default(now())
+  faseProducao           FaseProducaoAve @default(CRIA)
+  dataInicioPostura      DateTime?
+  dataEncerramento       DateTime?
+  status                 StatusLoteAve   @default(ATIVO)
+  observacao             String?
+  // Instalação / galpão
+  areaM2                 Float?
+  peDireitoM             Float?
+  numBebedouros          Int?
+  tipoBebedouro          String?
+  numComedouros          Int?
+  tipoComedouro          String?
+  capacidadeComedouroKg  Float?
+  // Programa de luz (fotoperíodo)
+  horasLuzMeta           Float?          @default(16)
+  horasLuzNaturalMeta    Float?
+  horasLuzArtificialMeta Float?
+  horaAcenderLuz         String?
+  horaApagarLuz          String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  producoesOvos          AveProducaoOvos[]
+  arracoamentos          AveArracoamento[]
+  mortalidades           AveMortalidade[]
+  sanidades              AveSanidade[]
+  vendas                 AveVenda[]
+  chocos                 AveChoco[]
 
   @@index([propertyId])
+}
+
+model AveChoco {
+  id             String    @id @default(uuid())
+  loteId         String
+  lote           AveLote   @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  quantidadeAves Int
+  dataInicio     DateTime  @default(now())
+  dataFim        DateTime?
+  metodo         String?
+  observacao     String?
+  createdAt      DateTime  @default(now())
+
+  @@index([loteId])
 }
 
 model AveProducaoOvos {

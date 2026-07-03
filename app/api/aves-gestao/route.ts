@@ -29,11 +29,16 @@ export async function GET() {
     })
 
     const ativos = lotes.filter((l: any) => l.status === 'ATIVO')
+    const comArea = ativos.filter((l: any) => l.areaM2)
+    const densidadeMedia = comArea.length
+      ? comArea.reduce((acc: number, l: any) => acc + l.quantidadeAtual / l.areaM2, 0) / comArea.length
+      : null
     const kpis = {
       totalLotes: lotes.length,
       lotesAtivos: ativos.length,
       totalAves: ativos.reduce((acc: number, l: any) => acc + l.quantidadeAtual, 0),
       lotesEmPostura: ativos.filter((l: any) => l.faseProducao === 'POSTURA').length,
+      densidadeMedia: densidadeMedia ? Number(densidadeMedia.toFixed(1)) : null,
     }
 
     return NextResponse.json({ lotes, kpis })
@@ -59,6 +64,8 @@ export async function POST(req: NextRequest) {
       const {
         nome, especie, linhagem, instalacao, quantidadeInicial,
         idadeInicialDias, dataAlojamento, faseProducao, observacao,
+        areaM2, peDireitoM, numBebedouros, tipoBebedouro, numComedouros, tipoComedouro, capacidadeComedouroKg,
+        horasLuzMeta, horasLuzNaturalMeta, horasLuzArtificialMeta, horaAcenderLuz, horaApagarLuz,
       } = body
       if (!nome || !especie || !quantidadeInicial) {
         return NextResponse.json({ error: 'Nome, espécie e quantidade inicial são obrigatórios' }, { status: 400 })
@@ -77,6 +84,18 @@ export async function POST(req: NextRequest) {
           faseProducao: faseProducao || 'CRIA',
           dataInicioPostura: faseProducao === 'POSTURA' ? new Date() : null,
           observacao: observacao || null,
+          areaM2: areaM2 ? Number(areaM2) : null,
+          peDireitoM: peDireitoM ? Number(peDireitoM) : null,
+          numBebedouros: numBebedouros ? Number(numBebedouros) : null,
+          tipoBebedouro: tipoBebedouro || null,
+          numComedouros: numComedouros ? Number(numComedouros) : null,
+          tipoComedouro: tipoComedouro || null,
+          capacidadeComedouroKg: capacidadeComedouroKg ? Number(capacidadeComedouroKg) : null,
+          horasLuzMeta: horasLuzMeta ? Number(horasLuzMeta) : 16,
+          horasLuzNaturalMeta: horasLuzNaturalMeta ? Number(horasLuzNaturalMeta) : null,
+          horasLuzArtificialMeta: horasLuzArtificialMeta ? Number(horasLuzArtificialMeta) : null,
+          horaAcenderLuz: horaAcenderLuz || null,
+          horaApagarLuz: horaApagarLuz || null,
         },
       })
       return NextResponse.json(lote, { status: 201 })
