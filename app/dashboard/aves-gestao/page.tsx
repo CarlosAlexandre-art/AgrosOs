@@ -382,7 +382,7 @@ function AbaPostura({ modoIniciante }: { modoIniciante: boolean }) {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 380px) 1fr', gap: 20, alignItems: 'flex-start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: 20, alignItems: 'flex-start' }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 22 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: '#f1f5f9' }}>Registrar Postura de Hoje</h2>
           <form onSubmit={registrar} style={{ display: 'grid', gap: 12 }}>
@@ -493,7 +493,7 @@ function AbaCalculadora({ modoIniciante }: { modoIniciante: boolean }) {
         Essa calculadora é uma estimativa simplificada pra quem está avaliando se vale a pena investir — considera só o custo de ração (o maior custo da criação) contra a receita de venda de ovos. Custos de mão de obra, energia, vacinas e depreciação de instalação não entram na conta.
       </Dica>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 340px) 1fr', gap: 20, alignItems: 'flex-start', marginTop: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 20, alignItems: 'flex-start', marginTop: 16 }}>
         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 22 }}>
           <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: '#f1f5f9' }}>Parâmetros</h2>
           <div style={{ display: 'grid', gap: 12 }}>
