@@ -104,6 +104,7 @@ model Property {
   valuations           ValuationRebanho[]
   tanquesAqua          TanqueAqua[]
   lotesAqua            LoteAqua[]
+  lotesAves            AveLote[]
   createdAt    DateTime     @default(now())
 }
 
@@ -1149,4 +1150,143 @@ model DocumentoAqua {
   updatedAt   DateTime  @updatedAt
 
   @@index([propertyId])
+}
+
+// ─── AVICULTURA ───────────────────────────────────────────────────────────────
+// Foco em galinhas poedeiras e codornas de postura, mas o campo "especie" é
+// livre para caber qualquer criação de aves (caipira, corte, pato, peru...).
+
+enum FaseProducaoAve {
+  CRIA
+  RECRIA
+  POSTURA
+  DESCARTE
+}
+
+enum StatusLoteAve {
+  ATIVO
+  ENCERRADO
+  CANCELADO
+}
+
+enum TipoSanidadeAve {
+  VACINA
+  MEDICAMENTO
+  VERMIFUGO
+  BIOSSEGURANCA
+  OUTRO
+}
+
+enum TipoVendaAve {
+  OVOS
+  AVES
+}
+
+model AveLote {
+  id                String          @id @default(uuid())
+  propertyId        String
+  property          Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  nome              String
+  especie           String
+  linhagem          String?
+  instalacao        String?
+  quantidadeInicial Int
+  quantidadeAtual   Int
+  idadeInicialDias  Int?
+  dataAlojamento    DateTime        @default(now())
+  faseProducao      FaseProducaoAve @default(CRIA)
+  dataInicioPostura DateTime?
+  dataEncerramento  DateTime?
+  status            StatusLoteAve   @default(ATIVO)
+  observacao        String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  producoesOvos     AveProducaoOvos[]
+  arracoamentos     AveArracoamento[]
+  mortalidades      AveMortalidade[]
+  sanidades         AveSanidade[]
+  vendas            AveVenda[]
+
+  @@index([propertyId])
+}
+
+model AveProducaoOvos {
+  id              String   @id @default(uuid())
+  loteId          String
+  lote            AveLote  @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data            DateTime @default(now())
+  ovosColetados   Int
+  ovosQuebrados   Int?
+  ovosSujos       Int?
+  ovosDescartados Int?
+  pesoMedioG      Float?
+  horasLuz        Float?
+  observacao      String?
+  createdAt       DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model AveArracoamento {
+  id             String   @id @default(uuid())
+  loteId         String
+  lote           AveLote  @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data           DateTime @default(now())
+  tipoRacao      String?
+  faseAlimentar  String?
+  quantidadeKg   Float
+  custoKg        Float?
+  aguaConsumidaL Float?
+  observacao     String?
+  createdAt      DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model AveMortalidade {
+  id            String   @id @default(uuid())
+  loteId        String
+  lote          AveLote  @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data          DateTime @default(now())
+  quantidade    Int
+  causaSuspeita String?
+  observacao    String?
+  createdAt     DateTime @default(now())
+
+  @@index([loteId])
+}
+
+model AveSanidade {
+  id               String          @id @default(uuid())
+  loteId           String
+  lote             AveLote         @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data             DateTime        @default(now())
+  tipo             TipoSanidadeAve @default(VACINA)
+  produto          String
+  dosagem          String?
+  viaAplicacao     String?
+  carenciaDias     Int?
+  proximaAplicacao DateTime?
+  observacao       String?
+  createdAt        DateTime        @default(now())
+
+  @@index([loteId])
+}
+
+model AveVenda {
+  id            String       @id @default(uuid())
+  loteId        String
+  lote          AveLote      @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  data          DateTime     @default(now())
+  tipo          TipoVendaAve @default(OVOS)
+  quantidade    Float
+  unidade       String?
+  precoUnitario Float
+  total         Float
+  comprador     String?
+  canal         String?
+  observacao    String?
+  createdAt     DateTime     @default(now())
+
+  @@index([loteId])
 }
