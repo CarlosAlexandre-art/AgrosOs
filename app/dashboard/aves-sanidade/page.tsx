@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
+import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
 
 type LoteResumo = { id: string; nome: string; especie: string; quantidadeAtual: number }
 type Mortalidade = { id: string; data: string; quantidade: number; causaSuspeita: string | null; observacao: string | null; lote: { nome: string; especie: string } }
@@ -20,6 +21,7 @@ const TIPO_LABEL: Record<string, string> = { VACINA: 'Vacina', MEDICAMENTO: 'Med
 const METODOS_CHOCO = ['Separação em ninho à parte', 'Separação + galo no lote', 'Redução da cama de maravalha', 'Ninho com queda de ovo (sem contato)']
 
 export default function AvesSanidadePage() {
+  const [modoIniciante, setModoIniciante] = useModoIniciante()
   const [tab, setTab] = useState<'mortalidade' | 'sanidade' | 'choco'>('mortalidade')
   const savedScroll = useRef<number | null>(null)
   const scroller = useRef<HTMLElement | null>(null)
@@ -89,15 +91,20 @@ export default function AvesSanidadePage() {
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9' }}>
 
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #dc2626, #b91c1c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>💉</div>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', lineHeight: 1 }}>AvesSanidade</h1>
             <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Mortalidade, vacinas e tratamentos do plantel</p>
           </div>
         </div>
+        <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
+
+      <Dica ativo={modoIniciante}>
+        Registre toda morte e todo tratamento aqui — isso vira histórico do lote e ajuda a identificar padrões (ex: mortes concentradas em dias quentes, ou depois de trocar de ração). O campo "carência" é o número de dias que você não pode vender o ovo/ave depois de aplicar um medicamento.
+      </Dica>
 
       {kpis && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
@@ -114,6 +121,17 @@ export default function AvesSanidadePage() {
               <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>{k.sub}</div>
             </div>
           ))}
+        </div>
+      )}
+
+      {kpis && (
+        <div style={{ marginBottom: 20 }}>
+          <Benchmark
+            label="Mortalidade acumulada vs. mercado"
+            valor={`${kpis.taxaMortalidade}%`}
+            referencia="até ~5% no ciclo"
+            dentro={kpis.taxaMortalidade <= 5}
+          />
         </div>
       )}
 
@@ -230,6 +248,11 @@ export default function AvesSanidadePage() {
           )
         )}
       </div>
+
+      <GuiaRapido titulo="Vacinação e biossegurança: o básico">
+        Poedeiras comerciais costumam ter calendário de vacinação para Newcastle, Gumboro, Bronquite Infecciosa e Coriza, geralmente aplicadas ainda na fase de cria/recria — confirme o protocolo com seu veterinário
+        ou a linhagem escolhida. Biossegurança básica que reduz mortalidade: pedilúvio na entrada do galpão, controle de roedores e aves silvestres, e quarentena para aves novas antes de juntar ao lote.
+      </GuiaRapido>
 
       {modalMort && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
 
 type LoteResumo = { id: string; nome: string; especie: string; quantidadeAtual: number; faseProducao: string }
 type Arracoamento = {
@@ -11,6 +12,7 @@ type Arracoamento = {
 type Kpis = { consumoMedioAveG: number; custoTotal7dias: number; lotesAtivos: number }
 
 export default function AvesNutricaoPage() {
+  const [modoIniciante, setModoIniciante] = useModoIniciante()
   const [lotes, setLotes] = useState<LoteResumo[]>([])
   const [arracoamentos, setArracoamentos] = useState<Arracoamento[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
@@ -45,18 +47,23 @@ export default function AvesNutricaoPage() {
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9' }}>
 
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #65a30d, #4d7c0f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🌾</div>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', lineHeight: 1 }}>AvesNutrição</h1>
             <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Consumo de ração e custo alimentar por lote</p>
           </div>
         </div>
+        <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
 
+      <Dica ativo={modoIniciante}>
+        Ração é o maior custo da criação (costuma passar de 60-70% do custo total). Registrar todo arraçoamento aqui ajuda a enxergar se o consumo por ave está dentro do esperado pra fase — consumo muito acima ou abaixo pode indicar desperdício, comedouro mal ajustado ou problema de saúde no lote.
+      </Dica>
+
       {kpis && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, margin: '16px 0 20px' }}>
           {[
             { label: 'Consumo Médio', value: `${kpis.consumoMedioAveG}g`, sub: 'por ave/dia (7 dias)', color: '#65a30d' },
             { label: 'Custo com Ração', value: `R$ ${kpis.custoTotal7dias.toLocaleString('pt-BR')}`, sub: 'últimos 7 registros', color: '#84cc16' },
@@ -68,6 +75,17 @@ export default function AvesNutricaoPage() {
               <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>{k.sub}</div>
             </div>
           ))}
+        </div>
+      )}
+
+      {kpis && (
+        <div style={{ marginBottom: 20 }}>
+          <Benchmark
+            label="Consumo por ave/dia vs. mercado (fase adulta)"
+            valor={`${kpis.consumoMedioAveG}g`}
+            referencia="110–120g/ave/dia"
+            dentro={kpis.consumoMedioAveG >= 100 && kpis.consumoMedioAveG <= 130}
+          />
         </div>
       )}
 
@@ -142,14 +160,11 @@ export default function AvesNutricaoPage() {
         </div>
       </div>
 
-      <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 16, padding: 22 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>📖 Referência: ração até o início da postura</h2>
-        <p style={{ fontSize: 12, color: '#64748b' }}>
-          Do 1º dia de vida até o início da postura, o consumo médio fica em torno de <strong style={{ color: '#a3e635' }}>8kg de ração por ave</strong>,
-          divididos em 5 formulações (pré-inicial, inicial, recria 1, recria 2, pré-postura) — as rações iniciais custam mais caro e vão baixando de preço ao longo do crescimento.
-          Com ração a R$2,50/kg, um lote de 100 aves custa cerca de <strong style={{ color: '#a3e635' }}>R$2.000</strong> nesse período. Use isso como referência de orçamento antes de alojar um novo lote.
-        </p>
-      </div>
+      <GuiaRapido titulo="Referência: ração até o início da postura">
+        Do 1º dia de vida até o início da postura, o consumo médio fica em torno de <strong style={{ color: '#a3e635' }}>8kg de ração por ave</strong>,
+        divididos em 5 formulações (pré-inicial, inicial, recria 1, recria 2, pré-postura) — as rações iniciais custam mais caro e vão baixando de preço ao longo do crescimento.
+        Com ração a R$2,50/kg, um lote de 100 aves custa cerca de <strong style={{ color: '#a3e635' }}>R$2.000</strong> nesse período. Use isso como referência de orçamento antes de alojar um novo lote.
+      </GuiaRapido>
     </div>
   )
 }

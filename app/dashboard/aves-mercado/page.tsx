@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
 
 type LoteResumo = { id: string; nome: string; especie: string }
 type Venda = {
@@ -19,6 +20,7 @@ const CANAIS_VENDA = [
 ]
 
 export default function AvesMercadoPage() {
+  const [modoIniciante, setModoIniciante] = useModoIniciante()
   const [lotes, setLotes] = useState<LoteResumo[]>([])
   const [vendas, setVendas] = useState<Venda[]>([])
   const [kpis, setKpis] = useState<Kpis | null>(null)
@@ -51,18 +53,23 @@ export default function AvesMercadoPage() {
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9' }}>
 
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #ca8a04, #a16207)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>💰</div>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', lineHeight: 1 }}>AvesMercado</h1>
             <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Comercialização de ovos e aves</p>
           </div>
         </div>
+        <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
 
+      <Dica ativo={modoIniciante}>
+        Se você está começando, não precisa vender direto pra indústria ou supermercado logo de cara — feira livre e venda direta ao consumidor são os canais mais simples pra testar o mercado. Ao crescer, formalize a venda (veja o aviso de regularização mais abaixo) pra acessar canais maiores.
+      </Dica>
+
       {kpis && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, margin: '16px 0 20px' }}>
           {[
             { label: 'Receita Total', value: `R$ ${kpis.receitaTotal.toLocaleString('pt-BR')}`, sub: 'acumulada', color: '#ca8a04' },
             { label: 'Vendas Registradas', value: kpis.totalVendas, sub: 'no total', color: '#eab308' },
@@ -154,15 +161,12 @@ export default function AvesMercadoPage() {
         </div>
       </div>
 
-      <div style={{ marginTop: 32, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 16, padding: 22 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8', marginBottom: 4 }}>📖 Regularização e sequência de lotes</h2>
-        <p style={{ fontSize: 12, color: '#64748b' }}>
-          Ovo é produto de origem animal — para vender formalmente (mercados, distribuidoras, indústrias) ele precisa passar por inspeção
-          (agroindústria/registro sanitário). A informalidade vem ficando cada vez mais difícil de sustentar o negócio.
-          Além disso, a produção de um lote único cai ao longo do ciclo (de um pico de ~95% para ~75%) — para manter regularidade de entrega,
-          trabalhe com pelo menos 4 lotes escalonados em vez de um único lote grande.
-        </p>
-      </div>
+      <GuiaRapido titulo="Regularização e sequência de lotes">
+        Ovo é produto de origem animal — para vender formalmente (mercados, distribuidoras, indústrias) ele precisa passar por inspeção
+        (agroindústria/registro sanitário). A informalidade vem ficando cada vez mais difícil de sustentar o negócio.
+        Além disso, a produção de um lote único cai ao longo do ciclo (de um pico de ~95% para ~75%) — para manter regularidade de entrega,
+        trabalhe com pelo menos 4 lotes escalonados em vez de um único lote grande. Use a aba Calculadora, em AvesGestão, pra estimar investimento e retorno antes de expandir.
+      </GuiaRapido>
     </div>
   )
 }
