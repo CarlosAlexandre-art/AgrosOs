@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
+import { AvesNav } from '@/components/aves/AvesNav'
 
 type Lote = {
   id: string; nome: string; especie: string; linhagem: string | null; instalacao: string | null
@@ -74,6 +75,8 @@ export default function AvesGestaoPage() {
         </div>
         <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
+
+      <AvesNav />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {(['lotes', 'postura', 'calculadora'] as const).map(t => (

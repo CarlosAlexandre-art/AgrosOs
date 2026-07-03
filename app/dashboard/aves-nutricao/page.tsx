@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
+import { AvesNav } from '@/components/aves/AvesNav'
 
 type LoteResumo = { id: string; nome: string; especie: string; quantidadeAtual: number; faseProducao: string }
 type Arracoamento = {
@@ -57,6 +58,8 @@ export default function AvesNutricaoPage() {
         </div>
         <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
+
+      <AvesNav />
 
       <Dica ativo={modoIniciante}>
         Ração é o maior custo da criação (costuma passar de 60-70% do custo total). Registrar todo arraçoamento aqui ajuda a enxergar se o consumo por ave está dentro do esperado pra fase — consumo muito acima ou abaixo pode indicar desperdício, comedouro mal ajustado ou problema de saúde no lote.

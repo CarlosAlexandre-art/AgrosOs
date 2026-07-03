@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
+import { AvesNav } from '@/components/aves/AvesNav'
 
 type LoteResumo = { id: string; nome: string; especie: string; quantidadeAtual: number }
 type Mortalidade = { id: string; data: string; quantidade: number; causaSuspeita: string | null; observacao: string | null; lote: { nome: string; especie: string } }
@@ -101,6 +102,8 @@ export default function AvesSanidadePage() {
         </div>
         <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
+
+      <AvesNav />
 
       <Dica ativo={modoIniciante}>
         Registre toda morte e todo tratamento aqui — isso vira histórico do lote e ajuda a identificar padrões (ex: mortes concentradas em dias quentes, ou depois de trocar de ração). O campo "carência" é o número de dias que você não pode vender o ovo/ave depois de aplicar um medicamento.

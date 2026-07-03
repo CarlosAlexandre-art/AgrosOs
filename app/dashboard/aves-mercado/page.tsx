@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useModoIniciante, ModoInicianteToggle, Dica, GuiaRapido, Benchmark } from '@/components/aves/AvesHelpers'
+import { AvesNav } from '@/components/aves/AvesNav'
 
 type LoteResumo = { id: string; nome: string; especie: string }
 type Venda = {
@@ -63,6 +64,8 @@ export default function AvesMercadoPage() {
         </div>
         <ModoInicianteToggle ativo={modoIniciante} onChange={setModoIniciante} />
       </div>
+
+      <AvesNav />
 
       <Dica ativo={modoIniciante}>
         Se você está começando, não precisa vender direto pra indústria ou supermercado logo de cara — feira livre e venda direta ao consumidor são os canais mais simples pra testar o mercado. Ao crescer, formalize a venda (veja o aviso de regularização mais abaixo) pra acessar canais maiores.
