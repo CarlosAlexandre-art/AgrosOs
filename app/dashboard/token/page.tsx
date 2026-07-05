@@ -1,81 +1,10 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import ProPaywall from '../../../components/ProPaywall'
-import { usePlan } from '../../../lib/hooks/usePlan'
-
-type Stats = { totalTokens: number; activeTokens: number; totalValue: number; investors: number }
-
-function fmt(v: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v)
-}
-
-function IconMarket() {
-  return (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
-    </svg>
-  )
-}
-
-function IconPlus() {
-  return (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>
-  )
-}
-
-function IconChart() {
-  return (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-    </svg>
-  )
-}
-
-function IconArrow() {
-  return (
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-    </svg>
-  )
-}
-
-const CARDS = [
-  {
-    href: '/dashboard/token/mercado',
-    title: 'Mercado',
-    desc: 'Explore tokens agrícolas ativos e invista',
-    icon: <IconMarket />,
-    accentColor: '#16a34a',
-    accentBg: 'rgba(22, 163, 74, 0.1)',
-    tag: 'Ao vivo',
-  },
-  {
-    href: '/dashboard/token/novo',
-    title: 'Tokenizar ativo',
-    desc: 'Registre sua safra, insumo ou maquinário',
-    icon: <IconPlus />,
-    accentColor: '#4ade80',
-    accentBg: 'rgba(74, 222, 128, 0.08)',
-    tag: null,
-  },
-  {
-    href: '/dashboard/token/investimentos',
-    title: 'Meus investimentos',
-    desc: 'Posição atual dos tokens que você comprou',
-    icon: <IconChart />,
-    accentColor: '#86efac',
-    accentBg: 'rgba(134, 239, 172, 0.07)',
-    tag: null,
-  },
-]
+// AgroToken em espera — página "disponível em breve" no lugar do hub.
+// Os fluxos de emissão/compra ficam pausados; subpáginas redirecionam para cá.
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap');
 
-.at-hub { font-family: 'Outfit', sans-serif; }
+.at-soon { font-family: 'Outfit', sans-serif; }
 
 @keyframes at-fadeUp {
   from { opacity: 0; transform: translateY(18px); }
@@ -83,37 +12,18 @@ const CSS = `
 }
 @keyframes at-pulse {
   0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
-  50%      { box-shadow: 0 0 0 5px rgba(22,163,74,0); }
+  50%      { box-shadow: 0 0 0 6px rgba(22,163,74,0); }
 }
 @keyframes at-shimmer {
   0%   { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
-
-.at-hub .at-card {
-  transition: border-color .2s, transform .2s, background .2s;
-}
-.at-hub .at-card:hover {
-  transform: translateX(5px);
-}
-.at-hub .at-card:hover .at-arrow {
-  transform: translateX(3px);
-  opacity: 1;
-}
-.at-hub .at-arrow {
-  transition: transform .2s, opacity .2s;
-  opacity: 0.35;
+@keyframes at-float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
 }
 
-.at-hub .at-stat-row {
-  animation: at-fadeUp .55s ease .2s both;
-}
-.at-hub .at-c1 { animation: at-fadeUp .5s ease .3s both; }
-.at-hub .at-c2 { animation: at-fadeUp .5s ease .38s both; }
-.at-hub .at-c3 { animation: at-fadeUp .5s ease .46s both; }
-.at-hub .at-footer { animation: at-fadeUp .5s ease .55s both; }
-
-.at-hub .at-title em {
+.at-soon .at-title em {
   font-style: normal;
   background: linear-gradient(90deg, #16a34a 0%, #4ade80 50%, #16a34a 100%);
   background-size: 200% auto;
@@ -122,24 +32,33 @@ const CSS = `
   background-clip: text;
   animation: at-shimmer 4s linear infinite;
 }
-
-.at-dot {
-  animation: at-pulse 2.5s ease infinite;
-}
+.at-soon .at-dot { animation: at-pulse 2.5s ease infinite; }
+.at-soon .at-coin { animation: at-float 5s ease-in-out infinite; }
+.at-soon .at-e1 { animation: at-fadeUp .5s ease both; }
+.at-soon .at-e2 { animation: at-fadeUp .5s ease .08s both; }
+.at-soon .at-e3 { animation: at-fadeUp .5s ease .16s both; }
+.at-soon .at-e4 { animation: at-fadeUp .55s ease .26s both; }
+.at-soon .at-e5 { animation: at-fadeUp .55s ease .36s both; }
 `
 
-function TokenHubContent() {
-  const [stats, setStats] = useState<Stats | null>(null)
+const FEATURES = [
+  {
+    title: 'Tokenização de recebíveis',
+    desc: 'Transforme sua produção futura em ativos digitais negociáveis',
+  },
+  {
+    title: 'Registro imutável',
+    desc: 'Cada operação gravada em blockchain na rede Polygon',
+  },
+  {
+    title: 'Liquidez para o produtor',
+    desc: 'Antecipe capital conectando sua safra a investidores',
+  },
+]
 
-  useEffect(() => {
-    fetch('/api/tokens/stats')
-      .then(r => r.json())
-      .then(d => { if (!d.error) setStats(d) })
-      .catch(() => {})
-  }, [])
-
+export default function AgroTokenEmBrevePage() {
   return (
-    <div className="at-hub" style={{
+    <div className="at-soon" style={{
       background: 'linear-gradient(160deg, #0d2218 0%, #142e1e 60%, #0d2218 100%)',
       minHeight: '100%',
       position: 'relative',
@@ -147,7 +66,7 @@ function TokenHubContent() {
     }}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      {/* Hexagonal grid bg — absolute para não vazar no sidebar */}
+      {/* Grade hexagonal de fundo */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 0L56 16.2V49L28 65.2L0 49V16.2Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3Cpath d='M28 33.8L56 50V82.8L28 99L0 82.8V50Z' fill='none' stroke='rgba(22,163,74,0.04)' stroke-width='0.6'/%3E%3C/svg%3E")`,
@@ -155,163 +74,101 @@ function TokenHubContent() {
         opacity: 0.8,
       }} />
 
-      <div style={{ position: 'relative', zIndex: 1, padding: 'clamp(24px, 5vw, 48px) clamp(16px, 4vw, 28px) 56px', maxWidth: 720, margin: '0 auto' }}>
+      {/* Glow central */}
+      <div style={{
+        position: 'absolute', top: '18%', left: '50%', transform: 'translateX(-50%)',
+        width: 560, height: 320, pointerEvents: 'none', zIndex: 0,
+        background: 'radial-gradient(ellipse, rgba(22,163,74,0.14) 0%, transparent 70%)',
+      }} />
+
+      <div style={{
+        position: 'relative', zIndex: 1,
+        minHeight: 'calc(100vh - 64px)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(32px, 6vw, 64px) clamp(16px, 4vw, 28px)',
+        maxWidth: 760, margin: '0 auto', textAlign: 'center',
+      }}>
+
+        {/* Moeda flutuante */}
+        <div className="at-coin at-e1" style={{
+          width: 88, height: 88, borderRadius: 24, marginBottom: 32,
+          background: 'linear-gradient(145deg, rgba(22,163,74,0.22) 0%, rgba(22,163,74,0.06) 100%)',
+          border: '1px solid rgba(74,222,128,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 20px 60px rgba(22,163,74,0.25)',
+        }}>
+          <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="#4ade80" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 2.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+          </svg>
+        </div>
 
         {/* Eyebrow */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18,
-          animation: 'at-fadeUp .5s ease both',
-        }}>
+        <div className="at-e2" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
           <div style={{ width: 28, height: 1, background: '#16a34a' }} />
           <span style={{
             fontFamily: 'Syne, sans-serif', fontSize: 11, fontWeight: 700,
             letterSpacing: '0.18em', textTransform: 'uppercase', color: '#16a34a',
           }}>AgroToken · Polygon Mainnet</span>
+          <div style={{ width: 28, height: 1, background: '#16a34a' }} />
         </div>
 
-        {/* Title */}
-        <h1 className="at-title" style={{
+        {/* Título */}
+        <h1 className="at-title at-e3" style={{
           fontFamily: 'Syne, sans-serif',
-          fontSize: 'clamp(34px, 5vw, 52px)',
+          fontSize: 'clamp(36px, 6vw, 58px)',
           fontWeight: 800,
           color: '#e8faf0',
           lineHeight: 1.08,
           letterSpacing: '-0.025em',
-          margin: '0 0 10px',
-          animation: 'at-fadeUp .5s ease .08s both',
+          margin: '0 0 14px',
         }}>
-          Ativos agrícolas<br />
-          <em>em blockchain</em>
+          Disponível<br /><em>em breve</em>
         </h1>
 
-        <p style={{
-          fontSize: 14, color: '#5a906c', marginBottom: 40, fontWeight: 400,
-          animation: 'at-fadeUp .5s ease .16s both',
+        <p className="at-e3" style={{
+          fontSize: 15, color: '#7fb392', maxWidth: 480, margin: '0 auto 40px',
+          fontWeight: 400, lineHeight: 1.6,
         }}>
-          Tokenização com liquidez, transparência e registro imutável na rede Polygon
+          Estamos finalizando a tokenização de ativos agrícolas com liquidez,
+          transparência e registro imutável em blockchain. Vale a pena esperar.
         </p>
 
-        {/* Stats */}
-        {stats && (
-          <div className="at-stat-row" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
-            border: '1px solid rgba(22,163,74,0.12)',
-            borderRadius: 16, overflow: 'hidden',
-            marginBottom: 28, gap: '1px',
-            background: 'rgba(22,163,74,0.08)',
-          }}>
-            {[
-              { label: 'Tokens vendidos', value: String(stats.totalTokens) },
-              { label: 'Ativos', value: String(stats.activeTokens) },
-              { label: 'Volume captado', value: fmt(stats.totalValue) },
-              { label: 'Investidores', value: String(stats.investors) },
-            ].map(s => (
-              <div key={s.label} style={{
-                background: 'rgba(10,28,18,0.92)', padding: 'clamp(12px,3vw,16px) clamp(14px,3vw,18px)',
-              }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: '#4a8060', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
-                  {s.label}
-                </div>
-                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(18px,4vw,22px)', fontWeight: 800, color: '#e2faea' }}>
-                  {s.value}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Status */}
+        <div className="at-e4" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+          padding: '10px 22px', borderRadius: 999, marginBottom: 48,
+          background: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.25)',
+        }}>
+          <span className="at-dot" style={{
+            width: 8, height: 8, borderRadius: '50%', background: '#4ade80', display: 'inline-block',
+          }} />
+          <span style={{
+            fontFamily: 'Syne, sans-serif', fontSize: 12, fontWeight: 700,
+            letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4ade80',
+          }}>Em desenvolvimento</span>
+        </div>
 
-        {/* Nav cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-          {CARDS.map((card, i) => (
-            <a
-              key={card.href}
-              href={card.href}
-              className={`at-card at-c${i + 1}`}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 'clamp(12px,3vw,18px)',
-                padding: 'clamp(14px,3vw,20px) clamp(14px,3vw,22px)',
-                background: 'rgba(12, 30, 20, 0.85)',
-                border: '1px solid rgba(22,163,74,0.1)',
-                borderRadius: 14,
-                textDecoration: 'none',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = card.accentColor + '55'
-                e.currentTarget.style.background = 'rgba(16, 38, 26, 0.98)'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'rgba(22,163,74,0.1)'
-                e.currentTarget.style.background = 'rgba(12, 30, 20, 0.85)'
-              }}
-            >
-              {/* Icon */}
+        {/* Features */}
+        <div className="at-e5" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 14, width: '100%', maxWidth: 680,
+        }}>
+          {FEATURES.map(f => (
+            <div key={f.title} style={{
+              padding: '22px 20px', borderRadius: 16, textAlign: 'left',
+              background: 'rgba(255,255,255,0.025)',
+              border: '1px solid rgba(22,163,74,0.14)',
+            }}>
               <div style={{
-                width: 44, height: 44, borderRadius: 11,
-                background: card.accentBg,
-                color: card.accentColor,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                {card.icon}
-              </div>
-
-              {/* Text */}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                  <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 15, fontWeight: 700, color: '#dcfce7' }}>
-                    {card.title}
-                  </span>
-                  {card.tag && (
-                    <span style={{
-                      fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
-                      textTransform: 'uppercase', color: '#16a34a',
-                      background: 'rgba(22,163,74,0.12)',
-                      padding: '2px 7px', borderRadius: 99,
-                    }}>
-                      {card.tag}
-                    </span>
-                  )}
-                </div>
-                <div style={{ fontSize: 13, color: '#5a906c', fontWeight: 400 }}>
-                  {card.desc}
-                </div>
-              </div>
-
-              {/* Arrow */}
-              <div className="at-arrow" style={{ color: '#16a34a', flexShrink: 0 }}>
-                <IconArrow />
-              </div>
-            </a>
+                fontFamily: 'Syne, sans-serif', fontSize: 14, fontWeight: 700,
+                color: '#dcfce7', marginBottom: 6,
+              }}>{f.title}</div>
+              <div style={{ fontSize: 13, color: '#5a906c', lineHeight: 1.55 }}>{f.desc}</div>
+            </div>
           ))}
         </div>
-
-        {/* Blockchain footer */}
-        <div className="at-footer" style={{
-          display: 'flex', alignItems: 'flex-start', gap: 12,
-          padding: '14px 18px',
-          background: 'rgba(10, 24, 16, 0.6)',
-          border: '1px solid rgba(22,163,74,0.07)',
-          borderRadius: 12,
-        }}>
-          <div className="at-dot" style={{
-            width: 7, height: 7, borderRadius: '50%', marginTop: 4,
-            background: '#16a34a', flexShrink: 0,
-          }} />
-          <p style={{ fontSize: 'clamp(11px,2.5vw,12px)', color: '#4a8060', margin: 0, lineHeight: 1.7 }}>
-            <strong style={{ color: '#5a9a72', fontWeight: 600 }}>Polygon Mainnet</strong>
-            {' '}— contrato ERC-1155 · cada token tem ID único derivado do UUID · mint e transferências on-chain após aprovação admin
-          </p>
-        </div>
-
       </div>
     </div>
   )
-}
-
-export default function TokenHubPage() {
-  const { loading, isPro } = usePlan()
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-slate-200 border-t-[#16a34a] rounded-full animate-spin" /></div>
-  if (!isPro) return <ProPaywall icon="🪙" feature="AgroToken" desc="Tokenize recebíveis agrícolas (safra, insumos, maquinário), conecte investidores e acesse o mercado de capitais rural." />
-  return <TokenHubContent />
 }

@@ -5,10 +5,21 @@ import { getStripe, PLATFORM_FEE_RATE } from '@/lib/stripe'
 import Stripe from 'stripe'
 import { isRateLimited, checkConcentrationRisk, logSecurityEvent } from '@/lib/security'
 
+// AgroToken em espera — compras pausadas até o lançamento oficial.
+// Remover este guard quando o módulo for reativado.
+const AGROTOKEN_ON_HOLD = true
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (AGROTOKEN_ON_HOLD) {
+    return NextResponse.json(
+      { error: 'AgroToken está em preparação. Disponível em breve.' },
+      { status: 503 }
+    )
+  }
+
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
