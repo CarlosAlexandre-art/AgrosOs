@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      select: { role: true },
+    });
+    if (dbUser?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const minScore = parseInt(searchParams.get('minScore') || '0');
@@ -66,6 +79,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+
     const body = await request.json();
     const { propertyId, requestedAmount, partnerId } = body;
 
@@ -74,6 +91,15 @@ export async function POST(request: NextRequest) {
         { error: 'propertyId e requestedAmount são obrigatórios' },
         { status: 400 }
       );
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseId: user.id },
+      select: { role: true, properties: { select: { id: true } } },
+    });
+    const ownsProperty = dbUser?.properties.some(p => p.id === propertyId);
+    if (dbUser?.role !== 'ADMIN' && !ownsProperty) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const creditRequest = await prisma.creditRequest.create({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 
 interface ScoreWeights {
   production: number;
@@ -179,33 +180,33 @@ function getCategory(score: number): 'ELITE' | 'HIGH' | 'GOOD' | 'REGULAR' | 'LO
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const propertyId = searchParams.get('propertyId');
-    const userId = searchParams.get('userId');
 
-    if (!propertyId && !userId) {
+    const caller = await prisma.user.findUnique({
+      where: { supabaseId: authUser.id },
+      include: { properties: { select: { id: true } } },
+    });
+    if (!caller || caller.properties.length === 0) {
       return NextResponse.json(
-        { error: 'propertyId ou userId é obrigatório' },
-        { status: 400 }
+        { error: 'Nenhuma propriedade encontrada' },
+        { status: 404 }
       );
     }
 
-    let targetPropertyId: string | undefined = propertyId || undefined;
-
-    if (!propertyId && userId) {
-      const user = await prisma.user.findUnique({
-        where: { supabaseId: userId },
-        include: { properties: { take: 1 } }
-      });
-      
-      if (!user || user.properties.length === 0) {
-        return NextResponse.json(
-          { error: 'Nenhuma propriedade encontrada' },
-          { status: 404 }
-        );
+    // Por padrão, usa a propriedade do próprio usuário autenticado.
+    // Um propertyId explícito só é aceito se pertencer ao usuário ou se for ADMIN.
+    let targetPropertyId = caller.properties[0].id;
+    if (propertyId) {
+      const owns = caller.properties.some(p => p.id === propertyId);
+      if (!owns && caller.role !== 'ADMIN') {
+        return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
       }
-      
-      targetPropertyId = user.properties[0].id;
+      targetPropertyId = propertyId;
     }
 
     const [
