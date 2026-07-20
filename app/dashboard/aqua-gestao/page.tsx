@@ -44,6 +44,7 @@ export default function AquaGestaoPage() {
   const [modalTanque, setModalTanque] = useState(false)
   const [modalLote, setModalLote] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [erro, setErro] = useState('')
   const [formTanque, setFormTanque] = useState({ nome: '', tipo: 'ESCAVADO', areaM2: '', volumeM3: '', profundidadeM: '', localizacao: '' })
   const [formLote, setFormLote] = useState({ tanqueId: '', nome: '', especie: 'Tilápia', quantidadeInicial: '', pesoMedioEntradaG: '', dataPovamento: '', dataDespescaPrev: '', observacao: '' })
 
@@ -59,15 +60,25 @@ export default function AquaGestaoPage() {
   useEffect(() => { carregar() }, [carregar])
 
   async function salvarTanque(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    await fetch('/api/aqua-gestao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tanque', ...formTanque }) })
-    setSaving(false); setModalTanque(false); setFormTanque({ nome: '', tipo: 'ESCAVADO', areaM2: '', volumeM3: '', profundidadeM: '', localizacao: '' }); carregar()
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-gestao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tanque', ...formTanque }) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); setSaving(false); return }
+      setModalTanque(false); setFormTanque({ nome: '', tipo: 'ESCAVADO', areaM2: '', volumeM3: '', profundidadeM: '', localizacao: '' }); carregar()
+    } catch (e: any) { setErro(e.message) }
+    setSaving(false)
   }
 
   async function salvarLote(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    await fetch('/api/aqua-gestao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'lote', ...formLote }) })
-    setSaving(false); setModalLote(false); setFormLote({ tanqueId: '', nome: '', especie: 'Tilápia', quantidadeInicial: '', pesoMedioEntradaG: '', dataPovamento: '', dataDespescaPrev: '', observacao: '' }); carregar()
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-gestao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'lote', ...formLote }) })
+      const data = await res.json()
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); setSaving(false); return }
+      setModalLote(false); setFormLote({ tanqueId: '', nome: '', especie: 'Tilápia', quantidadeInicial: '', pesoMedioEntradaG: '', dataPovamento: '', dataDespescaPrev: '', observacao: '' }); carregar()
+    } catch (e: any) { setErro(e.message) }
+    setSaving(false)
   }
 
   const diasParaDespesca = (data: string | null) => {
@@ -81,6 +92,14 @@ export default function AquaGestaoPage() {
 
   return (
     <div style={{ background: '#0a0e1a', minHeight: '100vh', padding: '28px 24px', color: '#f1f5f9' }}>
+
+      {/* Erro global */}
+      {erro && (
+        <div style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <span style={{ fontSize: 13, color: '#fca5a5' }}>⚠ {erro}</span>
+          <button onClick={() => setErro('')} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}>×</button>
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
@@ -241,7 +260,8 @@ export default function AquaGestaoPage() {
       {modalTanque && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
           <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 18, padding: 28, width: '100%', maxWidth: 480 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 20, color: '#f1f5f9' }}>Novo Tanque / Viveiro</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: erro ? 12 : 20, color: '#f1f5f9' }}>Novo Tanque / Viveiro</h2>
+            {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#fca5a5' }}>⚠ {erro}</div>}
             <form onSubmit={salvarTanque} style={{ display: 'grid', gap: 14 }}>
               <div><label style={labelStyle}>Nome *</label><input style={inputStyle} value={formTanque.nome} onChange={e => setFormTanque(p => ({ ...p, nome: e.target.value }))} placeholder="Ex: Tanque 01" required /></div>
               <div><label style={labelStyle}>Tipo</label>
@@ -270,7 +290,8 @@ export default function AquaGestaoPage() {
       {modalLote && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
           <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 18, padding: 28, width: '100%', maxWidth: 520 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 20, color: '#f1f5f9' }}>Novo Lote de Produção</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: erro ? 12 : 20, color: '#f1f5f9' }}>Novo Lote de Produção</h2>
+            {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#fca5a5' }}>⚠ {erro}</div>}
             <form onSubmit={salvarLote} style={{ display: 'grid', gap: 14 }}>
               <div><label style={labelStyle}>Tanque *</label>
                 <select style={inputStyle} value={formLote.tanqueId} onChange={e => setFormLote(p => ({ ...p, tanqueId: e.target.value }))} required>

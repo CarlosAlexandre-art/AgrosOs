@@ -43,6 +43,7 @@ export default function AquaQualidadePage() {
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [erro, setErro] = useState('')
   const [alertaSave, setAlertaSave] = useState<string[]>([])
   const [form, setForm] = useState({ tanqueId: '', ph: '', oxigenioMgL: '', temperaturaC: '', amoniaMgL: '', nitritoMgL: '', turbidezNTU: '', alcalinidadeMgL: '', data: new Date().toISOString().slice(0, 16), observacao: '' })
 
@@ -58,12 +59,15 @@ export default function AquaQualidadePage() {
   useEffect(() => { carregar() }, [carregar])
 
   async function salvar(e: React.FormEvent) {
-    e.preventDefault(); setSaving(true)
-    const res = await fetch('/api/aqua-qualidade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    const data = await res.json()
-    setSaving(false)
-    setAlertaSave(data.alertas ?? [])
-    if (!data.error) { setTimeout(() => { setModal(false); setAlertaSave([]); carregar() }, alertaSave.length > 0 ? 2000 : 0) }
+    e.preventDefault(); setSaving(true); setErro('')
+    try {
+      const res = await fetch('/api/aqua-qualidade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      const data = await res.json()
+      setSaving(false)
+      if (!res.ok || data.error) { setErro(data.error || `Erro ${res.status}`); return }
+      setAlertaSave(data.alertas ?? [])
+      setTimeout(() => { setModal(false); setAlertaSave([]); carregar() }, data.alertas?.length > 0 ? 2000 : 0)
+    } catch (err: any) { setErro(err.message); setSaving(false) }
   }
 
   const inputStyle: React.CSSProperties = { background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, padding: '10px 13px', color: '#f1f5f9', fontSize: 13, width: '100%', outline: 'none' }
@@ -82,6 +86,8 @@ export default function AquaQualidadePage() {
           <p style={{ fontSize: 13, color: '#64748b', marginTop: 3 }}>Monitoramento de qualidade da água — pH, OD, temperatura e mais</p>
         </div>
       </div>
+
+      {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 20, color: '#f87171', fontSize: 13, fontWeight: 600 }}>{erro}</div>}
 
       {/* Parâmetros ideais */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 28 }}>
@@ -184,6 +190,7 @@ export default function AquaQualidadePage() {
           <div style={{ background: '#111827', border: '1px solid #1e293b', borderRadius: 18, padding: 28, width: '100%', maxWidth: 520, margin: 'auto' }}>
             <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 6, color: '#f1f5f9' }}>Registrar Qualidade da Água</h2>
             <p style={{ fontSize: 12, color: '#64748b', marginBottom: 20 }}>Preencha os parâmetros disponíveis — campos em branco são ignorados</p>
+            {erro && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', marginBottom: 12, color: '#f87171', fontSize: 13 }}>{erro}</div>}
             {alertaSave.length > 0 && (
               <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '10px 14px', marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: '#f87171', fontWeight: 700, marginBottom: 4 }}>⚠ Alertas detectados:</div>
